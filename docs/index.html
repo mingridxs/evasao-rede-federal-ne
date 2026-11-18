@@ -3,262 +3,497 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Risco de evasão na Rede Federal do Nordeste</title>
-<meta name="description" content="Demonstração de um modelo que estima o risco de evasão a partir do perfil de ingresso, treinado com dados públicos da Plataforma Nilo Peçanha.">
+<title>Qual o risco de evasão no seu curso?</title>
+<meta name="description" content="Estime o risco de evasão de alunos com o seu perfil de ingresso, com um modelo treinado em dados públicos da Plataforma Nilo Peçanha.">
+<meta name="theme-color" content="#1e6b4f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --tinta: #1a202c; --suave: #4a5568; --linha: #e2e8f0; --fundo: #f7fafc;
-    --azul: #2b6cb0; --azul-claro: #ebf4ff; --alto: #c53030; --alto-claro: #fff5f5;
-    --medio: #b7791f; --medio-claro: #fffaf0; --baixo: #2f855a; --baixo-claro: #f0fff4;
+    --tinta: #1c2b27; --suave: #52625c; --linha: #d3ddd6; --fundo: #eef2ee; --papel: #fff;
+    --verde: #1e6b4f; --verde-escuro: #154d39; --verde-claro: #e3efe8;
+    --baixo: #2e7d52; --duvida: #a86a12; --alto: #b23a2e;
+    --raio: 10px;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-         color: var(--tinta); background: var(--fundo); line-height: 1.55; }
-  header { background: #fff; border-bottom: 1px solid var(--linha); }
-  .largura { max-width: 960px; margin: 0 auto; padding: 0 20px; }
-  header .largura { padding-top: 28px; padding-bottom: 24px; }
-  h1 { font-size: 1.6rem; margin: 0 0 6px; }
-  .subtitulo { color: var(--suave); margin: 0; max-width: 70ch; }
-  main { padding: 28px 0 48px; }
-  .grade { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; align-items: start; }
-  @media (max-width: 820px) { .grade { grid-template-columns: 1fr; } }
-  .cartao { background: #fff; border: 1px solid var(--linha); border-radius: 10px; padding: 22px; }
-  h2 { font-size: 1.1rem; margin: 0 0 14px; }
-  fieldset { border: 0; padding: 0; margin: 0 0 18px; }
-  legend { font-weight: 600; font-size: .95rem; margin-bottom: 8px; }
-  label { display: block; font-size: .9rem; color: var(--suave); margin: 10px 0 4px; }
-  select, input { width: 100%; padding: 9px 10px; font: inherit; color: var(--tinta);
-                  border: 1px solid #cbd5e0; border-radius: 6px; background: #fff; }
-  select:disabled { background: #edf2f7; color: #a0aec0; }
-  select:focus, input:focus, button:focus { outline: 2px solid var(--azul); outline-offset: 1px; }
-  .lado { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  button { margin-top: 6px; width: 100%; padding: 11px; font: inherit; font-weight: 600; color: #fff;
-           background: var(--azul); border: 0; border-radius: 6px; cursor: pointer; }
-  button:disabled { background: #a0aec0; cursor: not-allowed; }
-  .detalhe { font-size: .85rem; color: var(--suave); margin-top: 6px; }
-  #resultado { min-height: 260px; }
-  .vazio { color: var(--suave); }
-  .numero { font-size: 3.2rem; font-weight: 700; line-height: 1; margin: 6px 0 4px; }
-  .faixa { display: inline-block; font-weight: 600; font-size: .9rem; padding: 4px 10px; border-radius: 999px; }
-  .alto  { color: var(--alto);  background: var(--alto-claro); }
-  .medio { color: var(--medio); background: var(--medio-claro); }
-  .baixo { color: var(--baixo); background: var(--baixo-claro); }
-  .barra { position: relative; height: 12px; background: var(--linha); border-radius: 6px; margin: 18px 0 6px; }
-  .barra .preenchido { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--azul); }
-  .barra .marca { position: absolute; top: -5px; bottom: -5px; width: 2px; background: var(--tinta); }
-  .legenda-barra { display: flex; justify-content: space-between; font-size: .8rem; color: var(--suave); }
-  .explicacao { margin-top: 16px; font-size: .95rem; }
-  .aviso { background: var(--azul-claro); border-radius: 8px; padding: 12px 14px; font-size: .9rem; margin-top: 16px; }
-  section.sobre { margin-top: 28px; }
-  section.sobre h2 { margin-top: 0; }
-  section.sobre ul { padding-left: 20px; margin: 8px 0; }
-  .numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0; }
-  @media (max-width: 600px) { .numeros { grid-template-columns: 1fr; } }
-  .numeros div { background: var(--fundo); border-radius: 8px; padding: 12px; }
-  .numeros strong { display: block; font-size: 1.4rem; }
-  .numeros span { font-size: .85rem; color: var(--suave); }
-  footer { border-top: 1px solid var(--linha); background: #fff; font-size: .85rem; color: var(--suave); }
-  footer .largura { padding-top: 18px; padding-bottom: 24px; }
-  a { color: var(--azul); }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--fundo); color: var(--tinta);
+         font: 17px/1.55 "Atkinson Hyperlegible", system-ui, sans-serif; }
+  .coluna { max-width: 640px; margin: 0 auto; padding: 0 18px; }
+
+  header.coluna { padding-top: 40px; padding-bottom: 8px; }
+  h1 { font-size: clamp(1.75rem, 6vw, 2.35rem); line-height: 1.12; margin: 0 0 12px; letter-spacing: -0.01em; }
+  .abertura { margin: 0; color: var(--suave); max-width: 34em; }
+
+  .passo { margin: 28px 0 0; padding: 22px 20px 24px; background: var(--papel); border-radius: var(--raio);
+           border: 1px solid var(--linha); }
+  .passo > h2 { display: flex; align-items: center; gap: 12px; font-size: 1.2rem; margin: 0 0 16px; }
+  .passo > h2 .n { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--verde); color: #fff;
+                   display: grid; place-items: center; font-size: .95rem; }
+  .passo.inativo { opacity: .55; }
+
+  label, .rotulo { display: block; font-weight: 700; font-size: .95rem; margin: 16px 0 6px; }
+  .ajuda { display: block; font-weight: 400; color: var(--suave); font-size: .88rem; margin-top: 2px; }
+  select, input[type=number], textarea {
+    width: 100%; min-height: 48px; padding: 10px 12px; font: inherit; font-size: 17px; color: var(--tinta);
+    background: var(--papel); border: 1.5px solid #b9c7be; border-radius: 8px; }
+  select { appearance: none; padding-right: 40px;
+           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2352625c' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+           background-repeat: no-repeat; background-position: right 14px center; }
+  select:disabled { background-color: #f1f4f2; color: #8a9a93; }
+  textarea { min-height: 84px; resize: vertical; }
+  :focus-visible { outline: 3px solid #f2b705; outline-offset: 2px; }
+  .duas { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  @media (max-width: 480px) { .duas.empilha { grid-template-columns: 1fr; } }
+
+  .alternar { display: grid; grid-template-columns: 1fr 1fr; background: var(--fundo); border-radius: 10px; padding: 4px; gap: 4px; }
+  .alternar button { min-height: 52px; border: 0; border-radius: 8px; background: transparent; font: inherit; font-size: .95rem;
+                     color: var(--suave); cursor: pointer; padding: 6px 8px; line-height: 1.25; }
+  .alternar button[aria-checked="true"] { background: var(--papel); color: var(--tinta); font-weight: 700;
+                                          box-shadow: 0 1px 2px rgba(28, 43, 39, .18); }
+  .detalhe { color: var(--suave); font-size: .9rem; margin: 8px 0 0; }
+
+  .acao { width: 100%; min-height: 54px; margin-top: 22px; border: 0; border-radius: 8px; background: var(--verde);
+          color: #fff; font: inherit; font-weight: 700; font-size: 1.05rem; cursor: pointer; }
+  .acao:hover:not(:disabled) { background: var(--verde-escuro); }
+  .acao:disabled { background: #a9b8b0; cursor: not-allowed; }
+  .privacidade { color: var(--suave); font-size: .85rem; margin: 10px 0 0; }
+
+  /* Resultado: a régua é o elemento principal da página */
+  .valor { font-size: clamp(3.6rem, 18vw, 5rem); font-weight: 700; line-height: 1; letter-spacing: -0.02em;
+           font-variant-numeric: tabular-nums; margin: 4px 0 2px; }
+  .frase { margin: 0; font-size: 1.05rem; }
+  .selo { display: inline-block; font-weight: 700; font-size: .9rem; padding: 3px 10px; border-radius: 6px; margin-bottom: 8px; }
+  .selo.baixo { color: var(--baixo); background: #e2f0e7; }
+  .selo.duvida { color: var(--duvida); background: #f7ecd9; }
+  .selo.alto { color: var(--alto); background: #f6e1de; }
+  .regua { margin: 26px 0 8px; }
+  .regua svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .leitura { margin: 18px 0 0; }
+  .nota { margin: 16px 0 0; padding: 12px 14px; border-left: 4px solid var(--verde); background: var(--verde-claro);
+          border-radius: 0 8px 8px 0; font-size: .95rem; }
+  .nota.cautela { border-color: var(--duvida); background: #fbf3e6; }
+
+  /* Avaliação */
+  .escala { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 8px; }
+  .escala button { min-height: 52px; border: 1.5px solid #b9c7be; border-radius: 8px; background: var(--papel);
+                   font: inherit; font-weight: 700; font-size: 1.1rem; color: var(--tinta); cursor: pointer; }
+  .escala button[aria-checked="true"] { background: var(--verde); border-color: var(--verde); color: #fff; }
+  .extremos { display: flex; justify-content: space-between; color: var(--suave); font-size: .85rem; margin-top: 6px; }
+  .consentimento { display: flex; gap: 10px; align-items: flex-start; margin-top: 18px; font-size: .92rem; }
+  .consentimento input { width: 22px; height: 22px; margin: 2px 0 0; flex: none; accent-color: var(--verde); }
+  .enviado { font-weight: 700; color: var(--baixo); margin: 14px 0 0; }
   .erro { color: var(--alto); }
+
+  details { margin: 28px 0 0; background: var(--papel); border: 1px solid var(--linha); border-radius: var(--raio); padding: 0 20px; }
+  summary { cursor: pointer; font-weight: 700; padding: 18px 0; list-style-position: outside; }
+  details[open] { padding-bottom: 18px; }
+  details p, details li { font-size: .95rem; }
+  details ul { padding-left: 20px; }
+  .tabela { width: 100%; border-collapse: collapse; font-size: .9rem; margin: 8px 0; }
+  .tabela td, .tabela th { text-align: left; padding: 7px 4px; border-bottom: 1px solid var(--linha); }
+  .tabela td:last-child, .tabela th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+
+  footer.coluna { color: var(--suave); font-size: .85rem; padding-top: 26px; padding-bottom: 40px; }
+  a { color: var(--verde); }
+  [hidden] { display: none !important; }
+
+  @media (min-width: 700px) {
+    header.coluna { padding-top: 64px; }
+    .passo { padding: 28px 30px 30px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .regua .preenchido { transition: width .6s ease-out; }
+  }
 </style>
 </head>
 <body>
-<header>
-  <div class="largura">
-    <h1>Risco de evasão na Rede Federal do Nordeste</h1>
-    <p class="subtitulo">Informe o curso e o perfil de ingresso e veja com que frequência alunos com perfil parecido
-      deixaram o curso sem concluir, segundo um modelo treinado com dados públicos da Plataforma Nilo Peçanha.</p>
-  </div>
+<header class="coluna">
+  <h1>Qual o risco de evasão no seu curso?</h1>
+  <p class="abertura">Informe seu curso e como você entrou. O site mostra quantos alunos com perfil parecido deixaram o curso
+    sem concluir, segundo 178 mil matrículas da Rede Federal no Nordeste.</p>
 </header>
 
-<main class="largura">
-  <div class="grade">
-    <form id="formulario" class="cartao" novalidate>
-      <h2>Curso e perfil</h2>
-      <fieldset>
-        <legend>Onde e o quê</legend>
+<main class="coluna">
+  <form id="formulario" novalidate>
+    <section class="passo" aria-labelledby="t1">
+      <h2 id="t1"><span class="n" aria-hidden="true">1</span>Seu curso</h2>
+
+      <span class="rotulo" id="r-onde">Onde você estuda</span>
+      <div class="alternar" role="radiogroup" aria-labelledby="r-onde">
+        <button type="button" role="radio" aria-checked="true" data-modo="lista">Instituto Federal ou CEFET</button>
+        <button type="button" role="radio" aria-checked="false" data-modo="outra">Outra instituição</button>
+      </div>
+
+      <div id="modo-lista">
         <label for="instituicao">Instituição</label>
-        <select id="instituicao" required disabled><option>Carregando…</option></select>
+        <select id="instituicao" disabled><option>Carregando…</option></select>
         <label for="campus">Campus</label>
-        <select id="campus" required disabled></select>
+        <select id="campus" disabled></select>
         <label for="curso">Curso</label>
-        <select id="curso" required disabled></select>
-        <label for="oferta">Oferta, turno e modalidade</label>
-        <select id="oferta" required disabled></select>
-        <p class="detalhe" id="detalhe-oferta"></p>
-      </fieldset>
-      <fieldset>
-        <legend>Ingresso</legend>
-        <div class="lado">
+        <select id="curso" disabled></select>
+        <label for="oferta">Forma de oferta, turno e modalidade</label>
+        <select id="oferta" disabled></select>
+      </div>
+
+      <div id="modo-outra" hidden>
+        <p class="detalhe">Para universidades e outras instituições fora da base, o modelo usa só o curso, a forma de oferta e o seu perfil.</p>
+        <div class="duas empilha">
           <div>
-            <label for="idade">Idade ao entrar</label>
-            <input id="idade" type="number" min="12" max="80" step="1" required placeholder="ex.: 18">
+            <label for="o-uf">Estado</label>
+            <select id="o-uf"></select>
           </div>
           <div>
-            <label for="sexo">Sexo</label>
-            <select id="sexo" required disabled></select>
+            <label for="o-tipo">Nível</label>
+            <select id="o-tipo"></select>
           </div>
         </div>
-        <label for="mes">Mês de ingresso</label>
-        <select id="mes" required disabled></select>
-      </fieldset>
-      <button id="calcular" type="submit" disabled>Calcular risco</button>
-      <p class="detalhe">O cálculo é feito no seu navegador. Nada do que você informa é enviado ou guardado.</p>
-    </form>
+        <label for="o-curso">Curso <span class="ajuda">Escolha o nome mais parecido com o seu</span></label>
+        <select id="o-curso" disabled></select>
+        <div id="o-eixo-bloco" hidden>
+          <label for="o-eixo">Área do curso</label>
+          <select id="o-eixo"></select>
+        </div>
+        <div id="o-oferta-bloco" hidden>
+          <label for="o-oferta">Forma de oferta</label>
+          <select id="o-oferta"></select>
+        </div>
+        <div class="duas">
+          <div>
+            <label for="o-turno">Turno</label>
+            <select id="o-turno"></select>
+          </div>
+          <div>
+            <label for="o-modalidade">Modalidade</label>
+            <select id="o-modalidade"></select>
+          </div>
+        </div>
+      </div>
+      <p class="detalhe" id="detalhe-curso"></p>
+    </section>
 
-    <div class="cartao" id="resultado" aria-live="polite">
-      <h2>Resultado</h2>
-      <p class="vazio">Preencha o formulário para ver o risco estimado.</p>
-    </div>
-  </div>
+    <section class="passo" aria-labelledby="t2">
+      <h2 id="t2"><span class="n" aria-hidden="true">2</span>Como você entrou</h2>
+      <div class="duas">
+        <div>
+          <label for="idade">Idade ao entrar</label>
+          <input id="idade" type="number" inputmode="numeric" min="12" max="80" step="1" placeholder="18">
+        </div>
+        <div>
+          <label for="sexo">Sexo</label>
+          <select id="sexo" disabled></select>
+        </div>
+      </div>
+      <label for="mes">Mês em que as aulas começaram</label>
+      <select id="mes" disabled></select>
+      <button id="calcular" class="acao" type="submit" disabled>Ver o risco</button>
+      <p class="privacidade">O cálculo acontece no seu aparelho. Nada sai dele, a não ser que você escolha enviar a avaliação no fim.</p>
+    </section>
+  </form>
 
-  <section class="sobre cartao">
-    <h2>Como ler o resultado</h2>
-    <p>O número é a <strong>proporção de alunos com perfil parecido que evadiram</strong>: mesmo curso, campus,
-      oferta, idade, sexo e mês de ingresso. Ele não diz se uma pessoa específica vai evadir. O modelo só conhece
-      dados de cadastro; notas, frequência e a vida de cada aluno, que pesam muito na evasão, não estão na base.</p>
-    <div class="numeros">
-      <div><strong>0,815</strong><span>AUC no teste: em 81,5% dos pares (um aluno que evadiu e um que concluiu), o que evadiu recebe risco maior</span></div>
-      <div><strong>178 mil</strong><span>matrículas de cursos técnicos e de graduação do Nordeste, das edições 2021 a 2023 da Eficiência Acadêmica</span></div>
-      <div><strong>71%</strong><span>de acerto ao classificar como "evade" ou "conclui"; a taxa histórica do curso sozinha acerta 68%</span></div>
-    </div>
-    <ul>
-      <li><strong>Alerta:</strong> o modelo recomenda acompanhamento quando o risco passa do limiar do nível do curso
-        (<span id="limiar-tecnico">–</span> no técnico e <span id="limiar-graduacao">–</span> na graduação). Os limiares
-        foram escolhidos para equilibrar os acertos entre quem evade e quem conclui.</li>
-      <li><strong>Zona de dúvida:</strong> perto do limiar o modelo erra mais; nesses casos, a avaliação de uma pessoa
-        importa mais que o número.</li>
-      <li><strong>Limitações:</strong> treinado só com o Nordeste; turmas que passaram pela pandemia; parte dos dados
-        socioeconômicos não declarada. Renda e cor/raça não entram no cálculo.</li>
-    </ul>
-    <p class="detalhe">Projeto final da disciplina de Inteligência Artificial, UFPI, 2026.2. Dados: Plataforma Nilo
-      Peçanha (MEC), licença ODbL. <a id="link-repositorio" href="#">Código e artigo</a>.</p>
+  <section class="passo inativo" id="bloco-resultado" aria-labelledby="t3" aria-live="polite">
+    <h2 id="t3"><span class="n" aria-hidden="true">3</span>Resultado</h2>
+    <div id="resultado"><p class="detalhe">Preencha os passos 1 e 2 para ver o resultado.</p></div>
   </section>
+
+  <section class="passo" id="bloco-avaliacao" aria-labelledby="t4" hidden>
+    <h2 id="t4"><span class="n" aria-hidden="true">4</span>Esse resultado faz sentido para você?</h2>
+    <span class="rotulo" id="r-escala">Quanto ele combina com o que você vive no curso</span>
+    <div class="escala" role="radiogroup" aria-labelledby="r-escala">
+      <button type="button" role="radio" aria-checked="false" data-nota="1" aria-label="1, não combina nada">1</button>
+      <button type="button" role="radio" aria-checked="false" data-nota="2" aria-label="2">2</button>
+      <button type="button" role="radio" aria-checked="false" data-nota="3" aria-label="3">3</button>
+      <button type="button" role="radio" aria-checked="false" data-nota="4" aria-label="4">4</button>
+      <button type="button" role="radio" aria-checked="false" data-nota="5" aria-label="5, combina muito">5</button>
+    </div>
+    <div class="extremos" aria-hidden="true"><span>Não combina nada</span><span>Combina muito</span></div>
+    <label for="comentario">Quer explicar? <span class="ajuda">Opcional. Não escreva seu nome nem o de colegas.</span></label>
+    <textarea id="comentario" maxlength="400"></textarea>
+    <div id="bloco-envio">
+      <label class="consentimento" for="aceite">
+        <input type="checkbox" id="aceite">
+        <span>Concordo em enviar, sem nome nem e-mail, minhas respostas dos passos 1 e 2, o resultado e esta avaliação,
+          para uso no trabalho acadêmico que testa este modelo.</span>
+      </label>
+      <button type="button" id="enviar" class="acao" disabled>Enviar avaliação</button>
+    </div>
+    <p class="detalhe" id="sem-coleta" hidden>O envio de avaliações ainda não está ligado neste site.</p>
+    <p class="enviado" id="enviado" hidden>Avaliação enviada. Obrigada por ajudar a testar o modelo.</p>
+    <p class="erro" id="falha-envio" hidden>Não foi possível enviar. Confira a conexão e tente de novo.</p>
+  </section>
+
+  <details>
+    <summary>Como o modelo funciona e onde ele erra</summary>
+    <p>O número é a proporção de alunos com perfil parecido que evadiram, ou seja, que saíram do curso sem concluir:
+      abandono, desligamento, cancelamento, reprovação ou transferência para outra instituição. Ele não diz se uma pessoa
+      vai evadir. O modelo só conhece dados de matrícula; notas, frequência e a vida de cada aluno, que pesam muito, não
+      estão na base.</p>
+    <table class="tabela">
+      <tr><th>Como o modelo se saiu em 17.849 matrículas que ele não viu</th><th></th></tr>
+      <tr><td>Acerto ao classificar quem evade e quem conclui</td><td>71%</td></tr>
+      <tr><td>Acerto só usando a taxa histórica do curso, sem modelo</td><td>68%</td></tr>
+      <tr><td>Acerto nos 30% de casos em que o modelo está mais seguro</td><td>83%</td></tr>
+    </table>
+    <ul>
+      <li>O alerta aparece quando o risco passa do limite do nível do curso: <span id="limiar-tecnico">–</span> no técnico e
+        <span id="limiar-graduacao">–</span> na graduação.</li>
+      <li>Perto desse limite o modelo erra mais, e a opinião de quem conhece o aluno vale mais que o número.</li>
+      <li>Ele subestima o risco de estudantes indígenas e quase não detecta a evasão de quem entra com até 17 anos.</li>
+      <li>Foi treinado com turmas do Nordeste que passaram pela pandemia. Para universidades, que não estão na base, o
+        resultado é uma extrapolação.</li>
+    </ul>
+    <p>Dados: Plataforma Nilo Peçanha (MEC), Eficiência Acadêmica 2021 a 2023, licença ODbL.
+      <a href="https://github.com/mingridxs/evasao-rede-federal-ne">Código, análises e artigo</a>.</p>
+  </details>
 </main>
 
-<footer>
-  <div class="largura">Maria Ingrid Xavier Sousa · Modelo: gradient boosting (scikit-learn) exportado para o navegador.</div>
+<footer class="coluna">
+  Projeto final de Inteligência Artificial, UFPI, 2026.2. Maria Ingrid Xavier Sousa.
 </footer>
 
 <script type="module">
 import { probabilidade, nivelDoCurso, limiarDoNivel } from "./modelo.js";
-
-// Coleta de respostas: desligada. Para ligar depois da entrega, é preciso
-// consentimento explícito na página e um endereço para receber os dados.
-const COLETA = { ativa: false, endereco: null };
+import { ENDERECO_COLETA } from "./coleta.js";
 
 const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto",
                "setembro", "outubro", "novembro", "dezembro"];
 const SEXOS = { F: "Feminino", M: "Masculino" };
+const UFS = { AL: "Alagoas", BA: "Bahia", CE: "Ceará", MA: "Maranhão", PB: "Paraíba", PE: "Pernambuco",
+              PI: "Piauí", RN: "Rio Grande do Norte", SE: "Sergipe" };
+const TIPOS = ["Bacharelado", "Licenciatura", "Tecnologia", "Técnico"];
+const OUTRO = "__outro";
 const $ = id => document.getElementById(id);
-const pct = v => `${(v * 100).toFixed(0)}%`;
-let modelo, ofertas;
+const pct = v => `${Math.round(v * 100)}%`;
+const unicos = lista => [...new Set(lista)].filter(v => v !== null && v !== undefined)
+  .sort((a, b) => String(a).localeCompare(String(b), "pt-BR"));
+const moda = lista => { const c = new Map(); for (const v of lista) c.set(v, (c.get(v) || 0) + 1);
+  return [...c.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null; };
+const mediana = lista => { const s = [...lista].sort((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : null; };
 
-function preencher(select, itens, rotulo = v => v, placeholder = "Selecione") {
+let modelo, ofertas, modo = "lista", ultimo = null, nota = null;
+
+function preencher(select, itens, rotulo = v => v, vazio = "Selecione") {
   select.innerHTML = "";
-  select.append(new Option(placeholder, ""));
-  for (const item of itens) select.append(new Option(rotulo(item), typeof item === "object" ? item.id : item));
+  select.append(new Option(vazio, ""));
+  for (const item of itens) {
+    const [valor, texto] = Array.isArray(item) ? item : [item, rotulo(item)];
+    select.append(new Option(texto, valor));
+  }
   select.disabled = itens.length === 0;
 }
 
-const unicos = lista => [...new Set(lista)].sort((a, b) => a.localeCompare(b, "pt-BR"));
-
-function atualizarCampus() {
+/* ---------- Modo "Instituto Federal ou CEFET" ---------- */
+function listaCampus() {
   const inst = $("instituicao").value;
   preencher($("campus"), unicos(ofertas.filter(o => o.instituicao === inst).map(o => o.unidade_de_ensino)));
-  preencher($("curso"), []); preencher($("oferta"), []); $("detalhe-oferta").textContent = "";
-  verificar();
+  preencher($("curso"), []); preencher($("oferta"), []); atualizar();
 }
-
-function atualizarCurso() {
+function listaCursos() {
   const inst = $("instituicao").value, campus = $("campus").value;
   const cursos = unicos(ofertas.filter(o => o.instituicao === inst && o.unidade_de_ensino === campus)
                                .map(o => `${o.nome_de_curso}|${o.tipo_de_curso}`));
-  preencher($("curso"), cursos, c => { const [nome, tipo] = c.split("|"); return `${nome} (${tipo})`; });
-  preencher($("oferta"), []); $("detalhe-oferta").textContent = "";
-  verificar();
+  preencher($("curso"), cursos, c => { const [nome, tipo] = c.split("|"); return `${nome} (${tipo.toLowerCase()})`; });
+  preencher($("oferta"), []); atualizar();
 }
-
-function atualizarOferta() {
+function listaOfertas() {
   const [nome, tipo] = $("curso").value.split("|");
-  const lista = ofertas.map((o, id) => ({ ...o, id: String(id) }))
-    .filter(o => o.instituicao === $("instituicao").value && o.unidade_de_ensino === $("campus").value
-              && o.nome_de_curso === nome && o.tipo_de_curso === tipo);
-  preencher($("oferta"), lista, o => `${o.tipo_de_oferta} · ${o.turno} · ${o.modalidade_de_ensino}`);
-  if (lista.length === 1) { $("oferta").value = lista[0].id; }
-  mostrarDetalhe();
-  verificar();
+  const lista = ofertas.map((o, i) => [o, i]).filter(([o]) => o.instituicao === $("instituicao").value
+      && o.unidade_de_ensino === $("campus").value && o.nome_de_curso === nome && o.tipo_de_curso === tipo);
+  preencher($("oferta"), lista.map(([o, i]) => [String(i), `${o.tipo_de_oferta}, ${o.turno.toLowerCase()}, ${o.modalidade_de_ensino.replace("Educação ", "").toLowerCase()}`]));
+  if (lista.length === 1) $("oferta").value = String(lista[0][1]);
+  atualizar();
 }
 
-function mostrarDetalhe() {
-  const o = ofertas[Number($("oferta").value)];
-  $("detalhe-oferta").textContent = $("oferta").value === "" ? "" :
-    `Carga horária típica: ${o.carga_horaria} h · duração prevista: ${o.duracao_prevista_meses} meses`;
+/* ---------- Modo "Outra instituição" ---------- */
+function ofertasDoTipo() { return ofertas.filter(o => o.tipo_de_curso === $("o-tipo").value); }
+function outraTipo() {
+  const doTipo = ofertasDoTipo();
+  preencher($("o-curso"), [...unicos(doTipo.map(o => o.nome_de_curso)), [OUTRO, "Meu curso não está na lista"]]);
+  preencher($("o-eixo"), unicos(doTipo.map(o => o.eixo_tecnologico)));
+  const tecnico = $("o-tipo").value === "Técnico";
+  $("o-oferta-bloco").hidden = !tecnico;
+  preencher($("o-oferta"), tecnico ? unicos(doTipo.map(o => o.tipo_de_oferta)) : []);
+  preencher($("o-turno"), unicos(doTipo.map(o => o.turno)), t => t === "Não se aplica" ? "Não se aplica (a distância)" : t);
+  preencher($("o-modalidade"), unicos(doTipo.map(o => o.modalidade_de_ensino)), m => m.replace("Educação ", ""));
+  if (!$("o-tipo").value) for (const id of ["o-curso", "o-turno", "o-modalidade"]) $(id).disabled = true;
+  $("o-eixo-bloco").hidden = true;
+  atualizar();
+}
+function outraCurso() { $("o-eixo-bloco").hidden = $("o-curso").value !== OUTRO; atualizar(); }
+
+// Para quem não está na base, completa o que o formulário não pergunta com o mais comum em cursos parecidos.
+function perfilDoCurso() {
+  let base = ofertasDoTipo();
+  const nome = $("o-curso").value;
+  const porCurso = nome === OUTRO ? base.filter(o => o.eixo_tecnologico === $("o-eixo").value)
+                                  : base.filter(o => o.nome_de_curso === nome);
+  if (porCurso.length) base = porCurso;
+  const oferta = $("o-tipo").value === "Técnico" ? $("o-oferta").value : moda(base.map(o => o.tipo_de_oferta));
+  const comOferta = base.filter(o => o.tipo_de_oferta === oferta);
+  if (comOferta.length) base = comOferta;
+  return {
+    instituicao: null, unidade_de_ensino: null,
+    uf: $("o-uf").value || null,
+    nome_de_curso: nome === OUTRO ? null : nome,
+    tipo_de_curso: $("o-tipo").value,
+    tipo_de_oferta: oferta,
+    modalidade_de_ensino: $("o-modalidade").value,
+    eixo_tecnologico: nome === OUTRO ? $("o-eixo").value : moda(base.map(o => o.eixo_tecnologico)),
+    subeixo_tecnologico: moda(base.map(o => o.subeixo_tecnologico)),
+    turno: $("o-turno").value,
+    fonte_de_financiamento: moda(base.map(o => o.fonte_de_financiamento)),
+    carga_horaria: mediana(base.map(o => o.carga_horaria)),
+    duracao_prevista_meses: mediana(base.map(o => o.duracao_prevista_meses)),
+  };
 }
 
-function verificar() {
+function cursoEscolhido() {
+  if (modo === "lista") {
+    if ($("oferta").value === "") return null;
+    return { ...ofertas[Number($("oferta").value)] };
+  }
+  const ok = $("o-tipo").value && $("o-curso").value && $("o-turno").value && $("o-modalidade").value
+             && ($("o-curso").value !== OUTRO || $("o-eixo").value)
+             && ($("o-tipo").value !== "Técnico" || $("o-oferta").value);
+  return ok ? perfilDoCurso() : null;
+}
+
+function atualizar() {
+  const curso = cursoEscolhido();
+  $("detalhe-curso").textContent = curso && curso.carga_horaria
+    ? `Carga horária típica de ${curso.carga_horaria} horas, com duração prevista de ${curso.duracao_prevista_meses} meses.` : "";
   const idade = Number($("idade").value);
-  const ok = $("oferta").value !== "" && $("sexo").value !== "" && $("mes").value !== ""
-             && $("idade").value !== "" && idade >= 12 && idade <= 80;
-  $("calcular").disabled = !ok;
+  $("calcular").disabled = !(curso && $("sexo").value && $("mes").value && $("idade").value !== ""
+                             && idade >= 12 && idade <= 80);
+}
+
+function trocarModo(novo) {
+  modo = novo;
+  for (const b of document.querySelectorAll("[data-modo]")) b.setAttribute("aria-checked", String(b.dataset.modo === novo));
+  $("modo-lista").hidden = novo !== "lista";
+  $("modo-outra").hidden = novo !== "outra";
+  atualizar();
+}
+
+/* ---------- Resultado ---------- */
+function regua(prob, limiar) {
+  const L = 400, m = 8, x = v => (m + v * (L - 2 * m)).toFixed(1);
+  const ini = Math.max(0, limiar - 0.1), fim = Math.min(1, limiar + 0.1);
+  const marcas = Array.from({ length: 11 }, (_, i) => i / 10);
+  const ancora = limiar > 0.8 ? "end" : limiar < 0.2 ? "start" : "middle";
+  return `<svg viewBox="0 0 ${L} 92" role="img" aria-label="Risco de ${pct(prob)}; alerta a partir de ${pct(limiar)}">
+    <rect x="${x(0)}" y="30" width="${(x(ini) - x(0)).toFixed(1)}" height="16" rx="3" fill="#e2f0e7"/>
+    <rect x="${x(ini)}" y="30" width="${(x(fim) - x(ini)).toFixed(1)}" height="16" fill="#f7ecd9"/>
+    <rect x="${x(fim)}" y="30" width="${(x(1) - x(fim)).toFixed(1)}" height="16" rx="3" fill="#f6e1de"/>
+    ${marcas.map(v => `<line x1="${x(v)}" x2="${x(v)}" y1="46" y2="${Math.round(v * 10) % 5 === 0 ? 58 : 53}" stroke="#52625c" stroke-width="1.5"/>`).join("")}
+    ${[0, 0.5, 1].map(v => `<text x="${x(v)}" y="78" text-anchor="${v === 0 ? "start" : v === 1 ? "end" : "middle"}" font-size="13" fill="#52625c">${v * 100}%</text>`).join("")}
+    <line x1="${x(limiar)}" x2="${x(limiar)}" y1="22" y2="52" stroke="#1c2b27" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="${x(limiar)}" y="15" text-anchor="${ancora}" font-size="13" fill="#1c2b27">alerta a partir de ${pct(limiar)}</text>
+    <circle cx="${x(prob)}" cy="38" r="10" fill="#1e6b4f" stroke="#fff" stroke-width="3"/>
+  </svg>`;
 }
 
 function calcular(evento) {
   evento.preventDefault();
-  const o = ofertas[Number($("oferta").value)];
-  const entrada = { ...o, sexo: $("sexo").value, idade_ingresso: Number($("idade").value),
+  const curso = cursoEscolhido();
+  const entrada = { ...curso, sexo: $("sexo").value, idade_ingresso: Number($("idade").value),
                     mes_ingresso: Number($("mes").value) };
   const { prob } = probabilidade(modelo, entrada);
-  const limiar = limiarDoNivel(modelo, o.tipo_de_curso);
-  const nivel = nivelDoCurso(o.tipo_de_curso).toLowerCase();
-  const alerta = prob >= limiar;
-  const duvida = Math.abs(prob - limiar) < 0.10;
-  const [classe, faixa] = duvida ? ["medio", "Zona de dúvida"] : alerta ? ["alto", "Risco alto"] : ["baixo", "Risco abaixo do alerta"];
+  const limiar = limiarDoNivel(modelo, curso.tipo_de_curso);
+  const nivel = nivelDoCurso(curso.tipo_de_curso) === "Técnico" ? "cursos técnicos" : "graduações";
+  const alerta = prob >= limiar, duvida = Math.abs(prob - limiar) < 0.10;
+  const [classe, selo] = duvida ? ["duvida", "Perto do limite"] : alerta ? ["alto", "Risco alto"] : ["baixo", "Risco abaixo do alerta"];
+  const valor = Math.round(prob * 100) === Math.round(limiar * 100) ? `${(prob * 100).toFixed(1).replace(".", ",")}%` : pct(prob);
 
   $("resultado").innerHTML = `
-    <h2>Resultado</h2>
-    <span class="faixa ${classe}">${faixa}</span>
-    <div class="numero">${Math.round(prob * 100) === Math.round(limiar * 100) ? `${(prob * 100).toFixed(1).replace(".", ",")}%` : pct(prob)}</div>
-    <div>dos alunos com perfil parecido evadiram</div>
-    <div class="barra" role="img" aria-label="Risco de ${pct(prob)}; limiar de alerta de ${pct(limiar)}">
-      <div class="preenchido" style="width:${(prob * 100).toFixed(1)}%"></div>
-      <div class="marca" style="left:${(limiar * 100).toFixed(1)}%" title="Limiar de alerta"></div>
-    </div>
-    <div class="legenda-barra"><span>0%</span><span>limiar de alerta do ${nivel}: ${pct(limiar)}</span><span>100%</span></div>
-    <p class="explicacao">${alerta
-      ? `O risco passa do limiar do ${nivel}, então o modelo <strong>recomendaria acompanhamento</strong> desde a matrícula.`
-      : `O risco fica abaixo do limiar do ${nivel}, então o modelo <strong>não emitiria alerta</strong>.`}
-      ${duvida ? " Como o valor está perto do limiar, o modelo está pouco seguro aqui." : ""}</p>
-    <div class="aviso">Isto descreve o histórico de alunos parecidos, não o futuro de uma pessoa.
-      Se você está pensando em deixar o curso, procure a assistência estudantil ou a coordenação do seu campus.</div>`;
+    <span class="selo ${classe}">${selo}</span>
+    <div class="valor">${valor}</div>
+    <p class="frase">dos alunos com perfil parecido com o seu deixaram o curso sem concluir.</p>
+    <div class="regua">${regua(prob, limiar)}</div>
+    <p class="leitura">${alerta
+      ? `Passa do limite de alerta das ${nivel}: o modelo recomendaria acompanhamento desde a matrícula.`
+      : `Fica abaixo do limite de alerta das ${nivel}: o modelo não emitiria alerta.`}
+      ${duvida ? "Como está perto do limite, aqui o modelo está pouco seguro." : ""}</p>
+    ${modo === "outra" ? `<p class="nota cautela">Sua instituição não está na base de treino. O resultado usa só o curso,
+      a forma de oferta e o seu perfil, então vale como uma aproximação.</p>` : ""}
+    <p class="nota">Isto descreve o histórico de alunos parecidos, não o seu futuro. Se você pensa em deixar o curso,
+      a assistência estudantil e a coordenação do seu campus podem ajudar.</p>`;
+  $("bloco-resultado").classList.remove("inativo");
+  ultimo = { entrada, prob, limiar, alerta };
+  mostrarAvaliacao();
+  $("bloco-resultado").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}
 
-  if (COLETA.ativa && COLETA.endereco) {
-    // Reservado para depois da entrega: só envia com consentimento registrado na página.
+/* ---------- Avaliação ---------- */
+function mostrarAvaliacao() {
+  $("bloco-avaliacao").hidden = false;
+  $("enviado").hidden = true; $("falha-envio").hidden = true;
+  nota = null;
+  for (const b of document.querySelectorAll("[data-nota]")) b.setAttribute("aria-checked", "false");
+  $("comentario").value = ""; $("aceite").checked = false;
+  $("bloco-envio").hidden = !ENDERECO_COLETA;
+  $("sem-coleta").hidden = Boolean(ENDERECO_COLETA);
+  verificarEnvio();
+}
+function verificarEnvio() { $("enviar").disabled = !(nota && $("aceite").checked && ultimo); }
+
+async function enviar() {
+  $("enviar").disabled = true; $("falha-envio").hidden = true;
+  const e = ultimo.entrada;
+  const dados = {
+    versao_site: "2", modo, instituicao: e.instituicao, campus: e.unidade_de_ensino, uf: e.uf,
+    curso: e.nome_de_curso, tipo_de_curso: e.tipo_de_curso, tipo_de_oferta: e.tipo_de_oferta,
+    turno: e.turno, modalidade: e.modalidade_de_ensino, eixo: e.eixo_tecnologico,
+    sexo: e.sexo, idade: e.idade_ingresso, mes: e.mes_ingresso,
+    probabilidade: Number(ultimo.prob.toFixed(4)), limiar: Number(ultimo.limiar.toFixed(2)), alerta: ultimo.alerta,
+    avaliacao: nota, comentario: $("comentario").value.trim().slice(0, 400),
+  };
+  try {
+    await fetch(ENDERECO_COLETA, { method: "POST", mode: "no-cors",
+                                   headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(dados) });
+    $("bloco-envio").hidden = true; $("enviado").hidden = false;
+  } catch {
+    $("falha-envio").hidden = false; verificarEnvio();
   }
 }
 
+/* ---------- Início ---------- */
 async function iniciar() {
   let opcoes;
   try {
-    const [m, op] = await Promise.all([
-      fetch("modelo.json").then(r => r.json()), fetch("opcoes.json").then(r => r.json())]);
+    const [m, op] = await Promise.all([fetch("modelo.json").then(r => r.json()), fetch("opcoes.json").then(r => r.json())]);
     modelo = m; opcoes = op; ofertas = op.ofertas;
-  } catch (e) {
-    $("resultado").innerHTML = `<h2>Resultado</h2><p class="erro">Não foi possível carregar o modelo. Se abriu o
-      arquivo direto do computador, rode um servidor local na pasta docs (python -m http.server).</p>`;
+  } catch {
+    $("resultado").innerHTML = `<p class="erro">O modelo não carregou. Se você abriu o arquivo direto do computador,
+      rode um servidor local na pasta docs (python -m http.server) e abra pelo endereço que ele mostrar.</p>`;
     return;
   }
   preencher($("instituicao"), unicos(ofertas.map(o => o.instituicao)));
   preencher($("sexo"), opcoes.sexos.filter(s => SEXOS[s]), s => SEXOS[s]);
   preencher($("mes"), opcoes.meses, m => MESES[m - 1]);
+  preencher($("o-uf"), [...Object.entries(UFS), ["", "Fora do Nordeste"]], undefined, "Selecione");
+  $("o-uf").options[$("o-uf").options.length - 1].value = "fora";
+  preencher($("o-tipo"), TIPOS);
+  outraTipo();
   $("limiar-tecnico").textContent = pct(modelo.limiar["Técnico"]);
   $("limiar-graduacao").textContent = pct(modelo.limiar["Graduação"]);
-  $("instituicao").addEventListener("change", atualizarCampus);
-  $("campus").addEventListener("change", atualizarCurso);
-  $("curso").addEventListener("change", atualizarOferta);
-  $("oferta").addEventListener("change", () => { mostrarDetalhe(); verificar(); });
-  for (const id of ["idade", "sexo", "mes"]) $(id).addEventListener("input", verificar);
+
+  $("instituicao").addEventListener("change", listaCampus);
+  $("campus").addEventListener("change", listaCursos);
+  $("curso").addEventListener("change", listaOfertas);
+  $("o-tipo").addEventListener("change", outraTipo);
+  $("o-curso").addEventListener("change", outraCurso);
+  for (const id of ["oferta", "o-uf", "o-eixo", "o-oferta", "o-turno", "o-modalidade", "idade", "sexo", "mes"])
+    $(id).addEventListener("input", atualizar);
+  for (const b of document.querySelectorAll("[data-modo]")) b.addEventListener("click", () => trocarModo(b.dataset.modo));
+  for (const b of document.querySelectorAll("[data-nota]")) b.addEventListener("click", () => {
+    nota = Number(b.dataset.nota);
+    for (const o of document.querySelectorAll("[data-nota]")) o.setAttribute("aria-checked", String(o === b));
+    verificarEnvio();
+  });
+  $("aceite").addEventListener("change", verificarEnvio);
+  $("enviar").addEventListener("click", enviar);
   $("formulario").addEventListener("submit", calcular);
 }
 

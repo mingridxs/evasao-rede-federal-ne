@@ -31,7 +31,7 @@ plt.rcParams.update({"figure.dpi": 110, "axes.spines.top": False,
 COR = "#2b6cb0"      # destaque
 CINZA = "#9aa5b1"
 
-df_completo = pd.read_csv("ef_2021_2023.csv", dtype={"ano_base": int})
+df_completo = pd.read_csv("dados/processados/ef_2021_2023.csv", dtype={"ano_base": int})
 treino = df_completo[df_completo["particao"] == "treino"].copy()
 TAXA_GERAL = treino["evadiu"].mean()
 print(f"Treino: {len(treino):,} matrículas, evasão de {TAXA_GERAL:.1%}")

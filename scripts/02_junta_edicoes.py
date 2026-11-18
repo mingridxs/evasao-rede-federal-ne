@@ -15,7 +15,8 @@ from sklearn.model_selection import train_test_split
 
 SEMENTE = 42
 EDICOES = [2021, 2022, 2023]
-ARQUIVOS = {ano: f"ef_{ano}.csv" for ano in EDICOES}
+PASTA_DADOS = "dados/processados/"
+ARQUIVOS = {ano: f"{PASTA_DADOS}ef_{ano}.csv" for ano in EDICOES}
 
 # %% [markdown]
 # ## 1. Carregar e conferir as edições
@@ -92,11 +93,11 @@ print((pd.crosstab(df["particao"], df["ano_base"], normalize="index") * 100)
 # ## 4. Salvar
 
 # %%
-df.to_csv("ef_2021_2023.csv", index=False)
-print("Salvo em ef_2021_2023.csv")
+df.to_csv(PASTA_DADOS + "ef_2021_2023.csv", index=False)
+print("Salvo em dados/processados/ef_2021_2023.csv")
 
 # Para usar depois:
-# df = pd.read_csv("ef_2021_2023.csv")
+# df = pd.read_csv("dados/processados/ef_2021_2023.csv")
 # treino    = df[df["particao"] == "treino"]
 # validacao = df[df["particao"] == "validacao"]
 # teste     = df[df["particao"] == "teste"]

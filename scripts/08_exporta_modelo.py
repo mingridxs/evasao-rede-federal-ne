@@ -11,8 +11,8 @@ Gera:
   resultados/verificacao_site.json - 2.000 matrículas do teste com a
       probabilidade calculada em Python, para conferir o JavaScript
 
-Uso:  python exporta_modelo.py
-Depois: node verifica_site.mjs
+Uso, na raiz do repositório:  python scripts/08_exporta_modelo.py
+Depois: node scripts/09_verifica_site.mjs
 """
 import json
 from pathlib import Path
@@ -74,7 +74,7 @@ print(f"docs/modelo.json: {len(arvores)} árvores, "
       f"{(PASTA_SITE / 'modelo.json').stat().st_size / 1e6:.1f} MB")
 
 # %% Opções do formulário
-df = pd.read_csv("ef_2021_2023.csv", dtype={c: str for c in cats})
+df = pd.read_csv("dados/processados/ef_2021_2023.csv", dtype={c: str for c in cats})
 CHAVE = ["instituicao", "unidade_de_ensino", "uf", "nome_de_curso", "tipo_de_curso",
          "tipo_de_oferta", "modalidade_de_ensino", "eixo_tecnologico", "subeixo_tecnologico",
          "turno", "fonte_de_financiamento"]
@@ -105,4 +105,4 @@ casos = [{"entrada": {k: (None if pd.isna(v) else (v if isinstance(v, str) else 
           "prob_bruta": float(pb), "prob": float(p)}
          for linha, pb, p in zip(teste[cats + nums].to_dict(orient="records"), prob_bruta, prob)]
 (PASTA_RES / "verificacao_site.json").write_text(json.dumps(casos, ensure_ascii=False), encoding="utf-8")
-print(f"resultados/verificacao_site.json: {len(casos):,} casos do teste. Agora rode: node verifica_site.mjs")
+print(f"resultados/verificacao_site.json: {len(casos):,} casos do teste. Agora rode: node scripts/09_verifica_site.mjs")

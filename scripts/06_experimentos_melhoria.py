@@ -47,7 +47,7 @@ anterior = joblib.load(PASTA_RES / "modelo_principal.joblib")
 PARAMS = anterior["hiperparametros"]
 print("Hiperparâmetros do modelo principal:", PARAMS)
 
-df = pd.read_csv("ef_2021_2023.csv", dtype={c: str for c in CAT})
+df = pd.read_csv("dados/processados/ef_2021_2023.csv", dtype={c: str for c in CAT})
 treino = df[df["particao"] == "treino"].reset_index(drop=True)
 validacao = df[df["particao"] == "validacao"].reset_index(drop=True)
 teste = df[df["particao"] == "teste"].reset_index(drop=True)

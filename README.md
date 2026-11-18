@@ -4,9 +4,9 @@ Projeto final da disciplina de Inteligência Artificial (UFPI, 2026.2), de Maria
 
 Um modelo de classificação estima, a partir de dados conhecidos no ingresso (curso, campus, oferta, idade e sexo), a probabilidade de um aluno de curso técnico ou de graduação evadir. O trabalho avalia o desempenho contra baselines simples, a calibração das probabilidades e a desigualdade de erros entre grupos de alunos.
 
-- **Demonstração:** https://mingridxs.github.io/evasao-rede-federal-ne/ (o modelo roda no navegador; nada é enviado ou guardado)
-- **Notebook:** LINK DO COLAB OU KAGGLE
-- **Dados limpos:** LINK DO DATASET NO KAGGLE
+- **Demonstração:** https://mingridxs.github.io/evasao-rede-federal-ne/ (o modelo roda no navegador; só a avaliação opcional, com consentimento, é enviada)
+- **Notebook:** em preparação
+- **Dados limpos:** em preparação (Kaggle)
 
 ## Resultados principais (teste, 17.849 matrículas)
 
@@ -22,41 +22,42 @@ O modelo principal é bem calibrado para quase todos os grupos, mas tem taxas de
 
 ## Dados
 
-Microdados de Eficiência Acadêmica da [Plataforma Nilo Peçanha](https://dadosabertos.mec.gov.br/pnp) (MEC), edições 2021, 2022 e 2023, licença [Open Data Commons Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/). Os arquivos originais (cerca de 800 MB cada) não estão no repositório: baixe-os nas páginas abaixo e salve-os na raiz do projeto.
+Microdados de Eficiência Acadêmica da [Plataforma Nilo Peçanha](https://dadosabertos.mec.gov.br/pnp) (MEC), edições 2021, 2022 e 2023, licença [Open Data Commons Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/). Os arquivos originais (cerca de 800 MB cada) não estão no repositório: baixe-os nas páginas abaixo e salve-os em `dados/brutos/`.
 
-- [2021 – Microdados Eficiência Acadêmica](https://dadosabertos.mec.gov.br/pnp/item/180-2021-microdados-eficiencia-academica) → `microdados_eficiencia_academica_2021.csv`
-- [2022 – Microdados Eficiência Acadêmica](https://dadosabertos.mec.gov.br/pnp/item/254-2022-microdados-eficiencia-academica) → `microdados_eficiencia_academica_2022.csv`
-- [2023 – Microdados Eficiência Acadêmica](https://dadosabertos.mec.gov.br/pnp/item/261-2023-microdados-eficiencia-academica) → `microdados_eficiencia_academica_2023.csv`
+- [2021 – Microdados Eficiência Acadêmica](https://dadosabertos.mec.gov.br/pnp/item/180-2021-microdados-eficiencia-academica) → `dados/brutos/microdados_eficiencia_academica_2021.csv`
+- [2022 – Microdados Eficiência Acadêmica](https://dadosabertos.mec.gov.br/pnp/item/254-2022-microdados-eficiencia-academica) → `dados/brutos/microdados_eficiencia_academica_2022.csv`
+- [2023 – Microdados Eficiência Acadêmica](https://dadosabertos.mec.gov.br/pnp/item/261-2023-microdados-eficiencia-academica) → `dados/brutos/microdados_eficiencia_academica_2023.csv`
 
 A base derivada (`ef_2021_2023.csv`) é distribuída sob a mesma licença ODbL.
 
 ## Como reproduzir
+
+Todos os comandos rodam a partir da raiz do repositório.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 # 1. Limpeza de cada edição (recorte Nordeste, cursos técnicos e de graduação)
-python preprocessa_pnp_v2.py microdados_eficiencia_academica_2021.csv --ano 2021 --regiao Nordeste --saida ef_2021.csv
-python preprocessa_pnp_v2.py microdados_eficiencia_academica_2022.csv --ano 2022 --regiao Nordeste --saida ef_2022.csv
-python preprocessa_pnp_v2.py microdados_eficiencia_academica_2023.csv --ano 2023 --regiao Nordeste --saida ef_2023.csv
+for ano in 2021 2022 2023; do
+  python scripts/01_preprocessa_pnp.py dados/brutos/microdados_eficiencia_academica_$ano.csv \
+      --ano $ano --regiao Nordeste --saida dados/processados/ef_$ano.csv
+done
 
 # 2. Junção e divisão 70/20/10 (estratificada, semente 42)
-python junta_edicoes_v2.py
+python scripts/02_junta_edicoes.py
 
 # 3. Análises e modelos
-python analise_exploratoria.py     # só treino
-python modelagem.py                # baselines, gradient boosting, calibração, teste
-python analise_vies.py             # erros por grupo, no teste
-python experimentos_melhoria.py    # atributos novos, limiar por nível, curva de aprendizado
-python analise_confianca.py        # acerto por nível de confiança
+python scripts/03_analise_exploratoria.py   # só treino
+python scripts/04_modelagem.py              # baselines, gradient boosting, calibração, teste
+python scripts/05_analise_vies.py           # erros por grupo, no teste
+python scripts/06_experimentos_melhoria.py  # atributo novo, limiar por nível, curva de aprendizado
+python scripts/07_analise_confianca.py      # acerto por nível de confiança
 
 # 4. Site
-python exporta_modelo.py           # gera docs/modelo.json e docs/opcoes.json
-node verifica_site.mjs             # confere que o JavaScript calcula o mesmo que o Python
+python scripts/08_exporta_modelo.py         # gera docs/modelo.json e docs/opcoes.json
+node scripts/09_verifica_site.mjs           # confere que o JavaScript calcula o mesmo que o Python
 ```
-
-As versões `_v1` dos dois primeiros scripts ficam no repositório como histórico. A v2 acrescentaria colunas de demanda (inscritos por vaga), mas os arquivos de Eficiência Acadêmica não trazem a coluna de inscritos, então as duas versões geram a mesma base.
 
 Para ver o site localmente: `cd docs && python -m http.server` e abra http://localhost:8000.
 
@@ -64,10 +65,20 @@ Para ver o site localmente: `cd docs && python -m http.server` e abra http://loc
 
 | Caminho | Conteúdo |
 | --- | --- |
-| `*.py` | Etapas do trabalho, na ordem acima; cada arquivo tem células `# %%` para rodar no VS Code |
+| `scripts/` | Etapas do trabalho, numeradas na ordem em que rodam; cada uma tem células `# %%` para rodar no VS Code |
 | `figuras/` | Gráficos usados no artigo e nos slides |
 | `resultados/` | Métricas, busca de hiperparâmetros, análise de viés, previsões do teste |
 | `docs/` | Site do GitHub Pages: página, modelo exportado e cálculo em JavaScript |
+| `coleta/` | Código da planilha do Google que recebe as avaliações do site, e como configurá-la |
+| `historico/` | Primeira versão do pré-processamento e da junção. A segunda versão tentou acrescentar a demanda pelo curso (inscritos por vaga), mas os arquivos de Eficiência Acadêmica não trazem a coluna de inscritos; as duas geram a mesma base |
+| `referencias/` | Instruções oficiais dos microdados da PNP |
+| `dados/` | Microdados e bases derivadas; fora do git |
+
+## Site e avaliação
+
+O site aceita instituições fora da base (por exemplo, universidades federais). Nesse caso, instituição e campus ficam como desconhecidos para o modelo, e o que o formulário não pergunta (área, carga horária, duração) é preenchido com o mais comum em cursos parecidos da base. O resultado é uma extrapolação, e a página avisa isso.
+
+No fim, a pessoa pode dar uma nota de 1 a 5 para o quanto o resultado combina com o que vive no curso. O envio é opcional, exige consentimento e não inclui nome nem e-mail; veja `coleta/COMO_CONFIGURAR.md`.
 
 ## Uso de modelos de linguagem
 

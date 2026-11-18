@@ -67,7 +67,7 @@ NUM = ["carga_horaria", "duracao_prevista_meses", "mes_ingresso", "idade_ingress
 CAT_EXTRA = ["cor_raca", "renda_familiar"]
 CONJUNTOS = {"principal": CAT_PRINCIPAL, "completo": CAT_PRINCIPAL + CAT_EXTRA}
 
-df = pd.read_csv("ef_2021_2023.csv",
+df = pd.read_csv("dados/processados/ef_2021_2023.csv",
                  dtype={c: str for c in CAT_PRINCIPAL + CAT_EXTRA})
 treino = df[df["particao"] == "treino"].reset_index(drop=True)
 validacao = df[df["particao"] == "validacao"].reset_index(drop=True)

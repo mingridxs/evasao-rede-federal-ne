@@ -2,10 +2,9 @@
 Pré-processamento dos microdados de matrículas da Plataforma Nilo Peçanha (PNP)
 para o projeto de previsão de evasão.
 
-Uso no Colab/Kaggle:
-    from preprocessa_pnp import preprocessa
-    df = preprocessa({2023: "microdados_matriculas_2023.csv"}, regiao="Nordeste")
-    df.to_csv("pnp_limpo.csv", index=False)
+Uso, na raiz do repositório:
+    python scripts/01_preprocessa_pnp.py dados/brutos/microdados_eficiencia_academica_2023.csv \
+        --ano 2023 --regiao Nordeste --saida dados/processados/ef_2023.csv
 
 Passe um arquivo por ano-base ({2021: "...", 2022: "...", 2023: "..."}) para
 incluir quem evadiu em anos anteriores e poder dividir treino e teste por
@@ -222,7 +221,7 @@ if __name__ == "__main__":
                     help="um arquivo, ou vários no formato ANO=arquivo.csv")
     ap.add_argument("--ano", type=int, default=2023,
                     help="ano-base, quando se passa um arquivo só")
-    ap.add_argument("--saida", default="pnp_limpo.csv", help="nome do arquivo de saída")
+    ap.add_argument("--saida", default="dados/processados/pnp_limpo.csv", help="nome do arquivo de saída")
     ap.add_argument("--todos-os-tipos", action="store_true",
                     help="inclui FIC, pós-graduação e ensino médio")
     ap.add_argument("--regiao")
