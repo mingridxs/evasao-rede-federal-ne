@@ -4,7 +4,7 @@ Projeto final da disciplina de Inteligência Artificial (UFPI, 2026.2), de Maria
 
 Um modelo de classificação estima, a partir de dados conhecidos no ingresso (curso, campus, oferta, idade e sexo), a probabilidade de um aluno de curso técnico ou de graduação evadir. O trabalho avalia o desempenho contra baselines simples, a calibração das probabilidades e a desigualdade de erros entre grupos de alunos.
 
-- **Demonstração:** https://mingridxs.github.io/NOME-DO-REPOSITORIO/ (o modelo roda no navegador; nada é enviado ou guardado)
+- **Demonstração:** https://mingridxs.github.io/evasao-rede-federal-ne/ (o modelo roda no navegador; nada é enviado ou guardado)
 - **Notebook:** LINK DO COLAB OU KAGGLE
 - **Dados limpos:** LINK DO DATASET NO KAGGLE
 
