@@ -40,7 +40,9 @@ plt.rcParams.update({"figure.dpi": 110, "axes.spines.top": False,
 CAT = ["instituicao", "unidade_de_ensino", "uf", "nome_de_curso", "tipo_de_curso",
        "tipo_de_oferta", "modalidade_de_ensino", "eixo_tecnologico", "subeixo_tecnologico",
        "turno", "fonte_de_financiamento", "sexo"]
-NUM = ["carga_horaria", "duracao_prevista_meses", "mes_ingresso", "idade_ingresso"]
+# Numéricos do modelo principal, incluindo os indicadores de não declaração (decisão de 18/11).
+NUM = ["carga_horaria", "duracao_prevista_meses", "mes_ingresso", "idade_ingresso",
+       "renda_nao_declarada", "cor_nao_declarada"]
 GRADUACAO = {"Tecnologia", "Licenciatura", "Bacharelado"}
 
 anterior = joblib.load(PASTA_RES / "modelo_principal.joblib")
@@ -48,6 +50,9 @@ PARAMS = anterior["hiperparametros"]
 print("Hiperparâmetros do modelo principal:", PARAMS)
 
 df = pd.read_csv("dados/processados/ef_2021_2023.csv", dtype={c: str for c in CAT})
+AUSENTES = {"Não informado", "Não declarada", "Não declarado", "Não Declarada", "nan"}
+for novo, origem in [("renda_nao_declarada", "renda_familiar"), ("cor_nao_declarada", "cor_raca")]:
+    df[novo] = (df[origem].isin(AUSENTES) | df[origem].isna()).astype(int)
 treino = df[df["particao"] == "treino"].reset_index(drop=True)
 validacao = df[df["particao"] == "validacao"].reset_index(drop=True)
 teste = df[df["particao"] == "teste"].reset_index(drop=True)

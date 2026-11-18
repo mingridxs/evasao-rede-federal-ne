@@ -7,11 +7,15 @@
 #   probabilidades e escolha do limiar de decisão.
 # - **Teste** (10%): usado uma única vez, na seção 6, depois de tudo decidido.
 #
-# Dois conjuntos de atributos (decisão de 17/11):
-# - **principal:** dados do curso, da oferta, sexo e idade no ingresso;
-# - **completo:** o principal mais renda e cor/raça, com "não declarado" como
-#   categoria. Serve para medir se esses atributos trazem sinal real ou se o
-#   "não declarado" está vazando o desfecho.
+# Três conjuntos de atributos (decisões de 17/11 e 18/11):
+# - **sem indicadores:** dados do curso, da oferta, sexo e idade no ingresso
+#   (era o modelo principal até 18/11);
+# - **principal:** o anterior mais dois indicadores, "não declarou renda" e
+#   "não declarou cor/raça". O teste de 18/11 (scripts/10_renda_raca.py)
+#   mostrou que esses registros são feitos no ingresso e que todo o ganho de
+#   renda e cor/raça vem deles;
+# - **completo:** sem indicadores mais os valores de renda e cor/raça, com
+#   "não declarado" como categoria. Fica como comparação.
 #
 # Saídas: `resultados/metricas_validacao.csv`, `resultados/metricas_teste.csv`,
 # `resultados/predicoes_teste.csv` (para a análise de viés),
@@ -65,10 +69,16 @@ CAT_PRINCIPAL = ["instituicao", "unidade_de_ensino", "uf", "nome_de_curso", "tip
                  "subeixo_tecnologico", "turno", "fonte_de_financiamento", "sexo"]
 NUM = ["carga_horaria", "duracao_prevista_meses", "mes_ingresso", "idade_ingresso"]
 CAT_EXTRA = ["cor_raca", "renda_familiar"]
-CONJUNTOS = {"principal": CAT_PRINCIPAL, "completo": CAT_PRINCIPAL + CAT_EXTRA}
+IND = ["renda_nao_declarada", "cor_nao_declarada"]
+CONJUNTOS = {"sem indicadores": (CAT_PRINCIPAL, NUM),
+             "principal": (CAT_PRINCIPAL, NUM + IND),
+             "completo": (CAT_PRINCIPAL + CAT_EXTRA, NUM)}
+AUSENTES = {"Não informado", "Não declarada", "Não declarado", "Não Declarada", "nan"}
 
 df = pd.read_csv("dados/processados/ef_2021_2023.csv",
                  dtype={c: str for c in CAT_PRINCIPAL + CAT_EXTRA})
+for novo, origem in [("renda_nao_declarada", "renda_familiar"), ("cor_nao_declarada", "cor_raca")]:
+    df[novo] = (df[origem].isin(AUSENTES) | df[origem].isna()).astype(int)
 treino = df[df["particao"] == "treino"].reset_index(drop=True)
 validacao = df[df["particao"] == "validacao"].reset_index(drop=True)
 teste = df[df["particao"] == "teste"].reset_index(drop=True)
@@ -153,21 +163,21 @@ class TaxaHistoricaCurso:
         return np.column_stack([1 - p.values, p.values])
 
 
-def pipeline_logistica(cats):
+def pipeline_logistica(cats, nums):
     pre = ColumnTransformer([
         ("cat", OneHotEncoder(handle_unknown="ignore", min_frequency=30), cats),
         ("num", Pipeline([("imp", SimpleImputer(strategy="median")),
-                          ("esc", StandardScaler())]), NUM),
+                          ("esc", StandardScaler())]), nums),
     ])
     return Pipeline([("pre", pre),
                      ("modelo", LogisticRegression(max_iter=3000, C=1.0))])
 
 
-def pipeline_boosting(cats, **params):
+def pipeline_boosting(cats, nums, **params):
     pre = ColumnTransformer([
         ("cat", OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=np.nan,
                                encoded_missing_value=np.nan), cats),
-        ("num", "passthrough", NUM),
+        ("num", "passthrough", nums),
     ])
     modelo = HistGradientBoostingClassifier(
         categorical_features=list(range(len(cats))), max_iter=1000,
@@ -186,11 +196,11 @@ prob_va["Classe majoritária"] = np.full(len(validacao), y_tr.mean())
 modelos["Taxa histórica do curso"] = TaxaHistoricaCurso().fit(treino, y_tr)
 prob_va["Taxa histórica do curso"] = modelos["Taxa histórica do curso"].predict_proba(validacao)[:, 1]
 
-for conjunto, cats in CONJUNTOS.items():
+for conjunto, (cats, nums) in CONJUNTOS.items():
     nome = f"Regressão logística ({conjunto})"
     inicio = time.time()
-    modelos[nome] = pipeline_logistica(cats).fit(treino[cats + NUM], y_tr)
-    prob_va[nome] = modelos[nome].predict_proba(validacao[cats + NUM])[:, 1]
+    modelos[nome] = pipeline_logistica(cats, nums).fit(treino[cats + nums], y_tr)
+    prob_va[nome] = modelos[nome].predict_proba(validacao[cats + nums])[:, 1]
     print(f"{nome}: {time.time() - inicio:.0f}s, AUC validação {roc_auc_score(y_va, prob_va[nome]):.4f}")
 
 # %% [markdown]
@@ -206,12 +216,12 @@ GRADE = {"learning_rate": [0.05, 0.1], "max_leaf_nodes": [15, 31, 63],
 combinacoes = [dict(zip(GRADE, v)) for v in product(*GRADE.values())]
 
 busca = []
-for conjunto, cats in CONJUNTOS.items():
+for conjunto, (cats, nums) in CONJUNTOS.items():
     for params in combinacoes:
         inicio = time.time()
-        pipe = pipeline_boosting(cats, l2_regularization=1.0, **params)
-        pipe.fit(treino[cats + NUM], y_tr)
-        p = pipe.predict_proba(validacao[cats + NUM])[:, 1]
+        pipe = pipeline_boosting(cats, nums, l2_regularization=1.0, **params)
+        pipe.fit(treino[cats + nums], y_tr)
+        p = pipe.predict_proba(validacao[cats + nums])[:, 1]
         busca.append({"conjunto": conjunto, **params,
                       "iteracoes": pipe.named_steps["modelo"].n_iter_,
                       "AUC validação": roc_auc_score(y_va, p),
@@ -224,16 +234,16 @@ print(busca.groupby("conjunto").head(3).to_string(index=False))
 
 # %%
 melhores = {}
-for conjunto, cats in CONJUNTOS.items():
+for conjunto, (cats, nums) in CONJUNTOS.items():
     linha = busca[busca["conjunto"] == conjunto].iloc[0]
     params = {"learning_rate": float(linha["learning_rate"]),
               "max_leaf_nodes": int(linha["max_leaf_nodes"]),
               "min_samples_leaf": int(linha["min_samples_leaf"])}
     melhores[conjunto] = params
     nome = f"Gradient boosting ({conjunto})"
-    modelos[nome] = pipeline_boosting(cats, l2_regularization=1.0, **params).fit(
-        treino[cats + NUM], y_tr)
-    prob_va[nome] = modelos[nome].predict_proba(validacao[cats + NUM])[:, 1]
+    modelos[nome] = pipeline_boosting(cats, nums, l2_regularization=1.0, **params).fit(
+        treino[cats + nums], y_tr)
+    prob_va[nome] = modelos[nome].predict_proba(validacao[cats + nums])[:, 1]
     print(f"{nome}: {params}, AUC validação {roc_auc_score(y_va, prob_va[nome]):.4f}")
 
 # %% [markdown]
@@ -250,7 +260,10 @@ for conjunto, cats in CONJUNTOS.items():
 def colunas_de(nome):
     if nome in ("Classe majoritária", "Taxa histórica do curso"):
         return None
-    return CONJUNTOS["completo" if "completo" in nome else "principal"] + NUM
+    for conjunto, (cats, nums) in CONJUNTOS.items():
+        if f"({conjunto})" in nome:
+            return cats + nums
+    raise KeyError(nome)
 
 
 calibradores, limiares = {}, {}
@@ -290,7 +303,7 @@ plt.show()
 
 # %%
 amostra = validacao.sample(min(20000, len(validacao)), random_state=SEMENTE)
-cols = CONJUNTOS["principal"] + NUM
+cols = CONJUNTOS["principal"][0] + CONJUNTOS["principal"][1]
 imp = permutation_importance(modelos["Gradient boosting (principal)"], amostra[cols],
                              amostra["evadiu"], scoring="roc_auc", n_repeats=5,
                              random_state=SEMENTE, n_jobs=-1)
@@ -336,11 +349,11 @@ tabela_te.to_csv(PASTA_RES / "metricas_teste.csv")
 print(tabela_te.round(4).sort_values("AUC").to_string())
 
 # %%
-ordem = ["Classe majoritária", "Taxa histórica do curso", "Regressão logística (principal)",
-         "Gradient boosting (principal) · calibrado", "Regressão logística (completo)",
-         "Gradient boosting (completo) · calibrado"]
+ordem = ["Classe majoritária", "Taxa histórica do curso", "Regressão logística (sem indicadores)",
+         "Gradient boosting (sem indicadores) · calibrado", "Regressão logística (principal)",
+         "Gradient boosting (principal) · calibrado", "Gradient boosting (completo) · calibrado"]
 t = tabela_te.loc[ordem]
-fig, ax = plt.subplots(figsize=(8, 3.8))
+fig, ax = plt.subplots(figsize=(8, 4.4))
 cores = [COR if n == "Gradient boosting (principal) · calibrado" else CINZA for n in ordem]
 ax.barh(range(len(t)), t["AUC"], color=cores,
         xerr=[np.clip(t["AUC"] - t["AUC IC inf"], 0, None), np.clip(t["AUC IC sup"] - t["AUC"], 0, None)],
@@ -380,6 +393,7 @@ saida = teste[["instituicao", "uf", "tipo_de_curso", "sexo", "cor_raca", "renda_
                "idade_ingresso", "ano_base", "evadiu"]].copy()
 saida["prob_principal"] = prob_te["Gradient boosting (principal) · calibrado"]
 saida["prob_completo"] = prob_te["Gradient boosting (completo) · calibrado"]
+saida["prob_sem_indicadores"] = prob_te["Gradient boosting (sem indicadores) · calibrado"]
 saida["prob_taxa_curso"] = prob_te["Taxa histórica do curso"]
 saida["limiar_principal"] = limiares["Gradient boosting (principal) · calibrado"]
 saida.to_csv(PASTA_RES / "predicoes_teste.csv", index=False)
@@ -387,7 +401,7 @@ saida.to_csv(PASTA_RES / "predicoes_teste.csv", index=False)
 joblib.dump({"modelo": modelos["Gradient boosting (principal)"],
              "calibrador": calibradores["Gradient boosting (principal)"],
              "limiar": limiares["Gradient boosting (principal) · calibrado"],
-             "colunas": CONJUNTOS["principal"] + NUM,
+             "colunas": CONJUNTOS["principal"][0] + CONJUNTOS["principal"][1],
              "hiperparametros": melhores["principal"]},
             PASTA_RES / "modelo_principal.joblib")
 print("Salvos: predicoes_teste.csv e modelo_principal.joblib em resultados/")

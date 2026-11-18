@@ -50,6 +50,7 @@
   .alternar { display: grid; grid-template-columns: 1fr 1fr; background: var(--fundo); border-radius: 10px; padding: 4px; gap: 4px; }
   .alternar button { min-height: 52px; border: 0; border-radius: 8px; background: transparent; font: inherit; font-size: .95rem;
                      color: var(--suave); cursor: pointer; padding: 6px 8px; line-height: 1.25; }
+  .alternar.tres { grid-template-columns: 1fr 1fr 1fr; }
   .alternar button[aria-checked="true"] { background: var(--papel); color: var(--tinta); font-weight: 700;
                                           box-shadow: 0 1px 2px rgba(28, 43, 39, .18); }
   .detalhe { color: var(--suave); font-size: .9rem; margin: 8px 0 0; }
@@ -187,6 +188,21 @@
       </div>
       <label for="mes">Mês em que as aulas começaram</label>
       <select id="mes" disabled></select>
+
+      <span class="rotulo" id="r-renda">Você informou sua renda familiar na matrícula?
+        <span class="ajuda">No questionário socioeconômico ou no cadastro do curso. Não precisa dizer o valor.</span></span>
+      <div class="alternar tres" role="radiogroup" aria-labelledby="r-renda" data-campo="renda_nao_declarada">
+        <button type="button" role="radio" aria-checked="false" data-valor="0">Sim</button>
+        <button type="button" role="radio" aria-checked="false" data-valor="1">Não</button>
+        <button type="button" role="radio" aria-checked="false" data-valor="">Não lembro</button>
+      </div>
+
+      <span class="rotulo" id="r-cor">Você informou sua cor ou raça na matrícula?</span>
+      <div class="alternar tres" role="radiogroup" aria-labelledby="r-cor" data-campo="cor_nao_declarada">
+        <button type="button" role="radio" aria-checked="false" data-valor="0">Sim</button>
+        <button type="button" role="radio" aria-checked="false" data-valor="1">Não</button>
+        <button type="button" role="radio" aria-checked="false" data-valor="">Não lembro</button>
+      </div>
       <button id="calcular" class="acao" type="submit" disabled>Ver o risco</button>
       <p class="privacidade">O cálculo acontece no seu aparelho. Nada sai dele, a não ser que você escolha enviar a avaliação no fim.</p>
     </section>
@@ -225,21 +241,24 @@
 
   <details>
     <summary>Como o modelo funciona e onde ele erra</summary>
+    <p>As perguntas sobre renda e cor/raça não pedem o valor: o modelo usa só se a informação foi registrada.
+      Nos dados da Rede Federal, quem não teve renda ou cor/raça registradas na matrícula evadiu mais, e esses
+      registros são feitos no ingresso. Os valores em si (faixa de renda, cor/raça) não melhoraram a previsão.</p>
     <p>O número é a proporção de alunos com perfil parecido que evadiram, ou seja, que saíram do curso sem concluir:
       abandono, desligamento, cancelamento, reprovação ou transferência para outra instituição. Ele não diz se uma pessoa
       vai evadir. O modelo só conhece dados de matrícula; notas, frequência e a vida de cada aluno, que pesam muito, não
       estão na base.</p>
     <table class="tabela">
       <tr><th>Como o modelo se saiu em 17.849 matrículas que ele não viu</th><th></th></tr>
-      <tr><td>Acerto ao classificar quem evade e quem conclui</td><td>71%</td></tr>
+      <tr><td>Acerto ao classificar quem evade e quem conclui</td><td>73%</td></tr>
       <tr><td>Acerto só usando a taxa histórica do curso, sem modelo</td><td>68%</td></tr>
-      <tr><td>Acerto nos 30% de casos em que o modelo está mais seguro</td><td>83%</td></tr>
+      <tr><td>Acerto nos 30% de casos em que o modelo está mais seguro</td><td>86%</td></tr>
     </table>
     <ul>
       <li>O alerta aparece quando o risco passa do limite do nível do curso: <span id="limiar-tecnico">–</span> no técnico e
         <span id="limiar-graduacao">–</span> na graduação.</li>
       <li>Perto desse limite o modelo erra mais, e a opinião de quem conhece o aluno vale mais que o número.</li>
-      <li>Ele subestima o risco de estudantes indígenas e quase não detecta a evasão de quem entra com até 17 anos.</li>
+      <li>Ele subestima em cerca de 10 pontos o risco de estudantes indígenas e encontra menos de 40% dos casos de evasão de quem entra com até 17 anos.</li>
       <li>Foi treinado com turmas do Nordeste que passaram pela pandemia. Para universidades, que não estão na base, o
         resultado é uma extrapolação.</li>
     </ul>
@@ -272,6 +291,8 @@ const moda = lista => { const c = new Map(); for (const v of lista) c.set(v, (c.
 const mediana = lista => { const s = [...lista].sort((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : null; };
 
 let modelo, ofertas, modo = "lista", ultimo = null, nota = null;
+// Indicadores de não declaração: 0 = informou, 1 = não informou, null = não lembra (o modelo trata como ausente).
+const declaracao = { renda_nao_declarada: undefined, cor_nao_declarada: undefined };
 
 function preencher(select, itens, rotulo = v => v, vazio = "Selecione") {
   select.innerHTML = "";
@@ -364,8 +385,9 @@ function atualizar() {
   $("detalhe-curso").textContent = curso && curso.carga_horaria
     ? `Carga horária típica de ${curso.carga_horaria} horas, com duração prevista de ${curso.duracao_prevista_meses} meses.` : "";
   const idade = Number($("idade").value);
+  const respondeu = Object.values(declaracao).every(v => v !== undefined);
   $("calcular").disabled = !(curso && $("sexo").value && $("mes").value && $("idade").value !== ""
-                             && idade >= 12 && idade <= 80);
+                             && idade >= 12 && idade <= 80 && respondeu);
 }
 
 function trocarModo(novo) {
@@ -398,7 +420,7 @@ function calcular(evento) {
   evento.preventDefault();
   const curso = cursoEscolhido();
   const entrada = { ...curso, sexo: $("sexo").value, idade_ingresso: Number($("idade").value),
-                    mes_ingresso: Number($("mes").value) };
+                    mes_ingresso: Number($("mes").value), ...declaracao };
   const { prob } = probabilidade(modelo, entrada);
   const limiar = limiarDoNivel(modelo, curso.tipo_de_curso);
   const nivel = nivelDoCurso(curso.tipo_de_curso) === "Técnico" ? "cursos técnicos" : "graduações";
@@ -446,6 +468,7 @@ async function enviar() {
     curso: e.nome_de_curso, tipo_de_curso: e.tipo_de_curso, tipo_de_oferta: e.tipo_de_oferta,
     turno: e.turno, modalidade: e.modalidade_de_ensino, eixo: e.eixo_tecnologico,
     sexo: e.sexo, idade: e.idade_ingresso, mes: e.mes_ingresso,
+    renda_nao_declarada: e.renda_nao_declarada, cor_nao_declarada: e.cor_nao_declarada,
     probabilidade: Number(ultimo.prob.toFixed(4)), limiar: Number(ultimo.limiar.toFixed(2)), alerta: ultimo.alerta,
     avaliacao: nota, comentario: $("comentario").value.trim().slice(0, 400),
   };
@@ -487,6 +510,13 @@ async function iniciar() {
   for (const id of ["oferta", "o-uf", "o-eixo", "o-oferta", "o-turno", "o-modalidade", "idade", "sexo", "mes"])
     $(id).addEventListener("input", atualizar);
   for (const b of document.querySelectorAll("[data-modo]")) b.addEventListener("click", () => trocarModo(b.dataset.modo));
+  for (const grupo of document.querySelectorAll("[data-campo]")) {
+    for (const b of grupo.querySelectorAll("[data-valor]")) b.addEventListener("click", () => {
+      declaracao[grupo.dataset.campo] = b.dataset.valor === "" ? null : Number(b.dataset.valor);
+      for (const o of grupo.querySelectorAll("[data-valor]")) o.setAttribute("aria-checked", String(o === b));
+      atualizar();
+    });
+  }
   for (const b of document.querySelectorAll("[data-nota]")) b.addEventListener("click", () => {
     nota = Number(b.dataset.nota);
     for (const o of document.querySelectorAll("[data-nota]")) o.setAttribute("aria-checked", String(o === b));

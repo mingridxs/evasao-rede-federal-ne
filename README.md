@@ -14,11 +14,14 @@ Um modelo de classificação estima, a partir de dados conhecidos no ingresso (c
 | --- | --- | --- |
 | Classe majoritária | 0,500 | 0,243 |
 | Taxa histórica do curso no campus | 0,761 (0,755–0,769) | 0,195 |
-| Regressão logística | 0,779 (0,772–0,787) | 0,187 |
-| **Gradient boosting (modelo principal)** | **0,815 (0,809–0,822)** | **0,172** |
-| Gradient boosting com renda e cor/raça | 0,833 (0,828–0,839) | 0,163 |
+| Regressão logística | 0,789 (0,783–0,796) | 0,183 |
+| Gradient boosting sem os indicadores de não declaração | 0,815 (0,809–0,822) | 0,172 |
+| **Gradient boosting (modelo principal)** | **0,833 (0,828–0,839)** | **0,163** |
+| Gradient boosting com os valores de renda e cor/raça | 0,833 (0,828–0,839) | 0,163 |
 
-O modelo principal é bem calibrado para quase todos os grupos, mas tem taxas de erro diferentes entre grupos com taxas de evasão diferentes (sexo, cor/raça, idade). Ele subestima o risco de estudantes indígenas e quase não detecta a evasão de quem entra com até 17 anos. Os detalhes estão no artigo.
+O modelo principal usa curso, campus, oferta, idade, sexo e mês de ingresso, mais dois indicadores: se a renda e se a cor/raça foram registradas na matrícula. Os registros são feitos no ingresso, e quem não os tem evade mais mesmo dentro de cada instituição; os valores de renda e cor/raça em si não melhoram a previsão (`scripts/10_renda_raca.py`).
+
+Com um limiar por nível de curso (0,52 no técnico e 0,79 na graduação), o modelo acerta 73% das matrículas do teste, contra 68% da taxa histórica do curso; nos 30% de casos em que está mais seguro, acerta 86%. Ele é bem calibrado para quase todos os grupos, mas tem taxas de erro diferentes entre grupos com taxas de evasão diferentes (sexo, cor/raça, idade), subestima em cerca de 10 pontos o risco de estudantes indígenas e encontra menos de 40% dos casos de evasão de quem entra com até 17 anos.
 
 ## Dados
 

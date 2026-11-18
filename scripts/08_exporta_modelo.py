@@ -75,6 +75,13 @@ print(f"docs/modelo.json: {len(arvores)} árvores, "
 
 # %% Opções do formulário
 df = pd.read_csv("dados/processados/ef_2021_2023.csv", dtype={c: str for c in cats})
+AUSENTES = {"Não informado", "Não declarada", "Não declarado", "Não Declarada", "nan"}
+for novo, origem in [("renda_nao_declarada", "renda_familiar"), ("cor_nao_declarada", "cor_raca")]:
+    df[novo] = (df[origem].isin(AUSENTES) | df[origem].isna()).astype(int)
+faltam = [c for c in cats + nums if c not in df.columns]
+if faltam:
+    raise SystemExit(f"O modelo usa colunas que o site não sabe calcular: {faltam}. "
+                     "O site só aceita os atributos do modelo principal.")
 CHAVE = ["instituicao", "unidade_de_ensino", "uf", "nome_de_curso", "tipo_de_curso",
          "tipo_de_oferta", "modalidade_de_ensino", "eixo_tecnologico", "subeixo_tecnologico",
          "turno", "fonte_de_financiamento"]

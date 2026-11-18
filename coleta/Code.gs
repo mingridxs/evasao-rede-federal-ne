@@ -4,6 +4,7 @@
 const COLUNAS = [
   "recebido_em", "versao_site", "modo", "instituicao", "campus", "uf", "curso", "tipo_de_curso",
   "tipo_de_oferta", "turno", "modalidade", "eixo", "sexo", "idade", "mes",
+  "renda_nao_declarada", "cor_nao_declarada",
   "probabilidade", "limiar", "alerta", "avaliacao", "comentario",
 ];
 
