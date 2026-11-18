@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Risco de evasão na Rede Federal do Nordeste</title>
+<meta name="description" content="Demonstração de um modelo que estima o risco de evasão a partir do perfil de ingresso, treinado com dados públicos da Plataforma Nilo Peçanha.">
+<style>
+  :root {
+    --tinta: #1a202c; --suave: #4a5568; --linha: #e2e8f0; --fundo: #f7fafc;
+    --azul: #2b6cb0; --azul-claro: #ebf4ff; --alto: #c53030; --alto-claro: #fff5f5;
+    --medio: #b7791f; --medio-claro: #fffaf0; --baixo: #2f855a; --baixo-claro: #f0fff4;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+         color: var(--tinta); background: var(--fundo); line-height: 1.55; }
+  header { background: #fff; border-bottom: 1px solid var(--linha); }
+  .largura { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+  header .largura { padding-top: 28px; padding-bottom: 24px; }
+  h1 { font-size: 1.6rem; margin: 0 0 6px; }
+  .subtitulo { color: var(--suave); margin: 0; max-width: 70ch; }
+  main { padding: 28px 0 48px; }
+  .grade { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; align-items: start; }
+  @media (max-width: 820px) { .grade { grid-template-columns: 1fr; } }
+  .cartao { background: #fff; border: 1px solid var(--linha); border-radius: 10px; padding: 22px; }
+  h2 { font-size: 1.1rem; margin: 0 0 14px; }
+  fieldset { border: 0; padding: 0; margin: 0 0 18px; }
+  legend { font-weight: 600; font-size: .95rem; margin-bottom: 8px; }
+  label { display: block; font-size: .9rem; color: var(--suave); margin: 10px 0 4px; }
+  select, input { width: 100%; padding: 9px 10px; font: inherit; color: var(--tinta);
+                  border: 1px solid #cbd5e0; border-radius: 6px; background: #fff; }
+  select:disabled { background: #edf2f7; color: #a0aec0; }
+  select:focus, input:focus, button:focus { outline: 2px solid var(--azul); outline-offset: 1px; }
+  .lado { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  button { margin-top: 6px; width: 100%; padding: 11px; font: inherit; font-weight: 600; color: #fff;
+           background: var(--azul); border: 0; border-radius: 6px; cursor: pointer; }
+  button:disabled { background: #a0aec0; cursor: not-allowed; }
+  .detalhe { font-size: .85rem; color: var(--suave); margin-top: 6px; }
+  #resultado { min-height: 260px; }
+  .vazio { color: var(--suave); }
+  .numero { font-size: 3.2rem; font-weight: 700; line-height: 1; margin: 6px 0 4px; }
+  .faixa { display: inline-block; font-weight: 600; font-size: .9rem; padding: 4px 10px; border-radius: 999px; }
+  .alto  { color: var(--alto);  background: var(--alto-claro); }
+  .medio { color: var(--medio); background: var(--medio-claro); }
+  .baixo { color: var(--baixo); background: var(--baixo-claro); }
+  .barra { position: relative; height: 12px; background: var(--linha); border-radius: 6px; margin: 18px 0 6px; }
+  .barra .preenchido { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--azul); }
+  .barra .marca { position: absolute; top: -5px; bottom: -5px; width: 2px; background: var(--tinta); }
+  .legenda-barra { display: flex; justify-content: space-between; font-size: .8rem; color: var(--suave); }
+  .explicacao { margin-top: 16px; font-size: .95rem; }
+  .aviso { background: var(--azul-claro); border-radius: 8px; padding: 12px 14px; font-size: .9rem; margin-top: 16px; }
+  section.sobre { margin-top: 28px; }
+  section.sobre h2 { margin-top: 0; }
+  section.sobre ul { padding-left: 20px; margin: 8px 0; }
+  .numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0; }
+  @media (max-width: 600px) { .numeros { grid-template-columns: 1fr; } }
+  .numeros div { background: var(--fundo); border-radius: 8px; padding: 12px; }
+  .numeros strong { display: block; font-size: 1.4rem; }
+  .numeros span { font-size: .85rem; color: var(--suave); }
+  footer { border-top: 1px solid var(--linha); background: #fff; font-size: .85rem; color: var(--suave); }
+  footer .largura { padding-top: 18px; padding-bottom: 24px; }
+  a { color: var(--azul); }
+  .erro { color: var(--alto); }
+</style>
+</head>
+<body>
+<header>
+  <div class="largura">
+    <h1>Risco de evasão na Rede Federal do Nordeste</h1>
+    <p class="subtitulo">Informe o curso e o perfil de ingresso e veja com que frequência alunos com perfil parecido
+      deixaram o curso sem concluir, segundo um modelo treinado com dados públicos da Plataforma Nilo Peçanha.</p>
+  </div>
+</header>
+
+<main class="largura">
+  <div class="grade">
+    <form id="formulario" class="cartao" novalidate>
+      <h2>Curso e perfil</h2>
+      <fieldset>
+        <legend>Onde e o quê</legend>
+        <label for="instituicao">Instituição</label>
+        <select id="instituicao" required disabled><option>Carregando…</option></select>
+        <label for="campus">Campus</label>
+        <select id="campus" required disabled></select>
+        <label for="curso">Curso</label>
+        <select id="curso" required disabled></select>
+        <label for="oferta">Oferta, turno e modalidade</label>
+        <select id="oferta" required disabled></select>
+        <p class="detalhe" id="detalhe-oferta"></p>
+      </fieldset>
+      <fieldset>
+        <legend>Ingresso</legend>
+        <div class="lado">
+          <div>
+            <label for="idade">Idade ao entrar</label>
+            <input id="idade" type="number" min="12" max="80" step="1" required placeholder="ex.: 18">
+          </div>
+          <div>
+            <label for="sexo">Sexo</label>
+            <select id="sexo" required disabled></select>
+          </div>
+        </div>
+        <label for="mes">Mês de ingresso</label>
+        <select id="mes" required disabled></select>
+      </fieldset>
+      <button id="calcular" type="submit" disabled>Calcular risco</button>
+      <p class="detalhe">O cálculo é feito no seu navegador. Nada do que você informa é enviado ou guardado.</p>
+    </form>
+
+    <div class="cartao" id="resultado" aria-live="polite">
+      <h2>Resultado</h2>
+      <p class="vazio">Preencha o formulário para ver o risco estimado.</p>
+    </div>
+  </div>
+
+  <section class="sobre cartao">
+    <h2>Como ler o resultado</h2>
+    <p>O número é a <strong>proporção de alunos com perfil parecido que evadiram</strong>: mesmo curso, campus,
+      oferta, idade, sexo e mês de ingresso. Ele não diz se uma pessoa específica vai evadir. O modelo só conhece
+      dados de cadastro; notas, frequência e a vida de cada aluno, que pesam muito na evasão, não estão na base.</p>
+    <div class="numeros">
+      <div><strong>0,815</strong><span>AUC no teste: em 81,5% dos pares (um aluno que evadiu e um que concluiu), o que evadiu recebe risco maior</span></div>
+      <div><strong>178 mil</strong><span>matrículas de cursos técnicos e de graduação do Nordeste, das edições 2021 a 2023 da Eficiência Acadêmica</span></div>
+      <div><strong>71%</strong><span>de acerto ao classificar como "evade" ou "conclui"; a taxa histórica do curso sozinha acerta 68%</span></div>
+    </div>
+    <ul>
+      <li><strong>Alerta:</strong> o modelo recomenda acompanhamento quando o risco passa do limiar do nível do curso
+        (<span id="limiar-tecnico">–</span> no técnico e <span id="limiar-graduacao">–</span> na graduação). Os limiares
+        foram escolhidos para equilibrar os acertos entre quem evade e quem conclui.</li>
+      <li><strong>Zona de dúvida:</strong> perto do limiar o modelo erra mais; nesses casos, a avaliação de uma pessoa
+        importa mais que o número.</li>
+      <li><strong>Limitações:</strong> treinado só com o Nordeste; turmas que passaram pela pandemia; parte dos dados
+        socioeconômicos não declarada. Renda e cor/raça não entram no cálculo.</li>
+    </ul>
+    <p class="detalhe">Projeto final da disciplina de Inteligência Artificial, UFPI, 2026.2. Dados: Plataforma Nilo
+      Peçanha (MEC), licença ODbL. <a id="link-repositorio" href="#">Código e artigo</a>.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="largura">Maria Ingrid Xavier Sousa · Modelo: gradient boosting (scikit-learn) exportado para o navegador.</div>
+</footer>
+
+<script type="module">
+import { probabilidade, nivelDoCurso, limiarDoNivel } from "./modelo.js";
+
+// Coleta de respostas: desligada. Para ligar depois da entrega, é preciso
+// consentimento explícito na página e um endereço para receber os dados.
+const COLETA = { ativa: false, endereco: null };
+
+const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto",
+               "setembro", "outubro", "novembro", "dezembro"];
+const SEXOS = { F: "Feminino", M: "Masculino" };
+const $ = id => document.getElementById(id);
+const pct = v => `${(v * 100).toFixed(0)}%`;
+let modelo, ofertas;
+
+function preencher(select, itens, rotulo = v => v, placeholder = "Selecione") {
+  select.innerHTML = "";
+  select.append(new Option(placeholder, ""));
+  for (const item of itens) select.append(new Option(rotulo(item), typeof item === "object" ? item.id : item));
+  select.disabled = itens.length === 0;
+}
+
+const unicos = lista => [...new Set(lista)].sort((a, b) => a.localeCompare(b, "pt-BR"));
+
+function atualizarCampus() {
+  const inst = $("instituicao").value;
+  preencher($("campus"), unicos(ofertas.filter(o => o.instituicao === inst).map(o => o.unidade_de_ensino)));
+  preencher($("curso"), []); preencher($("oferta"), []); $("detalhe-oferta").textContent = "";
+  verificar();
+}
+
+function atualizarCurso() {
+  const inst = $("instituicao").value, campus = $("campus").value;
+  const cursos = unicos(ofertas.filter(o => o.instituicao === inst && o.unidade_de_ensino === campus)
+                               .map(o => `${o.nome_de_curso}|${o.tipo_de_curso}`));
+  preencher($("curso"), cursos, c => { const [nome, tipo] = c.split("|"); return `${nome} (${tipo})`; });
+  preencher($("oferta"), []); $("detalhe-oferta").textContent = "";
+  verificar();
+}
+
+function atualizarOferta() {
+  const [nome, tipo] = $("curso").value.split("|");
+  const lista = ofertas.map((o, id) => ({ ...o, id: String(id) }))
+    .filter(o => o.instituicao === $("instituicao").value && o.unidade_de_ensino === $("campus").value
+              && o.nome_de_curso === nome && o.tipo_de_curso === tipo);
+  preencher($("oferta"), lista, o => `${o.tipo_de_oferta} · ${o.turno} · ${o.modalidade_de_ensino}`);
+  if (lista.length === 1) { $("oferta").value = lista[0].id; }
+  mostrarDetalhe();
+  verificar();
+}
+
+function mostrarDetalhe() {
+  const o = ofertas[Number($("oferta").value)];
+  $("detalhe-oferta").textContent = $("oferta").value === "" ? "" :
+    `Carga horária típica: ${o.carga_horaria} h · duração prevista: ${o.duracao_prevista_meses} meses`;
+}
+
+function verificar() {
+  const idade = Number($("idade").value);
+  const ok = $("oferta").value !== "" && $("sexo").value !== "" && $("mes").value !== ""
+             && $("idade").value !== "" && idade >= 12 && idade <= 80;
+  $("calcular").disabled = !ok;
+}
+
+function calcular(evento) {
+  evento.preventDefault();
+  const o = ofertas[Number($("oferta").value)];
+  const entrada = { ...o, sexo: $("sexo").value, idade_ingresso: Number($("idade").value),
+                    mes_ingresso: Number($("mes").value) };
+  const { prob } = probabilidade(modelo, entrada);
+  const limiar = limiarDoNivel(modelo, o.tipo_de_curso);
+  const nivel = nivelDoCurso(o.tipo_de_curso).toLowerCase();
+  const alerta = prob >= limiar;
+  const duvida = Math.abs(prob - limiar) < 0.10;
+  const [classe, faixa] = duvida ? ["medio", "Zona de dúvida"] : alerta ? ["alto", "Risco alto"] : ["baixo", "Risco abaixo do alerta"];
+
+  $("resultado").innerHTML = `
+    <h2>Resultado</h2>
+    <span class="faixa ${classe}">${faixa}</span>
+    <div class="numero">${Math.round(prob * 100) === Math.round(limiar * 100) ? `${(prob * 100).toFixed(1).replace(".", ",")}%` : pct(prob)}</div>
+    <div>dos alunos com perfil parecido evadiram</div>
+    <div class="barra" role="img" aria-label="Risco de ${pct(prob)}; limiar de alerta de ${pct(limiar)}">
+      <div class="preenchido" style="width:${(prob * 100).toFixed(1)}%"></div>
+      <div class="marca" style="left:${(limiar * 100).toFixed(1)}%" title="Limiar de alerta"></div>
+    </div>
+    <div class="legenda-barra"><span>0%</span><span>limiar de alerta do ${nivel}: ${pct(limiar)}</span><span>100%</span></div>
+    <p class="explicacao">${alerta
+      ? `O risco passa do limiar do ${nivel}, então o modelo <strong>recomendaria acompanhamento</strong> desde a matrícula.`
+      : `O risco fica abaixo do limiar do ${nivel}, então o modelo <strong>não emitiria alerta</strong>.`}
+      ${duvida ? " Como o valor está perto do limiar, o modelo está pouco seguro aqui." : ""}</p>
+    <div class="aviso">Isto descreve o histórico de alunos parecidos, não o futuro de uma pessoa.
+      Se você está pensando em deixar o curso, procure a assistência estudantil ou a coordenação do seu campus.</div>`;
+
+  if (COLETA.ativa && COLETA.endereco) {
+    // Reservado para depois da entrega: só envia com consentimento registrado na página.
+  }
+}
+
+async function iniciar() {
+  let opcoes;
+  try {
+    const [m, op] = await Promise.all([
+      fetch("modelo.json").then(r => r.json()), fetch("opcoes.json").then(r => r.json())]);
+    modelo = m; opcoes = op; ofertas = op.ofertas;
+  } catch (e) {
+    $("resultado").innerHTML = `<h2>Resultado</h2><p class="erro">Não foi possível carregar o modelo. Se abriu o
+      arquivo direto do computador, rode um servidor local na pasta docs (python -m http.server).</p>`;
+    return;
+  }
+  preencher($("instituicao"), unicos(ofertas.map(o => o.instituicao)));
+  preencher($("sexo"), opcoes.sexos.filter(s => SEXOS[s]), s => SEXOS[s]);
+  preencher($("mes"), opcoes.meses, m => MESES[m - 1]);
+  $("limiar-tecnico").textContent = pct(modelo.limiar["Técnico"]);
+  $("limiar-graduacao").textContent = pct(modelo.limiar["Graduação"]);
+  $("instituicao").addEventListener("change", atualizarCampus);
+  $("campus").addEventListener("change", atualizarCurso);
+  $("curso").addEventListener("change", atualizarOferta);
+  $("oferta").addEventListener("change", () => { mostrarDetalhe(); verificar(); });
+  for (const id of ["idade", "sexo", "mes"]) $(id).addEventListener("input", verificar);
+  $("formulario").addEventListener("submit", calcular);
+}
+
+iniciar();
+</script>
+</body>
+</html>

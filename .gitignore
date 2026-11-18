@@ -1,0 +1,14 @@
+# Ambiente
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# Dados: os microdados originais e as bases derivadas não vão para o GitHub
+# (limite de 100 MB por arquivo; a base limpa fica no Kaggle)
+*.csv
+*.zip
+!resultados/*.csv
+saidas_v1/
+
+# Modelo em formato Python (depende da versão do scikit-learn; o site usa docs/modelo.json)
+resultados/*.joblib

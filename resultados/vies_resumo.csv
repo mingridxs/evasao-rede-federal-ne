@@ -1,0 +1,13 @@
+atributo,grupos comparados,diferença de recall,menor recall,diferença de falsos positivos,maior taxa de falsos positivos,maior erro de calibração (pontos)
+Sexo · Graduação,2,8.9,F,17.7,M,1.9
+Sexo · Técnico,2,10.0,F,9.2,M,1.3
+Sexo · todos,2,11.9,F,10.8,M,0.4
+Cor/raça · Graduação,3,1.2,Parda,7.1,Preta,0.7
+Cor/raça · Técnico,4,14.6,Branca,9.1,Preta,3.6
+Cor/raça · todos,4,13.0,Parda,8.6,Preta,1.6
+Renda familiar per capita · Graduação,4,4.0,"1,5<RFP<=2,5",8.6,"1,5<RFP<=2,5",3.6
+Renda familiar per capita · Técnico,6,15.2,"RFP>3,5",8.7,"0<RFP<=0,5",6.2
+Renda familiar per capita · todos,6,8.8,"RFP>3,5",5.7,"RFP>3,5",5.4
+Idade no ingresso · Graduação,4,7.9,18–20,12.2,21–24,4.8
+Idade no ingresso · Técnico,5,63.4,até 17,52.3,25–29,1.9
+Idade no ingresso · todos,5,66.9,até 17,52.7,25–29,2.9
