@@ -39,7 +39,7 @@ plt.rcParams.update({"figure.dpi": 110, "axes.spines.top": False,
 
 CAT = ["instituicao", "unidade_de_ensino", "uf", "nome_de_curso", "tipo_de_curso",
        "tipo_de_oferta", "modalidade_de_ensino", "eixo_tecnologico", "subeixo_tecnologico",
-       "turno", "fonte_de_financiamento", "sexo"]
+       "turno", "fonte_de_financiamento", "sexo", "cor_raca"]
 # Numéricos do modelo principal, incluindo os indicadores de não declaração (decisão de 18/11).
 NUM = ["carga_horaria", "duracao_prevista_meses", "mes_ingresso", "idade_ingresso",
        "renda_nao_declarada", "cor_nao_declarada"]

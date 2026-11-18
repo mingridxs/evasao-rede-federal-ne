@@ -7,13 +7,14 @@
 #   probabilidades e escolha do limiar de decisão.
 # - **Teste** (10%): usado uma única vez, na seção 6, depois de tudo decidido.
 #
-# Três conjuntos de atributos (decisões de 17/11 e 18/11):
-# - **sem indicadores:** dados do curso, da oferta, sexo e idade no ingresso
-#   (era o modelo principal até 18/11);
-# - **principal:** o anterior mais dois indicadores, "não declarou renda" e
-#   "não declarou cor/raça". O teste de 18/11 (scripts/10_renda_raca.py)
-#   mostrou que esses registros são feitos no ingresso e que todo o ganho de
-#   renda e cor/raça vem deles;
+# Quatro conjuntos de atributos (decisões de 17/11 e 18/11):
+# - **sem indicadores:** dados do curso, da oferta, sexo e idade no ingresso;
+# - **só indicadores:** o anterior mais "não declarou renda" e "não declarou
+#   cor/raça". Esses registros são feitos no ingresso e explicam todo o ganho
+#   de renda e cor/raça (scripts/10_renda_raca.py);
+# - **principal:** só indicadores mais a cor/raça como entrada. Adotada porque
+#   reduz a subestimação do risco de estudantes indígenas sem perda relevante
+#   de AUC (scripts/11_cor_raca_entrada.py);
 # - **completo:** sem indicadores mais os valores de renda e cor/raça, com
 #   "não declarado" como categoria. Fica como comparação.
 #
@@ -71,7 +72,8 @@ NUM = ["carga_horaria", "duracao_prevista_meses", "mes_ingresso", "idade_ingress
 CAT_EXTRA = ["cor_raca", "renda_familiar"]
 IND = ["renda_nao_declarada", "cor_nao_declarada"]
 CONJUNTOS = {"sem indicadores": (CAT_PRINCIPAL, NUM),
-             "principal": (CAT_PRINCIPAL, NUM + IND),
+             "só indicadores": (CAT_PRINCIPAL, NUM + IND),
+             "principal": (CAT_PRINCIPAL + ["cor_raca"], NUM + IND),
              "completo": (CAT_PRINCIPAL + CAT_EXTRA, NUM)}
 AUSENTES = {"Não informado", "Não declarada", "Não declarado", "Não Declarada", "nan"}
 
@@ -349,8 +351,8 @@ tabela_te.to_csv(PASTA_RES / "metricas_teste.csv")
 print(tabela_te.round(4).sort_values("AUC").to_string())
 
 # %%
-ordem = ["Classe majoritária", "Taxa histórica do curso", "Regressão logística (sem indicadores)",
-         "Gradient boosting (sem indicadores) · calibrado", "Regressão logística (principal)",
+ordem = ["Classe majoritária", "Taxa histórica do curso", "Regressão logística (principal)",
+         "Gradient boosting (sem indicadores) · calibrado", "Gradient boosting (só indicadores) · calibrado",
          "Gradient boosting (principal) · calibrado", "Gradient boosting (completo) · calibrado"]
 t = tabela_te.loc[ordem]
 fig, ax = plt.subplots(figsize=(8, 4.4))
@@ -394,6 +396,7 @@ saida = teste[["instituicao", "uf", "tipo_de_curso", "sexo", "cor_raca", "renda_
 saida["prob_principal"] = prob_te["Gradient boosting (principal) · calibrado"]
 saida["prob_completo"] = prob_te["Gradient boosting (completo) · calibrado"]
 saida["prob_sem_indicadores"] = prob_te["Gradient boosting (sem indicadores) · calibrado"]
+saida["prob_so_indicadores"] = prob_te["Gradient boosting (só indicadores) · calibrado"]
 saida["prob_taxa_curso"] = prob_te["Taxa histórica do curso"]
 saida["limiar_principal"] = limiares["Gradient boosting (principal) · calibrado"]
 saida.to_csv(PASTA_RES / "predicoes_teste.csv", index=False)

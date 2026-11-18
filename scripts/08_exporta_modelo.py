@@ -97,6 +97,7 @@ opcoes = {
     "ofertas": ofertas.to_dict(orient="records"),
     "sexos": sorted(v for v in df["sexo"].dropna().unique() if (df["sexo"] == v).sum() >= 100),
     "meses": sorted(int(m) for m in meses[meses >= 0.02].index),
+    "cores": sorted(v for v in df["cor_raca"].dropna().unique() if v not in AUSENTES),
 }
 (PASTA_SITE / "opcoes.json").write_text(json.dumps(opcoes, ensure_ascii=False, separators=(",", ":")),
                                         encoding="utf-8")

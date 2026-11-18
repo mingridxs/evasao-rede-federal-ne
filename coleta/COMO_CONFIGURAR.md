@@ -18,9 +18,11 @@ Para testar, abra o site, calcule um risco, avalie, marque o consentimento e env
 
 ## O que é guardado
 
-Data e hora do envio, o curso e a forma de entrada informados, o resultado do modelo, a nota de 1 a 5 e o comentário opcional. Não há nome, e-mail nem endereço IP. Só é enviado quem marca o consentimento.
+Data e hora do envio, o curso e a forma de entrada informados (inclusive cor ou raça), o resultado do modelo, a nota de 1 a 5 e o comentário opcional. Não há nome, e-mail nem endereço IP. Só é enviado quem marca o consentimento.
 
 ## Cuidados antes de usar os dados
+
+- Cor ou raça é dado pessoal sensível pela LGPD. O consentimento do site cita esse dado de forma explícita; não o retire do texto. Guarde a planilha só com acesso seu.
 
 - Numa turma pequena, curso, idade e sexo juntos podem identificar alguém. Não publique as linhas da planilha; publique só contagens e médias.
 - Para usar as respostas no artigo ou em outra publicação, combine antes com o professor. Pesquisa com pessoas pode exigir aprovação de um comitê de ética.

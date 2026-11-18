@@ -203,6 +203,11 @@
         <button type="button" role="radio" aria-checked="false" data-valor="1">Não</button>
         <button type="button" role="radio" aria-checked="false" data-valor="">Não lembro</button>
       </div>
+
+      <div id="bloco-cor" hidden>
+        <label for="cor">Sua cor ou raça <span class="ajuda">Como no IBGE. Usada só no cálculo, no seu aparelho.</span></label>
+        <select id="cor" disabled></select>
+      </div>
       <button id="calcular" class="acao" type="submit" disabled>Ver o risco</button>
       <p class="privacidade">O cálculo acontece no seu aparelho. Nada sai dele, a não ser que você escolha enviar a avaliação no fim.</p>
     </section>
@@ -229,8 +234,8 @@
     <div id="bloco-envio">
       <label class="consentimento" for="aceite">
         <input type="checkbox" id="aceite">
-        <span>Concordo em enviar, sem nome nem e-mail, minhas respostas dos passos 1 e 2, o resultado e esta avaliação,
-          para uso no trabalho acadêmico que testa este modelo.</span>
+        <span>Concordo em enviar, sem nome nem e-mail, minhas respostas dos passos 1 e 2, inclusive cor ou raça,
+          o resultado e esta avaliação, para uso no trabalho acadêmico que testa este modelo.</span>
       </label>
       <button type="button" id="enviar" class="acao" disabled>Enviar avaliação</button>
     </div>
@@ -241,9 +246,10 @@
 
   <details>
     <summary>Como o modelo funciona e onde ele erra</summary>
-    <p>As perguntas sobre renda e cor/raça não pedem o valor: o modelo usa só se a informação foi registrada.
-      Nos dados da Rede Federal, quem não teve renda ou cor/raça registradas na matrícula evadiu mais, e esses
-      registros são feitos no ingresso. Os valores em si (faixa de renda, cor/raça) não melhoraram a previsão.</p>
+    <p>O modelo usa se a renda e a cor/raça foram registradas na matrícula: nos dados da Rede Federal, quem não
+      teve esses registros evadiu mais, e eles são feitos no ingresso. O valor da renda não é usado, porque não
+      melhorou a previsão. A cor/raça é usada porque, sem ela, o modelo subestimava o risco de estudantes
+      indígenas; com ela, esse erro diminui. A intenção é orientar apoio, nunca restringir acesso.</p>
     <p>O número é a proporção de alunos com perfil parecido que evadiram, ou seja, que saíram do curso sem concluir:
       abandono, desligamento, cancelamento, reprovação ou transferência para outra instituição. Ele não diz se uma pessoa
       vai evadir. O modelo só conhece dados de matrícula; notas, frequência e a vida de cada aluno, que pesam muito, não
@@ -258,7 +264,7 @@
       <li>O alerta aparece quando o risco passa do limite do nível do curso: <span id="limiar-tecnico">–</span> no técnico e
         <span id="limiar-graduacao">–</span> na graduação.</li>
       <li>Perto desse limite o modelo erra mais, e a opinião de quem conhece o aluno vale mais que o número.</li>
-      <li>Ele subestima em cerca de 10 pontos o risco de estudantes indígenas e encontra menos de 40% dos casos de evasão de quem entra com até 17 anos.</li>
+      <li>Mesmo usando a cor/raça, ele ainda subestima em cerca de 6 pontos o risco de estudantes indígenas, e encontra só cerca de 40% dos casos de evasão de quem entra com até 17 anos.</li>
       <li>Foi treinado com turmas do Nordeste que passaram pela pandemia. Para universidades, que não estão na base, o
         resultado é uma extrapolação.</li>
     </ul>
@@ -293,6 +299,15 @@ const mediana = lista => { const s = [...lista].sort((a, b) => a - b); return s.
 let modelo, ofertas, modo = "lista", ultimo = null, nota = null;
 // Indicadores de não declaração: 0 = informou, 1 = não informou, null = não lembra (o modelo trata como ausente).
 const declaracao = { renda_nao_declarada: undefined, cor_nao_declarada: undefined };
+const PREFIRO_NAO = "__prefiro_nao";
+// Cor/raça como entrada (decisão de 18/11). Quem não a registrou na matrícula entra como
+// "Não declarada", igual aos dados de treino; "Prefiro não informar" vira valor ausente.
+function corRaca() {
+  if (declaracao.cor_nao_declarada === 1) return "Não declarada";
+  const v = $("cor").value;
+  return v === "" || v === PREFIRO_NAO ? null : v;
+}
+function corRespondida() { return declaracao.cor_nao_declarada === 1 || $("cor").value !== ""; }
 
 function preencher(select, itens, rotulo = v => v, vazio = "Selecione") {
   select.innerHTML = "";
@@ -385,7 +400,8 @@ function atualizar() {
   $("detalhe-curso").textContent = curso && curso.carga_horaria
     ? `Carga horária típica de ${curso.carga_horaria} horas, com duração prevista de ${curso.duracao_prevista_meses} meses.` : "";
   const idade = Number($("idade").value);
-  const respondeu = Object.values(declaracao).every(v => v !== undefined);
+  const respondeu = Object.values(declaracao).every(v => v !== undefined) && corRespondida();
+  $("bloco-cor").hidden = declaracao.cor_nao_declarada === undefined || declaracao.cor_nao_declarada === 1;
   $("calcular").disabled = !(curso && $("sexo").value && $("mes").value && $("idade").value !== ""
                              && idade >= 12 && idade <= 80 && respondeu);
 }
@@ -420,7 +436,7 @@ function calcular(evento) {
   evento.preventDefault();
   const curso = cursoEscolhido();
   const entrada = { ...curso, sexo: $("sexo").value, idade_ingresso: Number($("idade").value),
-                    mes_ingresso: Number($("mes").value), ...declaracao };
+                    mes_ingresso: Number($("mes").value), ...declaracao, cor_raca: corRaca() };
   const { prob } = probabilidade(modelo, entrada);
   const limiar = limiarDoNivel(modelo, curso.tipo_de_curso);
   const nivel = nivelDoCurso(curso.tipo_de_curso) === "Técnico" ? "cursos técnicos" : "graduações";
@@ -468,7 +484,7 @@ async function enviar() {
     curso: e.nome_de_curso, tipo_de_curso: e.tipo_de_curso, tipo_de_oferta: e.tipo_de_oferta,
     turno: e.turno, modalidade: e.modalidade_de_ensino, eixo: e.eixo_tecnologico,
     sexo: e.sexo, idade: e.idade_ingresso, mes: e.mes_ingresso,
-    renda_nao_declarada: e.renda_nao_declarada, cor_nao_declarada: e.cor_nao_declarada,
+    renda_nao_declarada: e.renda_nao_declarada, cor_nao_declarada: e.cor_nao_declarada, cor_raca: e.cor_raca,
     probabilidade: Number(ultimo.prob.toFixed(4)), limiar: Number(ultimo.limiar.toFixed(2)), alerta: ultimo.alerta,
     avaliacao: nota, comentario: $("comentario").value.trim().slice(0, 400),
   };
@@ -495,6 +511,7 @@ async function iniciar() {
   preencher($("instituicao"), unicos(ofertas.map(o => o.instituicao)));
   preencher($("sexo"), opcoes.sexos.filter(s => SEXOS[s]), s => SEXOS[s]);
   preencher($("mes"), opcoes.meses, m => MESES[m - 1]);
+  preencher($("cor"), [...(opcoes.cores || []), [PREFIRO_NAO, "Prefiro não informar"]]);
   preencher($("o-uf"), [...Object.entries(UFS), ["", "Fora do Nordeste"]], undefined, "Selecione");
   $("o-uf").options[$("o-uf").options.length - 1].value = "fora";
   preencher($("o-tipo"), TIPOS);
@@ -507,7 +524,7 @@ async function iniciar() {
   $("curso").addEventListener("change", listaOfertas);
   $("o-tipo").addEventListener("change", outraTipo);
   $("o-curso").addEventListener("change", outraCurso);
-  for (const id of ["oferta", "o-uf", "o-eixo", "o-oferta", "o-turno", "o-modalidade", "idade", "sexo", "mes"])
+  for (const id of ["oferta", "o-uf", "o-eixo", "o-oferta", "o-turno", "o-modalidade", "idade", "sexo", "mes", "cor"])
     $(id).addEventListener("input", atualizar);
   for (const b of document.querySelectorAll("[data-modo]")) b.addEventListener("click", () => trocarModo(b.dataset.modo));
   for (const grupo of document.querySelectorAll("[data-campo]")) {
