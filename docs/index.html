@@ -538,7 +538,7 @@
 </footer>
 
 <script type="module">
-import { probabilidade, nivelDoCurso, limiarDoNivel } from "./modelo.js";
+import { probabilidade, explicar, nivelDoCurso, limiarDoNivel } from "./modelo.js";
 import { ENDERECO_COLETA, CONTATO } from "./coleta.js";
 
 const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto",
@@ -560,7 +560,7 @@ const dec = v => v.toFixed(2).replace(".", ",");
 const unicos = lista => [...new Set(lista)].filter(v => v !== null && v !== undefined)
   .sort((a, b) => String(a).localeCompare(String(b), "pt-BR"));
 
-let modelo, ofertas, painel = null, trabalhador = null, pedido = 0, ultimo = null, nota = null, registrar = null;
+let modelo, ofertas, painel = null, pedido = 0, ultimo = null, nota = null, registrar = null;
 
 // Grupos de atributos para explicar o resultado ("o que mais pesou").
 const GRUPOS = [
@@ -678,7 +678,7 @@ function calcular(evento) {
       ? `Passa do limite de alerta ${nivel}: o modelo recomendaria acompanhamento desde a matrícula.`
       : `Fica abaixo do limite de alerta ${nivel}: o modelo não emitiria alerta.`}
       ${duvida ? "Como está perto do limite, aqui o modelo está pouco seguro." : ""}</p>
-    <div class="pesos" id="pesos" ${trabalhador ? "" : "hidden"}>
+    <div class="pesos" id="pesos" ${painel ? "" : "hidden"}>
       <h3>O que mais pesou</h3>
       <p class="detalhe" id="pesos-texto">Calculando…</p>
       <div class="barras" id="pesos-barras"></div>
@@ -693,7 +693,7 @@ function calcular(evento) {
   $("resultado").classList.add("resultado-novo");
   $("bloco-resultado").classList.remove("inativo");
   ultimo = { entrada, prob, limiar, alerta };
-  pedirExplicacao(entrada, prob);
+  pedirExplicacao(entrada);
   mostrarAvaliacao();
   // No celular, rola até o resultado; no notebook, ele está ao lado e só rola se estiver fora da tela.
   $("bloco-resultado").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
@@ -787,10 +787,11 @@ function iniciarPainel() {
 }
 
 /* ---------- Explicação do resultado ---------- */
-function pedirExplicacao(entrada, prob) {
-  if (!trabalhador) return;
-  pedido += 1;
-  trabalhador.postMessage({ tipo: "explicar", id: pedido, entrada, grupos: GRUPOS });
+function pedirExplicacao(entrada) {
+  if (!painel) return;
+  const id = ++pedido;
+  // Deixa o resultado aparecer primeiro; a explicação leva alguns centésimos de segundo.
+  setTimeout(() => mostrarExplicacao({ id, ...explicar(modelo, entrada, painel.fundo, GRUPOS) }), 30);
 }
 
 function mostrarExplicacao({ id, referencia, prob, contribuicoes }) {
@@ -921,11 +922,6 @@ async function iniciar() {
   } catch { painel = null; }
   if (painel) {
     iniciarPainel();
-    try {
-      trabalhador = new Worker("./explicacao.worker.js", { type: "module" });
-      trabalhador.onmessage = e => mostrarExplicacao(e.data);
-      trabalhador.postMessage({ tipo: "iniciar", modelo, fundo: painel.fundo });
-    } catch { trabalhador = null; }
   } else {
     $("aba-numeros").hidden = true;
   }

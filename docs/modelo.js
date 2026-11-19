@@ -7,22 +7,22 @@ function bitLigado(bitset, valor) {
   return ((bitset[valor >>> 5] >>> (valor & 31)) & 1) === 1;
 }
 
+// Para qual filho o nó i manda o valor v.
+function passo(arvore, i, v, modelo) {
+  const faltante = arvore.m[i] === 1 ? arvore.e[i] : arvore.d[i];
+  if (v === null || Number.isNaN(v)) return faltante;
+  if (arvore.c[i]) {
+    if (v < 0) return faltante;
+    if (bitLigado(arvore.bits[arvore.b[i]], v)) return arvore.e[i];
+    if (bitLigado(modelo.conhecidas[modelo.f_idx_map[arvore.f[i]]], v)) return arvore.d[i];
+    return faltante; // categoria desconhecida é tratada como ausente
+  }
+  return v <= arvore.t[i] ? arvore.e[i] : arvore.d[i];
+}
+
 function percorrer(arvore, x, modelo) {
   let i = 0;
-  while (!arvore.folha[i]) {
-    const v = x[arvore.f[i]];
-    const faltante = arvore.m[i] === 1 ? arvore.e[i] : arvore.d[i];
-    if (v === null || Number.isNaN(v)) {
-      i = faltante;
-    } else if (arvore.c[i]) {
-      if (v < 0) i = faltante;
-      else if (bitLigado(arvore.bits[arvore.b[i]], v)) i = arvore.e[i];
-      else if (bitLigado(modelo.conhecidas[modelo.f_idx_map[arvore.f[i]]], v)) i = arvore.d[i];
-      else i = faltante; // categoria desconhecida é tratada como ausente
-    } else {
-      i = v <= arvore.t[i] ? arvore.e[i] : arvore.d[i];
-    }
-  }
+  while (!arvore.folha[i]) i = passo(arvore, i, x[arvore.f[i]], modelo);
   return arvore.v[i];
 }
 
@@ -71,38 +71,74 @@ export function probabilidade(modelo, entrada) {
 // relação a perfis de referência (valores de Shapley por grupo, com a
 // probabilidade calibrada). Para cada subconjunto S de grupos, v(S) é o risco
 // médio quando os grupos de S têm os valores da pessoa e os demais vêm de um
-// perfil de referência. As contribuições somam prob(pessoa) − média de v(∅).
+// perfil de referência. As contribuições somam prob(pessoa) − v(∅).
 // grupos: [{ nome, colunas: [...] }]. Colunas fora do modelo são ignoradas.
+//
+// Para ser rápido, cada árvore é percorrida uma vez por perfil de referência,
+// dividindo o caminho só onde a pessoa e a referência discordam (ver abaixo).
 export function explicar(modelo, entrada, fundo, grupos) {
   const colunas = [...modelo.categoricas, ...modelo.numericas];
   const usados = grupos.map(g => ({ ...g, idx: g.colunas.map(c => colunas.indexOf(c)).filter(i => i >= 0) }))
                        .filter(g => g.idx.length);
-  const k = usados.length;
+  const k = usados.length, total = 1 << k;
+  const grupoDe = new Int32Array(colunas.length).fill(-1);
+  usados.forEach((g, gi) => { for (const i of g.idx) grupoDe[i] = gi; });
+  const mascaraArvore = modelo.arvores.map(a => {
+    let m = 0;
+    for (let n = 0; n < a.f.length; n++) if (!a.folha[n] && grupoDe[a.f[n]] >= 0) m |= 1 << grupoDe[a.f[n]];
+    return m;
+  });
+
   const x = vetorizar(modelo, entrada);
-  const bs = fundo.map(b => vetorizar(modelo, b));
-  const v = new Float64Array(1 << k);
-  for (let s = 0; s < 1 << k; s++) {
-    let soma = 0;
-    for (const b of bs) {
-      const z = b.slice();
-      for (let g = 0; g < k; g++) if (s >> g & 1) for (const i of usados[g].idx) z[i] = x[i];
-      soma += probDoVetor(modelo, z).prob;
+  const v = new Float64Array(total);
+  const bruto = new Float64Array(total);
+  const cache = new Float64Array(total);
+  for (const ref of fundo) {
+    const b = vetorizar(modelo, ref);
+    bruto.fill(modelo.base);
+    modelo.arvores.forEach((arvore, t) => {
+      const G = mascaraArvore[t];
+      // Percorre a árvore uma vez, seguindo a pessoa (x) e a referência (b) ao
+      // mesmo tempo. Onde as duas se separam num atributo do grupo g, o caminho
+      // se divide: um lado vale quando g está em S, o outro quando não está.
+      // Cada folha alcançada vale para os S compatíveis com as escolhas feitas.
+      const andar = (i, dentro, fora) => {
+        while (!arvore.folha[i]) {
+          const f = arvore.f[i], g = grupoDe[f];
+          const ib = passo(arvore, i, b[f], modelo);
+          if (g < 0 || fora >> g & 1) { i = ib; continue; }
+          const ix = passo(arvore, i, x[f], modelo);
+          if (ix === ib || dentro >> g & 1) { i = ix; continue; }
+          andar(ix, dentro | 1 << g, fora);
+          i = ib; fora |= 1 << g;
+        }
+        const livre = G & ~dentro & ~fora, valor = arvore.v[i];
+        let sub = livre;
+        while (true) { cache[dentro | sub] = valor; if (sub === 0) break; sub = (sub - 1) & livre; }
+      };
+      andar(0, 0, 0);
+      for (let s = 0; s < total; s++) bruto[s] += cache[s & G];
+    });
+    for (let s = 0; s < total; s++) {
+      const p = 1 / (1 + Math.exp(-bruto[s]));
+      v[s] += interpolar(modelo.calibracao.x, modelo.calibracao.y, p);
     }
-    v[s] = soma / bs.length;
   }
+  for (let s = 0; s < total; s++) v[s] /= fundo.length;
+
   const fat = [1];
   for (let i = 1; i <= k; i++) fat[i] = fat[i - 1] * i;
   const bits = s => { let c = 0; while (s) { c += s & 1; s >>= 1; } return c; };
   const contribuicoes = usados.map((g, i) => {
     let phi = 0;
-    for (let s = 0; s < 1 << k; s++) {
+    for (let s = 0; s < total; s++) {
       if (s >> i & 1) continue;
       const t = bits(s);
       phi += fat[t] * fat[k - t - 1] / fat[k] * (v[s | 1 << i] - v[s]);
     }
     return { nome: g.nome, valor: phi };
   });
-  return { referencia: v[0], prob: v[(1 << k) - 1], contribuicoes };
+  return { referencia: v[0], prob: v[total - 1], contribuicoes };
 }
 
 const GRADUACAO = new Set(["Tecnologia", "Licenciatura", "Bacharelado"]);
