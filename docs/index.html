@@ -58,6 +58,16 @@
   .passo.texto { max-width: 78ch; }
   .passo.texto.largo { max-width: none; }
   .passo.texto > p:last-child { margin-bottom: 0; }
+  .pizza { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px; margin: 18px 0 20px; }
+  .pizza svg { width: 200px; height: 200px; flex: none; }
+  .pizza path { stroke: var(--papel); stroke-width: 2; }
+  .pizza figcaption { flex: 1 1 200px; }
+  .pizza-legenda { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .pizza-legenda li { display: grid; grid-template-columns: 14px auto; column-gap: 10px; align-items: baseline; margin: 0; }
+  .pizza-legenda .chave { width: 14px; height: 14px; border-radius: 3px; background: var(--cor); align-self: center; }
+  .pizza-legenda strong { font: 700 1.6rem/1.1 Literata, Georgia, serif; color: var(--marinho); }
+  .pizza-legenda span.texto-legenda { grid-column: 2; color: var(--suave); font-size: .92rem; }
+  .subtitulo { font-size: 1.25rem; margin: 0 0 12px; color: var(--marinho); }
 
   .passo { margin: 0 0 20px; padding: 22px 20px 24px; background: var(--papel); border-radius: var(--raio);
            border: 1px solid #e3e9f2; box-shadow: 0 1px 2px rgba(15, 42, 79, .06), 0 10px 28px rgba(15, 42, 79, .07); }
@@ -205,11 +215,16 @@
 
   /* Computador: menu fixo à esquerda */
   @media (min-width: 1024px) {
-    .app { display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100vh; }
-    .menu { position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 28px 20px 24px 18px; display: flex; flex-direction: column; gap: 6px; }
+    .app { display: grid; grid-template-columns: clamp(300px, 22vw, 360px) minmax(0, 1fr); min-height: 100vh; }
+    .menu { position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 36px 30px 28px 24px; display: flex; flex-direction: column; gap: 6px; }
     .menu::after { content: ""; position: absolute; top: 0; bottom: 0; right: 8px; width: 10px;
                    background: radial-gradient(circle at 5px 14px, var(--fundo) 0 3.6px, transparent 4.2px) 0 0 / 10px 28px repeat-y; }
-    .marca { margin: 0 12px 22px 0; }
+    .marca { margin: 0 12px 30px 0; gap: 14px; }
+    .marca img { width: 48px; height: 48px; border-radius: 11px; }
+    .nome-site { font-size: 1.3rem; }
+    .nome-site span { font-size: .95rem; margin-top: 2px; }
+    .menu-lista a { font-size: 1.05rem; padding: 11px 14px; }
+    .menu-grupo { margin: 24px 14px 6px; font-size: .85rem; }
     .menu-lista a { margin-right: 14px; }
     .menu-rodape { display: block; margin: auto 14px 0 12px; padding-top: 24px; font-size: .8rem; color: #9fb4d4; }
     .cabeca { padding: 44px 0 22px; }
@@ -224,7 +239,7 @@
     #bloco-resultado { grid-area: resultado; }
   }
   /* Tela larga: três colunas, curso | entrada e registro | resultado */
-  @media (min-width: 1600px) {
+  @media (min-width: 1700px) {
     .grade { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(380px, 440px);
              grid-template-rows: auto 1fr; grid-template-areas: "curso perfil resultado" "curso registro resultado"; }
   }
@@ -250,14 +265,11 @@
     </ul>
     <p class="menu-grupo">Sobre o trabalho</p>
     <ul class="menu-lista">
-        <li><a href="#numeros" data-pagina="numeros">Em números</a></li>
-        <li><a href="#porque" data-pagina="porque">Por quê</a></li>
-        <li><a href="#modelo" data-pagina="modelo">Como funciona</a></li>
-        <li><a href="#dados" data-pagina="dados">Dados</a></li>
-        <li><a href="#parametros" data-pagina="parametros">Parâmetros</a></li>
-        <li><a href="#resultados" data-pagina="resultados">Resultados</a></li>
-        <li><a href="#limites" data-pagina="limites">Limites e ética</a></li>
-        <li><a href="#privacidade" data-pagina="privacidade">Privacidade</a></li>
+      <li><a href="#numeros" data-pagina="numeros">Em números</a></li>
+      <li><a href="#projeto" data-pagina="projeto">O projeto</a></li>
+      <li><a href="#modelo" data-pagina="modelo">O modelo</a></li>
+      <li><a href="#resultados" data-pagina="resultados">Resultados</a></li>
+      <li><a href="#etica" data-pagina="etica">Ética e privacidade</a></li>
     </ul>
     </div>
     <p class="menu-rodape">Projeto final de Inteligência Artificial, UFPI, 2026.2</p>
@@ -442,27 +454,49 @@
       </div>
     </div>
   </section>
-
-  <section class="pagina" id="porque" aria-labelledby="h-porque" hidden>
+  <section class="pagina" id="projeto" aria-labelledby="h-projeto" hidden>
     <div class="largura">
-      <header class="cabeca"><h1 id="h-porque">Por quê</h1></header>
+      <header class="cabeca"><h1 id="h-projeto">O projeto</h1></header>
       <div class="passo texto">
+        <h2 class="subtitulo">Por que estudar a evasão</h2>
     <p>Nos cursos técnicos e de graduação da Rede Federal do Nordeste, 58% das matrículas que chegaram ao fim do prazo
       previsto terminaram em evasão: abandono, desligamento, cancelamento, reprovação ou transferência para outra
       instituição. Na graduação, a taxa passa de 70%.</p>
+    <figure class="pizza" id="pizza" hidden>
+      <svg viewBox="0 0 200 200" role="img" id="pizza-svg"></svg>
+      <figcaption>
+        <ul class="pizza-legenda" id="pizza-legenda"></ul>
+        <p class="detalhe" id="pizza-total"></p>
+      </figcaption>
+    </figure>
     <p>Quanto mais cedo uma instituição sabe quem corre mais risco, mais cedo pode oferecer assistência estudantil,
       monitoria ou acompanhamento. Este trabalho testa se dá para estimar esse risco já na matrícula, só com dados de
       cadastro, e se a estimativa é igualmente confiável para todos os grupos de estudantes.</p>
     <p>É o projeto final da disciplina de Inteligência Artificial do curso de Ciência da Computação da Universidade
       Federal do Piauí (2026.2), feito por Maria Ingrid Xavier Sousa.</p>
       </div>
+      <div class="passo texto">
+        <h2 class="subtitulo">De onde vêm os dados</h2>
+    <p>Microdados de Eficiência Acadêmica da <a href="https://dadosabertos.mec.gov.br/pnp">Plataforma Nilo Peçanha</a>
+      (MEC), edições 2021, 2022 e 2023, sob licença Open Data Commons Open Database License (ODbL). Cada edição traz as
+      turmas cujo prazo de conclusão terminou e a situação final de cada aluno.</p>
+    <table class="tabela">
+      <tr><th>Recorte</th><th class="num">Matrículas</th></tr>
+      <tr><td>Nordeste, cursos técnicos e de graduação, com desfecho</td><td class="num">178.484</td></tr>
+      <tr><td>Treino (70%)</td><td class="num">124.938</td></tr>
+      <tr><td>Validação (20%): escolha de parâmetros e calibração</td><td class="num">35.697</td></tr>
+      <tr><td>Teste (10%): usado uma vez, para medir o resultado</td><td class="num">17.849</td></tr>
+    </table>
+    <p>A divisão é aleatória e mantém em cada parte a mesma proporção de edições e de evasão. Ficaram de fora cursos
+      de qualificação (FIC), pós-graduação e alunos que ainda estavam cursando após o prazo.</p>
+      </div>
     </div>
   </section>
-
   <section class="pagina" id="modelo" aria-labelledby="h-modelo" hidden>
     <div class="largura">
-      <header class="cabeca"><h1 id="h-modelo">Como funciona</h1></header>
+      <header class="cabeca"><h1 id="h-modelo">O modelo</h1></header>
       <div class="passo texto">
+        <h2 class="subtitulo">Como funciona</h2>
     <h3>Gradient boosting</h3>
     <p>O modelo é um conjunto de <span id="n-arvores">várias centenas de</span> árvores de decisão pequenas. Cada árvore
       faz perguntas simples ("o curso é uma licenciatura?", "a idade ao entrar passa de 20 anos?") e corrige parte do erro
@@ -482,33 +516,8 @@
     <p>O modelo foi exportado para um arquivo e roda em JavaScript no navegador. Um teste automático confere que o site
       calcula a mesma probabilidade que o Python em 2.000 casos.</p>
       </div>
-    </div>
-  </section>
-
-  <section class="pagina" id="dados" aria-labelledby="h-dados" hidden>
-    <div class="largura">
-      <header class="cabeca"><h1 id="h-dados">Dados</h1></header>
       <div class="passo texto">
-    <p>Microdados de Eficiência Acadêmica da <a href="https://dadosabertos.mec.gov.br/pnp">Plataforma Nilo Peçanha</a>
-      (MEC), edições 2021, 2022 e 2023, sob licença Open Data Commons Open Database License (ODbL). Cada edição traz as
-      turmas cujo prazo de conclusão terminou e a situação final de cada aluno.</p>
-    <table class="tabela">
-      <tr><th>Recorte</th><th class="num">Matrículas</th></tr>
-      <tr><td>Nordeste, cursos técnicos e de graduação, com desfecho</td><td class="num">178.484</td></tr>
-      <tr><td>Treino (70%)</td><td class="num">124.938</td></tr>
-      <tr><td>Validação (20%): escolha de parâmetros e calibração</td><td class="num">35.697</td></tr>
-      <tr><td>Teste (10%): usado uma vez, para medir o resultado</td><td class="num">17.849</td></tr>
-    </table>
-    <p>A divisão é aleatória e mantém em cada parte a mesma proporção de edições e de evasão. Ficaram de fora cursos
-      de qualificação (FIC), pós-graduação e alunos que ainda estavam cursando após o prazo.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="pagina" id="parametros" aria-labelledby="h-parametros" hidden>
-    <div class="largura">
-      <header class="cabeca"><h1 id="h-parametros">Parâmetros</h1></header>
-      <div class="passo texto">
+        <h2 class="subtitulo">O que ele usa e como foi ajustado</h2>
     <h3>O que o modelo usa</h3>
     <ul class="etiquetas" id="lista-atributos"></ul>
     <p>O valor da renda não é usado: não melhorou a previsão. O que o modelo usa é se a renda e a cor/raça foram
@@ -529,7 +538,6 @@
       </div>
     </div>
   </section>
-
   <section class="pagina" id="resultados" aria-labelledby="h-resultados" hidden>
     <div class="largura">
       <header class="cabeca"><h1 id="h-resultados">Resultados</h1></header>
@@ -551,11 +559,11 @@
       </div>
     </div>
   </section>
-
-  <section class="pagina" id="limites" aria-labelledby="h-limites" hidden>
+  <section class="pagina" id="etica" aria-labelledby="h-etica" hidden>
     <div class="largura">
-      <header class="cabeca"><h1 id="h-limites">Limites e ética</h1></header>
+      <header class="cabeca"><h1 id="h-etica">Ética e privacidade</h1></header>
       <div class="passo texto">
+        <h2 class="subtitulo">Limites e cuidados</h2>
     <ul>
       <li>O modelo só conhece dados de matrícula. Notas, frequência, trabalho e a vida de cada aluno, que pesam muito
         na evasão, não estão na base.</li>
@@ -572,16 +580,11 @@
         indevido.</li>
     </ul>
       </div>
-    </div>
-  </section>
-
-  <section class="pagina" id="privacidade" aria-labelledby="h-privacidade" hidden>
-    <div class="largura">
-      <header class="cabeca"><h1 id="h-privacidade">Privacidade</h1></header>
       <div class="passo texto">
+        <h2 class="subtitulo">Seus dados neste site</h2>
     <p>O cálculo acontece inteiro no seu navegador: o site baixa o modelo e não envia o que você preenche.</p>
-    <p>Só a avaliação do passo 4 pode sair do seu aparelho, e só se você marcar a autorização. Cor ou raça exige uma
-      segunda autorização, específica. Não há nome, e-mail, documento nem registro do seu endereço de internet. Depois
+    <p>Suas respostas só saem do seu aparelho se você escolher registrá-las no passo 4 e marcar a autorização. Cor ou
+      raça exige uma segunda autorização, específica. Não há nome, e-mail, documento nem registro do seu endereço de internet. Depois
       do envio, o site mostra um código que permite pedir a exclusão da resposta.</p>
       </div>
     </div>
@@ -836,7 +839,26 @@ function desenharPainel() {
   }
 }
 
+// Pizza da página "O projeto": evadiu x concluiu no Nordeste.
+function desenharPizza() {
+  const { n, ev } = painel.escopos.Nordeste, fracao = ev / n;
+  const ponto = f => [100 + 96 * Math.sin(2 * Math.PI * f), 100 - 96 * Math.cos(2 * Math.PI * f)];
+  const fatia = (de, ate, classe) => {
+    const [x1, y1] = ponto(de), [x2, y2] = ponto(ate), grande = ate - de > 0.5 ? 1 : 0;
+    return `<path class="${classe}" style="fill: var(--cor)" d="M100 100 L${x1.toFixed(2)} ${y1.toFixed(2)} A96 96 0 ${grande} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z"/>`;
+  };
+  $("pizza-svg").innerHTML = fatia(0, fracao, "evadiu") + fatia(fracao, 1, "concluiu");
+  $("pizza-svg").setAttribute("aria-label", `${pct(fracao)} evadiram e ${pct(1 - fracao)} concluíram`);
+  $("pizza-legenda").innerHTML = [["evadiu", "evadiram", ev], ["concluiu", "concluíram", n - ev]].map(([c, verbo, k]) =>
+    `<li class="${c}"><span class="chave"></span><strong>${pct(k / n)}</strong>
+       <span class="texto-legenda">${verbo} (${milhar(k)} matrículas)</span></li>`).join("");
+  $("pizza-total").textContent = `${milhar(n)} matrículas de cursos técnicos e de graduação dos Institutos Federais e ` +
+    "CEFETs do Nordeste que chegaram ao fim do prazo previsto (edições 2021 a 2023 da Plataforma Nilo Peçanha).";
+  $("pizza").hidden = false;
+}
+
 function iniciarPainel() {
+  desenharPizza();
   const nomes = Object.keys(painel.escopos).filter(k => k !== "Nordeste").sort((a, b) => a.localeCompare(b, "pt-BR"));
   preencher($("escopo"), nomes, v => v, "Escolha uma instituição");
   $("escopo").options[0].remove();
