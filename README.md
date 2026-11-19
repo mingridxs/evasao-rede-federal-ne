@@ -13,16 +13,18 @@ Um modelo de classificação estima, a partir de dados conhecidos no ingresso (c
 | Modelo | AUC (IC 95%) | Brier |
 | --- | --- | --- |
 | Classe majoritária | 0,500 | 0,243 |
-| Taxa histórica do curso no campus | 0,761 (0,755–0,769) | 0,195 |
-| Regressão logística | 0,789 (0,783–0,797) | 0,183 |
-| Gradient boosting sem renda e cor/raça | 0,815 (0,809–0,822) | 0,172 |
-| Gradient boosting com indicadores de não declaração | 0,833 (0,828–0,839) | 0,163 |
-| **Gradient boosting (modelo principal: indicadores e cor/raça)** | **0,832 (0,827–0,838)** | **0,164** |
-| Gradient boosting com os valores de renda e cor/raça | 0,833 (0,828–0,839) | 0,163 |
+| Taxa histórica do curso no campus | 0,761 (0,754–0,769) | 0,195 |
+| Regressão logística | 0,788 (0,782–0,796) | 0,183 |
+| Gradient boosting sem renda e cor/raça | 0,814 (0,808–0,820) | 0,172 |
+| Gradient boosting com indicadores de não declaração | 0,831 (0,825–0,837) | 0,165 |
+| **Gradient boosting (modelo principal: indicadores e cor/raça)** | **0,829 (0,823–0,835)** | **0,165** |
+| Gradient boosting com os valores de renda e cor/raça | 0,830 (0,825–0,837) | 0,164 |
 
-O modelo principal usa curso, campus, oferta, idade, sexo, mês de ingresso e cor/raça, mais dois indicadores: se a renda e se a cor/raça foram registradas na matrícula. Os registros são feitos no ingresso, e quem não os tem evade mais mesmo dentro de cada instituição; o valor da renda não melhora a previsão (`scripts/10_renda_raca.py`) nem a calibração por faixa de renda (`scripts/12_renda_entrada.py`). A cor/raça quase não muda a AUC, mas reduz a subestimação do risco de estudantes indígenas de 10,6 para 5,8 pontos no teste (`scripts/11_cor_raca_entrada.py`).
+O modelo principal usa curso, campus, oferta, idade, sexo, mês de ingresso e cor/raça, mais dois indicadores: se a renda e se a cor/raça foram registradas na matrícula. Os registros são feitos no ingresso, e quem não os tem evade mais mesmo dentro de cada instituição; o valor da renda não melhora a previsão (`scripts/10_renda_raca.py`) nem a calibração por faixa de renda (`scripts/12_renda_entrada.py`). A cor/raça quase não muda a AUC, mas reduz a subestimação do risco de estudantes indígenas (`scripts/11_cor_raca_entrada.py`); no teste, o erro restante é de 6,6 pontos.
 
-Com um limiar por nível de curso (0,47 no técnico e 0,77 na graduação), o modelo acerta 73% das matrículas do teste, contra 68% da taxa histórica do curso; nos 30% de casos em que está mais seguro, acerta 86%. Ele é bem calibrado para quase todos os grupos, mas tem taxas de erro diferentes entre grupos com taxas de evasão diferentes (sexo, cor/raça, idade), ainda subestima o risco de estudantes indígenas e encontra só cerca de 40% dos casos de evasão de quem entra com até 17 anos.
+Com um limiar por nível de curso (0,52 no técnico e 0,80 na graduação), o modelo acerta 72,5% das matrículas do teste, contra 68,0% da taxa histórica do curso; nos 30% de casos em que está mais seguro, acerta 85%. Ele é bem calibrado para quase todos os grupos, mas tem taxas de erro diferentes entre grupos com taxas de evasão diferentes (sexo, cor/raça, idade), ainda subestima o risco de estudantes indígenas e encontra só cerca de 40% dos casos de evasão de quem entra com até 17 anos.
+
+Os nomes das instituições mudam entre edições da Plataforma Nilo Peçanha (siglas em 2021 e 2022, nomes completos em 2023) e são padronizados em `scripts/02_junta_edicoes.py`. Antes da padronização, a AUC de teste era 0,832; a queda para 0,829 provavelmente vem de o nome da instituição deixar de indicar a edição, informação que não existe na hora de prever.
 
 ## Dados
 

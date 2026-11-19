@@ -525,15 +525,15 @@
       instituição. A cor/raça em si entra porque, sem ela, o risco de estudantes indígenas era subestimado.</p>
     <h3>Hiperparâmetros</h3>
     <table class="tabela">
-      <tr><td>Taxa de aprendizado</td><td class="num">0,1</td></tr>
-      <tr><td>Folhas por árvore (máximo)</td><td class="num">31</td></tr>
-      <tr><td>Alunos por folha (mínimo)</td><td class="num">20</td></tr>
+      <tr><td>Taxa de aprendizado</td><td class="num">0,05</td></tr>
+      <tr><td>Folhas por árvore (máximo)</td><td class="num">63</td></tr>
+      <tr><td>Alunos por folha (mínimo)</td><td class="num">100</td></tr>
       <tr><td>Regularização L2</td><td class="num">1,0</td></tr>
       <tr><td>Número de árvores (parada antecipada)</td><td class="num" id="t-arvores">–</td></tr>
       <tr><td>Limite de alerta no técnico</td><td class="num" id="t-limiar-tecnico">–</td></tr>
       <tr><td>Limite de alerta na graduação</td><td class="num" id="t-limiar-graduacao">–</td></tr>
     </table>
-    <p>Os hiperparâmetros saíram de 12 combinações testadas na validação; todas ficaram a menos de 0,002 de AUC umas
+    <p>Os hiperparâmetros saíram de 12 combinações testadas na validação; todas ficaram a menos de 0,003 de AUC umas
       das outras, então o resultado não depende de ajuste fino.</p>
       </div>
     </div>
@@ -546,13 +546,13 @@
       evadiu e um que concluiu, o que evadiu receber risco maior; 0,5 é o acaso.</p>
     <table class="tabela">
       <tr><th>Estratégia</th><th class="num">AUC</th><th class="num">Acerto</th></tr>
-      <tr><td>Dizer que todos evadem</td><td class="num">0,500</td><td class="num">58%</td></tr>
-      <tr><td>Taxa histórica do curso no campus</td><td class="num">0,761</td><td class="num">68%</td></tr>
-      <tr><td>Regressão logística</td><td class="num">0,789</td><td class="num">72%</td></tr>
-      <tr class="destaque"><td>Gradient boosting (este site)</td><td class="num">0,832</td><td class="num">73%</td></tr>
+      <tr><td>Dizer que todos evadem</td><td class="num">0,500</td><td class="num">58,4%</td></tr>
+      <tr><td>Taxa histórica do curso no campus</td><td class="num">0,761</td><td class="num">68,0%</td></tr>
+      <tr><td>Regressão logística</td><td class="num">0,788</td><td class="num">72,1%</td></tr>
+      <tr class="destaque"><td>Gradient boosting (este site)</td><td class="num">0,829</td><td class="num">72,5%</td></tr>
     </table>
     <ul>
-      <li>Nos 30% de casos em que o modelo está mais seguro, ele acerta 86%; em 60% dos alunos, acerta 80% ou mais.</li>
+      <li>Nos 30% de casos em que o modelo está mais seguro, ele acerta 85%; em 40% dos alunos, acerta 80% ou mais.</li>
       <li>As probabilidades estão bem calibradas: o erro médio fica abaixo de 3 pontos para quase todos os grupos.</li>
       <li>Mais dados ainda ajudariam: cada vez que a base de treino dobrou, a AUC subiu cerca de 0,01.</li>
     </ul>
@@ -570,7 +570,7 @@
       <li>Grupos com mais evasão (homens, pessoas pretas, quem não declarou renda) recebem mais alertas, inclusive
         errados. Isso acontece porque o modelo é calibrado; não é possível ter, ao mesmo tempo, calibração e as mesmas
         taxas de erro para todos quando as taxas de evasão diferem.</li>
-      <li>Mesmo com a cor/raça, o risco de estudantes indígenas ainda é subestimado em cerca de 6 pontos, e há poucos
+      <li>Mesmo com a cor/raça, o risco de estudantes indígenas ainda é subestimado em cerca de 7 pontos, e há poucos
         casos para medir com precisão.</li>
       <li>Quem entra com até 17 anos (quase sempre no técnico integrado) evade menos, e o modelo encontra só cerca de
         40% desses casos de evasão.</li>
