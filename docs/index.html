@@ -141,6 +141,48 @@
   .etiquetas { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; padding: 0; list-style: none; }
   .etiquetas li { background: var(--marinho-claro); color: var(--marinho); border-radius: 6px; padding: 3px 9px; font-size: .88rem; margin: 0; }
 
+  /* Gráficos: linhas com nome, barra e valor */
+  .evadiu { --cor: #e08a2e; } .concluiu { --cor: #1f4f8f; }
+  .legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 8px 0 4px; padding: 0; list-style: none;
+             font-size: .88rem; color: var(--suave); }
+  .legenda li { display: flex; align-items: center; gap: 6px; margin: 0; }
+  .legenda .chave { width: 12px; height: 12px; border-radius: 3px; background: var(--cor); }
+  .legenda .chave.marca-ref { width: 3px; height: 14px; border-radius: 1px; background: var(--tinta); }
+  .barras { display: grid; gap: 2px; margin: 8px 0 4px; }
+  .linha { display: grid; grid-template-columns: minmax(7em, 34%) 1fr 3.4em; align-items: center; gap: 10px;
+           padding: 3px 4px; border-radius: 6px; font-size: .9rem; cursor: default; }
+  .linha:hover, .linha:focus-visible { background: var(--marinho-claro); }
+  .linha .nome { line-height: 1.25; overflow-wrap: anywhere; }
+  .linha .valor-barra { text-align: right; font-variant-numeric: tabular-nums; color: var(--tinta); }
+  .trilho { position: relative; height: 18px; }
+  .trilho .barra { position: absolute; left: 0; top: 2px; bottom: 2px; background: var(--cor, var(--marinho)); border-radius: 0 4px 4px 0; }
+  .trilho .barra.apagada { background: #c5cedc; }
+  .trilho .ref { position: absolute; top: -1px; bottom: -1px; width: 3px; margin-left: -1.5px; background: var(--tinta); border-radius: 1px; }
+  .linha.destaque .nome { font-weight: 700; }
+  .segmentos { display: grid; gap: 10px; margin: 10px 0 4px; }
+  .segmentos .linha { grid-template-columns: minmax(7em, 34%) 1fr; }
+  .segmentado { display: flex; gap: 2px; height: 28px; }
+  .segmentado span { background: var(--cor); border-radius: 4px; display: flex; align-items: center; padding: 0 8px;
+                     font-size: .85rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; }
+  .segmentado .evadiu { color: #13203a; } .segmentado .concluiu { color: #fff; }
+  .multiplos { display: grid; gap: 8px 32px; }
+  .multiplos h4 { font: 700 .95rem "Atkinson Hyperlegible", sans-serif; margin: 14px 0 0; }
+  .filtro { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 8px; }
+  .filtro label { margin: 0; }
+  .filtro select { width: auto; min-width: 14em; max-width: 100%; }
+  .dica { position: fixed; z-index: 10; pointer-events: none; background: var(--tinta); color: #fff; font-size: .85rem;
+          padding: 6px 10px; border-radius: 6px; max-width: 280px; line-height: 1.35; box-shadow: 0 4px 14px rgba(0, 0, 0, .2); }
+  .dica strong { display: block; font-size: 1rem; }
+
+  /* Explicação do resultado: barras para os dois lados a partir do centro */
+  .pesos { margin: 22px 0 0; padding-top: 18px; border-top: 1px solid var(--linha); }
+  .pesos h3 { font-size: 1.05rem; margin: 0 0 6px; }
+  .pesos .linha { grid-template-columns: minmax(8em, 42%) 1fr 4.6em; }
+  .pesos .trilho::before { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: #9aa6ba; }
+  .pesos .barra { border-radius: 4px; }
+  .pesos .barra.sobe { --cor: #e08a2e; border-radius: 0 4px 4px 0; }
+  .pesos .barra.desce { --cor: #1f4f8f; border-radius: 4px 0 0 4px; }
+
   footer.largura { color: var(--suave); font-size: .85rem; padding-top: 8px; padding-bottom: 40px; }
   a { color: var(--marinho-2); }
   [hidden] { display: none !important; }
@@ -171,6 +213,8 @@
     .abas button { border-bottom: 0; border-left: 3px solid transparent; border-radius: 0; padding: 10px 14px; }
     .abas button[aria-selected="true"] { border-left-color: var(--marinho); background: var(--marinho-claro); }
     .painel { padding: 10px 40px 32px; max-width: 78ch; }
+    .painel.largo { max-width: none; }
+    .multiplos { grid-template-columns: 1fr 1fr; }
   }
   .topo .lado { display: none; }
   @media (min-width: 1180px) {
@@ -273,13 +317,11 @@
 
     <section class="passo" id="bloco-avaliacao" aria-labelledby="t4" hidden>
       <h2 id="t4"><span class="n" aria-hidden="true">4</span>Quer registrar suas respostas?</h2>
-      <p class="detalhe">Se você só está testando o site, escolha “Não”: nada é enviado. Escolha “Sim” só se as respostas
-        acima são reais, sobre você e o seu curso.</p>
       <div class="alternar" role="radiogroup" aria-labelledby="t4" id="registrar">
-        <button type="button" role="radio" aria-checked="false" data-registrar="sim">Sim, são reais</button>
-        <button type="button" role="radio" aria-checked="false" data-registrar="nao">Não, só testando</button>
+        <button type="button" role="radio" aria-checked="false" data-registrar="sim">Sim</button>
+        <button type="button" role="radio" aria-checked="false" data-registrar="nao">Não</button>
       </div>
-      <p class="detalhe" id="nao-registrar" hidden>Tudo bem. Nada foi enviado, e você pode testar outros cursos à vontade.</p>
+      <p class="detalhe" id="nao-registrar" hidden>Nada foi enviado.</p>
 
       <div id="bloco-registro" hidden>
       <span class="rotulo" id="r-escala">O resultado combina com o que você vive no curso?</span>
@@ -341,6 +383,7 @@
     <h2 id="t-sobre">Sobre o trabalho</h2>
     <div class="abas" role="tablist" aria-label="Informações do trabalho">
       <button role="tab" id="aba-porque" aria-controls="p-porque" aria-selected="true">Por quê</button>
+      <button role="tab" id="aba-numeros" aria-controls="p-numeros" aria-selected="false" tabindex="-1">Em números</button>
       <button role="tab" id="aba-modelo" aria-controls="p-modelo" aria-selected="false" tabindex="-1">Como funciona</button>
       <button role="tab" id="aba-dados" aria-controls="p-dados" aria-selected="false" tabindex="-1">Dados</button>
       <button role="tab" id="aba-parametros" aria-controls="p-parametros" aria-selected="false" tabindex="-1">Parâmetros</button>
@@ -360,6 +403,33 @@
         Federal do Piauí (2026.2), feito por Maria Ingrid Xavier Sousa.</p>
     </div>
 
+    <div class="painel largo" role="tabpanel" id="p-numeros" aria-labelledby="aba-numeros" hidden>
+      <div class="filtro">
+        <label for="escopo">Comparar o Nordeste com</label>
+        <select id="escopo"></select>
+      </div>
+      <h3>Quantos deixam o curso</h3>
+      <p class="detalhe" id="frase-segmentos"></p>
+      <div class="segmentos" id="g-segmentos"></div>
+      <ul class="legenda"><li class="evadiu"><span class="chave"></span>Evadiu</li><li class="concluiu"><span class="chave"></span>Concluiu</li></ul>
+
+      <h3>Evasão por instituição</h3>
+      <p class="detalhe">A linha escura marca a média do Nordeste. Passe o mouse ou toque numa linha para ver o total de matrículas.</p>
+      <div class="barras" id="g-instituicoes"></div>
+
+      <h3 id="t-multiplos">Onde a evasão é maior</h3>
+      <ul class="legenda" id="legenda-multiplos"><li><span class="chave" style="--cor: var(--marinho)"></span><span id="nome-escopo"></span></li>
+        <li><span class="chave marca-ref"></span>Média do Nordeste no mesmo grupo</li></ul>
+      <div class="multiplos">
+        <div><h4>Nível do curso</h4><div class="barras" id="g-nivel"></div></div>
+        <div><h4>Forma de oferta</h4><div class="barras" id="g-oferta"></div></div>
+        <div><h4>Idade ao entrar</h4><div class="barras" id="g-idade"></div></div>
+        <div><h4>Edição da Plataforma Nilo Peçanha</h4><div class="barras" id="g-edicao"></div></div>
+      </div>
+      <p class="detalhe">Todas as 178 mil matrículas com desfecho, edições 2021 a 2023. Grupos com menos de 30 matrículas
+        não aparecem.</p>
+    </div>
+
     <div class="painel" role="tabpanel" id="p-modelo" aria-labelledby="aba-modelo" hidden>
       <h3>Gradient boosting</h3>
       <p>O modelo é um conjunto de <span id="n-arvores">várias centenas de</span> árvores de decisão pequenas. Cada árvore
@@ -371,6 +441,11 @@
       <h3>Alerta</h3>
       <p>O alerta usa um limite para cada nível de curso, escolhido para equilibrar os acertos entre quem evade e quem
         conclui. Sem isso, quase todo aluno de graduação receberia alerta.</p>
+      <h3>O que mais pesou</h3>
+      <p>Depois do resultado, o site mostra quanto cada grupo de informações (curso, instituição, idade, cor/raça e
+        outros) empurrou o risco para cima ou para baixo. O cálculo compara a pessoa com 40 perfis típicos da base, trocando
+        um grupo de cada vez em todas as combinações possíveis (valores de Shapley). As contribuições somam exatamente a
+        diferença entre o risco da pessoa e o de um perfil típico.</p>
       <h3>No seu aparelho</h3>
       <p>O modelo foi exportado para um arquivo e roda em JavaScript no navegador. Um teste automático confere que o site
         calcula a mesma probabilidade que o Python em 2.000 casos.</p>
@@ -455,6 +530,8 @@
   </section>
 </div>
 
+<div class="dica" id="dica" role="tooltip" hidden></div>
+
 <footer class="largura">
   Dados: Plataforma Nilo Peçanha (MEC), licença ODbL.
   <a href="https://github.com/mingridxs/evasao-rede-federal-ne">Código, análises e artigo</a>.
@@ -483,7 +560,23 @@ const dec = v => v.toFixed(2).replace(".", ",");
 const unicos = lista => [...new Set(lista)].filter(v => v !== null && v !== undefined)
   .sort((a, b) => String(a).localeCompare(String(b), "pt-BR"));
 
-let modelo, ofertas, ultimo = null, nota = null, registrar = null;
+let modelo, ofertas, painel = null, trabalhador = null, pedido = 0, ultimo = null, nota = null, registrar = null;
+
+// Grupos de atributos para explicar o resultado ("o que mais pesou").
+const GRUPOS = [
+  { nome: "Instituição e campus", colunas: ["instituicao", "unidade_de_ensino", "uf"] },
+  { nome: "Curso", colunas: ["nome_de_curso", "eixo_tecnologico", "subeixo_tecnologico", "carga_horaria",
+                             "duracao_prevista_meses", "fonte_de_financiamento"] },
+  { nome: "Nível e forma de oferta", colunas: ["tipo_de_curso", "tipo_de_oferta"] },
+  { nome: "Turno e modalidade", colunas: ["turno", "modalidade_de_ensino"] },
+  { nome: "Idade ao entrar", colunas: ["idade_ingresso"] },
+  { nome: "Sexo", colunas: ["sexo"] },
+  { nome: "Cor/raça", colunas: ["cor_raca", "cor_nao_declarada"] },
+  { nome: "Renda declarada ou não", colunas: ["renda_nao_declarada"] },
+  { nome: "Mês de ingresso", colunas: ["mes_ingresso"] },
+];
+const pontos = v => `${v >= 0 ? "+" : "−"}${Math.abs(v * 100).toFixed(1).replace(".", ",")}`;
+const milhar = n => n.toLocaleString("pt-BR");
 // Indicadores de não declaração: 0 = informou, 1 = não informou, null = não lembra (o modelo trata como ausente).
 const declaracao = { renda_nao_declarada: undefined, cor_nao_declarada: undefined };
 
@@ -585,16 +678,144 @@ function calcular(evento) {
       ? `Passa do limite de alerta ${nivel}: o modelo recomendaria acompanhamento desde a matrícula.`
       : `Fica abaixo do limite de alerta ${nivel}: o modelo não emitiria alerta.`}
       ${duvida ? "Como está perto do limite, aqui o modelo está pouco seguro." : ""}</p>
+    <div class="pesos" id="pesos" ${trabalhador ? "" : "hidden"}>
+      <h3>O que mais pesou</h3>
+      <p class="detalhe" id="pesos-texto">Calculando…</p>
+      <div class="barras" id="pesos-barras"></div>
+      <ul class="legenda"><li class="evadiu"><span class="chave"></span>Aumentou o risco</li>
+        <li class="concluiu"><span class="chave"></span>Diminuiu o risco</li></ul>
+      <p class="detalhe">Mostra como o modelo chegou ao número, comparando você com perfis típicos da base. Não diz o que
+        causa a evasão.</p>
+    </div>
     <p class="nota">Isto descreve o histórico de alunos parecidos, não o seu futuro. Se você pensa em deixar o curso,
       a assistência estudantil e a coordenação do seu campus podem ajudar.</p>`;
   $("resultado").classList.remove("resultado-novo"); void $("resultado").offsetWidth;
   $("resultado").classList.add("resultado-novo");
   $("bloco-resultado").classList.remove("inativo");
   ultimo = { entrada, prob, limiar, alerta };
+  pedirExplicacao(entrada, prob);
   mostrarAvaliacao();
   // No celular, rola até o resultado; no notebook, ele está ao lado e só rola se estiver fora da tela.
   $("bloco-resultado").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
                                         block: matchMedia("(min-width: 1180px)").matches ? "nearest" : "start" });
+}
+
+/* ---------- Dica ao passar o mouse ou focar uma linha ---------- */
+function comDica(el, titulo, texto) {
+  el.tabIndex = 0;
+  const mostrar = (x, y) => {
+    const d = $("dica");
+    d.replaceChildren(Object.assign(document.createElement("strong"), { textContent: titulo }), document.createTextNode(texto));
+    d.hidden = false;
+    const r = d.getBoundingClientRect();
+    d.style.left = `${Math.min(x + 14, innerWidth - r.width - 8)}px`;
+    d.style.top = `${Math.max(8, y - r.height - 10)}px`;
+  };
+  el.addEventListener("pointermove", e => mostrar(e.clientX, e.clientY));
+  el.addEventListener("pointerleave", () => { $("dica").hidden = true; });
+  el.addEventListener("focus", () => { const r = el.getBoundingClientRect(); mostrar(r.left + r.width / 3, r.top); });
+  el.addEventListener("blur", () => { $("dica").hidden = true; });
+  el.setAttribute("aria-label", `${titulo}: ${texto}`);
+}
+
+// Uma linha de gráfico: nome, barra de 0 a 100% e valor. ref = marca da média do Nordeste.
+function linhaBarra({ nome, taxa, n, ref = null, destaque = false, apagada = false }) {
+  const linha = document.createElement("div");
+  linha.className = "linha" + (destaque ? " destaque" : "");
+  const rotulo = Object.assign(document.createElement("span"), { className: "nome", textContent: nome });
+  const trilho = Object.assign(document.createElement("span"), { className: "trilho" });
+  const barra = Object.assign(document.createElement("span"), { className: "barra" + (apagada ? " apagada" : "") });
+  barra.style.width = `${taxa * 100}%`;
+  trilho.append(barra);
+  if (ref !== null) {
+    const marca = Object.assign(document.createElement("span"), { className: "ref" });
+    marca.style.left = `${ref * 100}%`;
+    trilho.append(marca);
+  }
+  linha.append(rotulo, trilho, Object.assign(document.createElement("span"), { className: "valor-barra", textContent: pct(taxa) }));
+  comDica(linha, nome, `${pct(taxa)} de evasão em ${milhar(n)} matrículas` +
+                        (ref !== null ? `; média do Nordeste: ${pct(ref)}` : ""));
+  return linha;
+}
+
+/* ---------- Aba "Em números" ---------- */
+const ROTULO_OFERTA = { "Não se aplica": "Graduação" };
+function desenharPainel() {
+  const escopo = $("escopo").value, ne = painel.escopos.Nordeste, es = painel.escopos[escopo];
+  const taxa = e => e.ev / e.n;
+  $("frase-segmentos").textContent = `No Nordeste, ${pct(taxa(ne))} das matrículas terminaram em evasão; ` +
+    `no ${escopo}, ${pct(taxa(es))}.`;
+
+  $("g-segmentos").replaceChildren(...[["Nordeste", ne], [escopo, es]].map(([nome, e]) => {
+    const linha = Object.assign(document.createElement("div"), { className: "linha" });
+    const barra = Object.assign(document.createElement("div"), { className: "segmentado" });
+    for (const [classe, valor] of [["evadiu", taxa(e)], ["concluiu", 1 - taxa(e)]]) {
+      const parte = Object.assign(document.createElement("span"), { className: classe, textContent: pct(valor) });
+      parte.style.flex = `${valor} 1 0`;
+      barra.append(parte);
+    }
+    linha.append(Object.assign(document.createElement("span"), { className: "nome", textContent: nome }), barra);
+    comDica(linha, nome, `${pct(taxa(e))} evadiram e ${pct(1 - taxa(e))} concluíram, em ${milhar(e.n)} matrículas`);
+    return linha;
+  }));
+
+  const instituicoes = Object.entries(painel.escopos).filter(([k]) => k !== "Nordeste")
+    .sort((a, b) => taxa(b[1]) - taxa(a[1]));
+  $("g-instituicoes").replaceChildren(...instituicoes.map(([nome, e]) => {
+    const linha = linhaBarra({ nome, taxa: taxa(e), n: e.n, ref: taxa(ne), destaque: nome === escopo, apagada: nome !== escopo });
+    linha.addEventListener("click", () => { $("escopo").value = nome; desenharPainel(); });
+    return linha;
+  }));
+
+  $("t-multiplos").textContent = `Onde a evasão é maior no ${escopo}`;
+  $("nome-escopo").textContent = escopo;
+  for (const dim of ["nivel", "oferta", "idade", "edicao"]) {
+    const refs = new Map(ne.dims[dim].map(([c, n, ev]) => [c, ev / n]));
+    $(`g-${dim}`).replaceChildren(...es.dims[dim].map(([c, n, ev]) =>
+      linhaBarra({ nome: ROTULO_OFERTA[c] || c, taxa: ev / n, n, ref: refs.get(c) ?? null })));
+    if (!es.dims[dim].length) $(`g-${dim}`).textContent = "Poucas matrículas para mostrar.";
+  }
+}
+
+function iniciarPainel() {
+  const nomes = Object.keys(painel.escopos).filter(k => k !== "Nordeste").sort((a, b) => a.localeCompare(b, "pt-BR"));
+  preencher($("escopo"), nomes, v => v, "Escolha uma instituição");
+  $("escopo").options[0].remove();
+  $("escopo").value = nomes.find(n => /IFPI|Piauí/i.test(n)) || nomes[0];
+  $("escopo").addEventListener("change", desenharPainel);
+  desenharPainel();
+}
+
+/* ---------- Explicação do resultado ---------- */
+function pedirExplicacao(entrada, prob) {
+  if (!trabalhador) return;
+  pedido += 1;
+  trabalhador.postMessage({ tipo: "explicar", id: pedido, entrada, grupos: GRUPOS });
+}
+
+function mostrarExplicacao({ id, referencia, prob, contribuicoes }) {
+  if (id !== pedido || !$("pesos-barras")) return;
+  const relevantes = contribuicoes.filter(c => Math.abs(c.valor) >= 0.005).sort((a, b) => Math.abs(b.valor) - Math.abs(a.valor));
+  const maior = Math.max(...relevantes.map(c => Math.abs(c.valor)), 0.01);
+  $("pesos-barras").replaceChildren(...relevantes.map(c => {
+    const linha = Object.assign(document.createElement("div"), { className: "linha" });
+    const trilho = Object.assign(document.createElement("span"), { className: "trilho" });
+    const barra = Object.assign(document.createElement("span"), { className: "barra " + (c.valor > 0 ? "sobe" : "desce") });
+    const largura = Math.abs(c.valor) / maior * 50;
+    barra.style.width = `${largura}%`;
+    barra.style.left = c.valor > 0 ? "50%" : `${50 - largura}%`;
+    trilho.append(barra);
+    linha.append(Object.assign(document.createElement("span"), { className: "nome", textContent: c.nome }), trilho,
+                 Object.assign(document.createElement("span"), { className: "valor-barra", textContent: `${pontos(c.valor)} pts` }));
+    comDica(linha, c.nome, `${c.valor > 0 ? "aumentou" : "diminuiu"} o risco em ${pontos(Math.abs(c.valor)).slice(1)} pontos percentuais`);
+    return linha;
+  }));
+  const [a, b] = relevantes;
+  const principais = [a, b].filter(Boolean).map(c => `${c.nome.toLowerCase()} (${pontos(c.valor)} pontos)`).join(" e ");
+  const resto = contribuicoes.length - relevantes.length;
+  $("pesos-texto").textContent = `Um perfil típico da base tem risco de ${pct(referencia)}. O seu chega a ${pct(prob)}` +
+    (principais ? `, e o que mais pesou foi ${principais}.` : ".") +
+    (resto ? ` ${resto === 1 ? "Outro fator mudou" : `Outros ${resto} fatores mudaram`} menos de meio ponto.` : "");
 }
 
 /* ---------- Avaliação e envio ---------- */
@@ -668,12 +889,14 @@ function abas() {
     aba.focus({ preventScroll: true });
     aba.scrollIntoView({ block: "nearest", inline: "nearest" });
   };
-  lista.forEach((aba, i) => {
+  lista.forEach(aba => {
     aba.addEventListener("click", () => ativar(aba));
     aba.addEventListener("keydown", e => {
-      const j = ["ArrowRight", "ArrowDown"].includes(e.key) ? i + 1 : ["ArrowLeft", "ArrowUp"].includes(e.key) ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? lista.length - 1 : null;
+      const visiveis = lista.filter(a => !a.hidden), i = visiveis.indexOf(aba);
+      const j = ["ArrowRight", "ArrowDown"].includes(e.key) ? i + 1 : ["ArrowLeft", "ArrowUp"].includes(e.key) ? i - 1
+              : e.key === "Home" ? 0 : e.key === "End" ? visiveis.length - 1 : null;
       if (j === null) return;
-      e.preventDefault(); ativar(lista[(j + lista.length) % lista.length]);
+      e.preventDefault(); ativar(visiveis[(j + visiveis.length) % visiveis.length]);
     });
   });
 }
@@ -692,6 +915,19 @@ async function iniciar() {
     $("resultado").innerHTML = `<p class="erro">O modelo não carregou. Se você abriu o arquivo direto do computador,
       rode um servidor local na pasta docs (python -m http.server) e abra pelo endereço que ele mostrar.</p>`;
     return;
+  }
+  try {
+    painel = await fetch("painel.json").then(r => { if (!r.ok) throw new Error(); return r.json(); });
+  } catch { painel = null; }
+  if (painel) {
+    iniciarPainel();
+    try {
+      trabalhador = new Worker("./explicacao.worker.js", { type: "module" });
+      trabalhador.onmessage = e => mostrarExplicacao(e.data);
+      trabalhador.postMessage({ tipo: "iniciar", modelo, fundo: painel.fundo });
+    } catch { trabalhador = null; }
+  } else {
+    $("aba-numeros").hidden = true;
   }
   preencher($("instituicao"), unicos(ofertas.map(o => o.instituicao)));
   preencher($("sexo"), opcoes.sexos.filter(s => SEXOS[s]), s => SEXOS[s]);

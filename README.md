@@ -20,7 +20,7 @@ Um modelo de classificação estima, a partir de dados conhecidos no ingresso (c
 | **Gradient boosting (modelo principal: indicadores e cor/raça)** | **0,832 (0,827–0,838)** | **0,164** |
 | Gradient boosting com os valores de renda e cor/raça | 0,833 (0,828–0,839) | 0,163 |
 
-O modelo principal usa curso, campus, oferta, idade, sexo, mês de ingresso e cor/raça, mais dois indicadores: se a renda e se a cor/raça foram registradas na matrícula. Os registros são feitos no ingresso, e quem não os tem evade mais mesmo dentro de cada instituição; o valor da renda não melhora a previsão (`scripts/10_renda_raca.py`). A cor/raça quase não muda a AUC, mas reduz a subestimação do risco de estudantes indígenas de 10,6 para 5,8 pontos no teste (`scripts/11_cor_raca_entrada.py`).
+O modelo principal usa curso, campus, oferta, idade, sexo, mês de ingresso e cor/raça, mais dois indicadores: se a renda e se a cor/raça foram registradas na matrícula. Os registros são feitos no ingresso, e quem não os tem evade mais mesmo dentro de cada instituição; o valor da renda não melhora a previsão (`scripts/10_renda_raca.py`) nem a calibração por faixa de renda (`scripts/12_renda_entrada.py`). A cor/raça quase não muda a AUC, mas reduz a subestimação do risco de estudantes indígenas de 10,6 para 5,8 pontos no teste (`scripts/11_cor_raca_entrada.py`).
 
 Com um limiar por nível de curso (0,47 no técnico e 0,77 na graduação), o modelo acerta 73% das matrículas do teste, contra 68% da taxa histórica do curso; nos 30% de casos em que está mais seguro, acerta 86%. Ele é bem calibrado para quase todos os grupos, mas tem taxas de erro diferentes entre grupos com taxas de evasão diferentes (sexo, cor/raça, idade), ainda subestima o risco de estudantes indígenas e encontra só cerca de 40% dos casos de evasão de quem entra com até 17 anos.
 
@@ -61,6 +61,7 @@ python scripts/07_analise_confianca.py      # acerto por nível de confiança
 # 4. Site
 python scripts/08_exporta_modelo.py         # gera docs/modelo.json e docs/opcoes.json
 node scripts/09_verifica_site.mjs           # confere que o JavaScript calcula o mesmo que o Python
+python scripts/13_exporta_painel.py         # gera docs/painel.json (aba "Em números" e explicação do resultado)
 ```
 
 Para ver o site localmente: `cd docs && python -m http.server` e abra http://localhost:8000.

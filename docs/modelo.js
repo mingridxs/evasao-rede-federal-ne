@@ -55,13 +55,54 @@ function vetorizar(modelo, entrada) {
   return x;
 }
 
-export function probabilidade(modelo, entrada) {
-  const x = vetorizar(modelo, entrada);
+function probDoVetor(modelo, x) {
   let bruto = modelo.base;
   for (const arvore of modelo.arvores) bruto += percorrer(arvore, x, modelo);
   const probBruta = 1 / (1 + Math.exp(-bruto));
   const prob = interpolar(modelo.calibracao.x, modelo.calibracao.y, probBruta);
   return { probBruta, prob };
+}
+
+export function probabilidade(modelo, entrada) {
+  return probDoVetor(modelo, vetorizar(modelo, entrada));
+}
+
+// Quanto cada grupo de atributos empurra o risco para cima ou para baixo, em
+// relação a perfis de referência (valores de Shapley por grupo, com a
+// probabilidade calibrada). Para cada subconjunto S de grupos, v(S) é o risco
+// médio quando os grupos de S têm os valores da pessoa e os demais vêm de um
+// perfil de referência. As contribuições somam prob(pessoa) − média de v(∅).
+// grupos: [{ nome, colunas: [...] }]. Colunas fora do modelo são ignoradas.
+export function explicar(modelo, entrada, fundo, grupos) {
+  const colunas = [...modelo.categoricas, ...modelo.numericas];
+  const usados = grupos.map(g => ({ ...g, idx: g.colunas.map(c => colunas.indexOf(c)).filter(i => i >= 0) }))
+                       .filter(g => g.idx.length);
+  const k = usados.length;
+  const x = vetorizar(modelo, entrada);
+  const bs = fundo.map(b => vetorizar(modelo, b));
+  const v = new Float64Array(1 << k);
+  for (let s = 0; s < 1 << k; s++) {
+    let soma = 0;
+    for (const b of bs) {
+      const z = b.slice();
+      for (let g = 0; g < k; g++) if (s >> g & 1) for (const i of usados[g].idx) z[i] = x[i];
+      soma += probDoVetor(modelo, z).prob;
+    }
+    v[s] = soma / bs.length;
+  }
+  const fat = [1];
+  for (let i = 1; i <= k; i++) fat[i] = fat[i - 1] * i;
+  const bits = s => { let c = 0; while (s) { c += s & 1; s >>= 1; } return c; };
+  const contribuicoes = usados.map((g, i) => {
+    let phi = 0;
+    for (let s = 0; s < 1 << k; s++) {
+      if (s >> i & 1) continue;
+      const t = bits(s);
+      phi += fat[t] * fat[k - t - 1] / fat[k] * (v[s | 1 << i] - v[s]);
+    }
+    return { nome: g.nome, valor: phi };
+  });
+  return { referencia: v[0], prob: v[(1 << k) - 1], contribuicoes };
 }
 
 const GRADUACAO = new Set(["Tecnologia", "Licenciatura", "Bacharelado"]);
