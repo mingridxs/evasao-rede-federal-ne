@@ -1,0 +1,5 @@
+pergunta avaliada,modelo,n,AUC,IC 95%
+evasão (teste original),atual (evasão),17849,0.829,0.823–0.835
+evasão (teste original),não concluiu no prazo,17849,0.821,0.815–0.827
+não concluiu no prazo (teste com retidos),atual (evasão),22322,0.8106,0.805–0.817
+não concluiu no prazo (teste com retidos),não concluiu no prazo,22322,0.8259,0.820–0.831

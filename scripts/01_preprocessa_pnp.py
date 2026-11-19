@@ -75,7 +75,7 @@ def sem_acento(serie: pd.Series) -> pd.Series:
 
 def preprocessa(arquivos: dict, regiao: str | None = None, uf: str | None = None,
                 instituicao: str | None = None, tipos_de_curso: list | None = TIPOS_PADRAO,
-                so_ciclos_encerrados: bool = True) -> pd.DataFrame:
+                so_ciclos_encerrados: bool = True, manter_retidos: bool = False) -> pd.DataFrame:
     """
     arquivos: {ano_base: caminho_do_csv}
     regiao / uf / instituicao: recortes opcionais e combináveis
@@ -84,6 +84,9 @@ def preprocessa(arquivos: dict, regiao: str | None = None, uf: str | None = None
     so_ciclos_encerrados: mantém só matrículas cujo fim previsto do ciclo já passou
         no último ano-base carregado, para não comparar quem evadiu cedo com quem
         ainda nem teria tido tempo de concluir.
+    manter_retidos: mantém também os alunos 'Em curso' depois do fim previsto
+        (retidos), com evadiu = 0 e a coluna 'retido' = 1. Usado só na análise
+        de sensibilidade (scripts/15_retidos.py); a base principal não os inclui.
     """
     partes = []
     for ano_base, caminho in arquivos.items():
@@ -145,9 +148,14 @@ def preprocessa(arquivos: dict, regiao: str | None = None, uf: str | None = None
     # Acadêmica, são alunos ainda ativos depois do fim previsto do ciclo: retidos).
     # 'Concluídos' (Concluída) e 'Concluintes' (Integralizada) contam como não evasão.
     cat = df[ROTULO].str.lower().fillna("")
-    df = df[cat.str.startswith(("evadid", "conclu"))].copy()
+    mantidos = ("evadid", "conclu", "em curso") if manter_retidos else ("evadid", "conclu")
+    df = df[cat.str.startswith(mantidos)].copy()
     df["evadiu"] = df[ROTULO].str.lower().str.startswith("evadid").astype(int)
-    print(f"Com desfecho (evadido ou concluinte): {len(df):,}")
+    if manter_retidos:
+        df["retido"] = df[ROTULO].str.lower().str.startswith("em curso").astype(int)
+        print(f"Com desfecho ou retidos: {len(df):,} (retidos: {df['retido'].sum():,})")
+    else:
+        print(f"Com desfecho (evadido ou concluinte): {len(df):,}")
 
     # Com vários anos-base, a mesma matrícula pode aparecer mais de uma vez:
     # fica o registro mais recente.
@@ -201,7 +209,8 @@ def preprocessa(arquivos: dict, regiao: str | None = None, uf: str | None = None
 
     derivados = [c for c in ("ano_ingresso", "mes_ingresso", "duracao_prevista_meses")
                  if c in df.columns] + derivados_idade + derivados_demanda
-    final = df[["ano_base"] + atributos + derivados + ["evadiu"]].reset_index(drop=True)
+    rotulos = ["evadiu"] + (["retido"] if manter_retidos else [])
+    final = df[["ano_base"] + atributos + derivados + rotulos].reset_index(drop=True)
 
     print(f"\nBase final: {final.shape[0]:,} linhas x {final.shape[1]} colunas")
     print(f"Taxa de evasão: {final['evadiu'].mean():.1%}")
@@ -227,12 +236,15 @@ if __name__ == "__main__":
     ap.add_argument("--regiao")
     ap.add_argument("--uf")
     ap.add_argument("--instituicao")
+    ap.add_argument("--manter-retidos", action="store_true",
+                    help="mantém os alunos em curso depois do prazo (só para a análise de retidos)")
     a = ap.parse_args()
     arquivos = {}
     for item in a.csv:
         ano, _, caminho = item.rpartition("=")
         arquivos[int(ano) if ano else a.ano] = caminho
     saida = preprocessa(arquivos, regiao=a.regiao, uf=a.uf, instituicao=a.instituicao,
-                        tipos_de_curso=None if a.todos_os_tipos else TIPOS_PADRAO)
+                        tipos_de_curso=None if a.todos_os_tipos else TIPOS_PADRAO,
+                        manter_retidos=a.manter_retidos)
     saida.to_csv(a.saida, index=False)
     print(f"Salvo em {a.saida}")

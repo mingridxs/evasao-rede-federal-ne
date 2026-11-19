@@ -1,0 +1,10 @@
+nível,grupo,n,risco médio (%),risco mediano (%),recebem alerta (%)
+Graduação,Concluiu (teste),957,59.828,63.673,22.466
+Graduação,Evadiu (teste),3609,82.245,86.691,67.858
+Graduação,Retido,19124,77.783,83.771,58.492
+Todos,Concluiu (teste),7428,39.745,35.629,28.002
+Todos,Evadiu (teste),10421,72.066,76.612,72.843
+Todos,Retido,44723,65.317,72.189,58.938
+Técnico,Concluiu (teste),6471,36.775,30.308,28.821
+Técnico,Evadiu (teste),6812,66.672,72.189,75.484
+Técnico,Retido,25599,56.003,58.756,59.272
