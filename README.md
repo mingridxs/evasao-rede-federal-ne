@@ -87,4 +87,4 @@ No fim, a pessoa pode dar uma nota de 1 a 5 para o quanto o resultado combina co
 
 ## Uso de modelos de linguagem
 
-O Claude (Anthropic) foi usado para sugerir o tema e o desenho do experimento, buscar bases e documentação, gerar e depurar o código e organizar a documentação do projeto. Todas as execuções foram feitas pela autora nos dados reais, e as decisões estão registradas na documentação do projeto e no artigo.
+O Claude (Anthropic) foi usado para buscar bases e documentação, sugerir o desenho do experimento, gerar e depurar o código e organizar a documentação do projeto. Todas as execuções foram feitas pela autora nos dados reais, e as decisões estão registradas na documentação do projeto e no artigo.
