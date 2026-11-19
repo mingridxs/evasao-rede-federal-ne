@@ -268,7 +268,7 @@ for atributo in ["sexo", "cor_raca", "renda_familiar"]:
 # %%
 inst = taxa_por(treino, "instituicao").sort_values("taxa", ascending=False)
 fig, ax = plt.subplots(figsize=(8, 0.4 * len(inst) + 1.4))
-eh_ifpi = inst.index.str.contains("Piau", case=False)
+eh_ifpi = inst.index == "Instituto Federal do Piauí"
 ax.barh(inst.index, inst["taxa"] * 100, color=np.where(eh_ifpi, COR, CINZA),
         xerr=[(inst["taxa"] - inst["ic_inf"]) * 100, (inst["ic_sup"] - inst["taxa"]) * 100],
         error_kw={"ecolor": "#555", "capsize": 2, "lw": 1})
@@ -284,7 +284,7 @@ fig.savefig(PASTA_FIG / "14_instituicoes.png", bbox_inches="tight")
 plt.show()
 
 # %%
-treino["grupo_ifpi"] = np.where(treino["instituicao"].str.contains("Piau", case=False),
+treino["grupo_ifpi"] = np.where(treino["instituicao"] == "Instituto Federal do Piauí",
                                 "IFPI", "Resto do Nordeste")
 comparacao = (treino.groupby(["nivel", "grupo_ifpi"])["evadiu"]
                     .agg(n="size", taxa="mean").unstack("grupo_ifpi"))
@@ -294,7 +294,7 @@ print("IFPI x resto do Nordeste, por nível (taxa em %):")
 print(comparacao.round(1).to_string())
 print(f"\nMatrículas do IFPI no treino: {(treino['grupo_ifpi'] == 'IFPI').sum():,}")
 print(f"Matrículas do IFPI no teste: "
-      f"{(df_completo.query('particao == \"teste\"')['instituicao'].str.contains('Piau', case=False)).sum():,}")
+      f"{(df_completo.query('particao == \"teste\"')['instituicao'] == 'Instituto Federal do Piauí').sum():,}")
 
 # %% [markdown]
 # ## 7. Resumo numérico para a documentação

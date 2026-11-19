@@ -53,6 +53,63 @@ numericas = [c for c in numericas if c in df.columns]
 categoricas = [c for c in df.columns if c not in numericas]
 df[categoricas] = df[categoricas].astype(str)
 
+# %% [markdown]
+# ## 2b. Padronizar nomes que mudaram entre edições
+#
+# A edição 2023 traz o nome completo das instituições ("Instituto Federal do
+# Piauí"); as de 2021 e 2022 trazem a sigla ("IFPI"), e as escolas técnicas
+# vinculadas a universidades aparecem com siglas escritas de formas diferentes
+# ("UFPI - CTF", "UFPI-CTF"). Sem padronizar, o modelo trataria a mesma
+# instituição como duas, uma para 2021–2022 e outra para 2023.
+# Padroniza também diferenças só de maiúsculas e minúsculas no nome do curso
+# e do campus ("Informática Para Internet" e "Informática para Internet").
+
+# %%
+NOME_INSTITUICAO = {
+    "IF BAIANO": "Instituto Federal Baiano",
+    "IF SERTÃO-PE": "Instituto Federal do Sertão Pernambucano",
+    "IFAL": "Instituto Federal de Alagoas",
+    "IFBA": "Instituto Federal da Bahia",
+    "IFCE": "Instituto Federal do Ceará",
+    "IFMA": "Instituto Federal do Maranhão",
+    "IFPB": "Instituto Federal da Paraíba",
+    "IFPE": "Instituto Federal de Pernambuco",
+    "IFPI": "Instituto Federal do Piauí",
+    "IFRN": "Instituto Federal do Rio Grande do Norte",
+    "IFS": "Instituto Federal de Sergipe",
+    "ESUFRN": "Escola de Saúde da UFRN",
+    "UFAL-ETA": "Escola Técnica de Artes da UFAL",
+    "UFCG-ETSC": "Escola Técnica de Saúde de Cajazeiras da UFCG",
+    "UFMA-COLUN": "Colégio Universitário da UFMA",
+    "UFPB-CAVN": "Colégio Agrícola Vidal de Negreiros da UFPB",
+    "UFPB-ETS": "Escola Técnica de Saúde da UFPB",
+    "UFPB-ESTES": "Escola Técnica de Saúde da UFPB",
+    "UFPI-CABJ": "Colégio Técnico de Bom Jesus da UFPI",   # antigo Colégio Agrícola de Bom Jesus
+    "UFPI-CTBJ": "Colégio Técnico de Bom Jesus da UFPI",
+    "UFPI-CAT": "Colégio Técnico de Teresina da UFPI",     # antigo Colégio Agrícola de Teresina
+    "UFPI-CTF": "Colégio Técnico de Floriano da UFPI",
+    "UFRN-EAJ": "Escola Agrícola de Jundiaí da UFRN",
+    "UFRN-MÚSICA": "Escola de Música da UFRN",
+    "UFRN-MUSICA": "Escola de Música da UFRN",
+    "UFRPE-CODAI": "Colégio Agrícola Dom Agostinho Ikas da UFRPE",
+}
+antes = df["instituicao"].nunique()
+sigla = df["instituicao"].str.strip().str.replace(r"\s*-\s*", "-", regex=True).str.upper()
+df["instituicao"] = sigla.map({k.upper(): v for k, v in NOME_INSTITUICAO.items()}).fillna(df["instituicao"].str.strip())
+print(f"Instituições: {antes} nomes antes, {df['instituicao'].nunique()} depois de padronizar.")
+por_edicao = pd.crosstab(df["instituicao"], df["ano_base"])
+incompletas = por_edicao[(por_edicao == 0).any(axis=1)]
+if len(incompletas):
+    print("AVISO - instituições que não aparecem em todas as edições (confira se é outro nome a padronizar):")
+    print(incompletas.to_string())
+
+for coluna in ["nome_de_curso", "unidade_de_ensino"]:
+    chave = df[coluna].str.strip().str.casefold()
+    mais_comum = df.groupby(chave)[coluna].agg(lambda s: s.value_counts().index[0])
+    antes = df[coluna].nunique()
+    df[coluna] = chave.map(mais_comum)
+    print(f"{coluna}: {antes} grafias antes, {df[coluna].nunique()} depois.")
+
 resumo = (df.groupby("ano_base")["evadiu"]
             .agg(matriculas="size", taxa_evasao="mean")
             .assign(taxa_evasao=lambda t: (t["taxa_evasao"] * 100).round(1)))

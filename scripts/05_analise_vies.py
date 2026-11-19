@@ -46,7 +46,7 @@ p["alerta"] = (p["prob_principal"] >= LIMIAR).astype(int)
 p["nivel"] = np.where(p["tipo_de_curso"].isin(GRADUACAO), "Graduação", "Técnico")
 p["faixa_idade"] = pd.cut(p["idade_ingresso"], bins=[0, 17, 20, 24, 29, 120],
                           labels=["até 17", "18–20", "21–24", "25–29", "30 ou mais"]).astype(str)
-p["grupo_ifpi"] = np.where(p["instituicao"].str.contains("Piau", case=False), "IFPI",
+p["grupo_ifpi"] = np.where(p["instituicao"] == "Instituto Federal do Piauí", "IFPI",
                            "Resto do Nordeste")
 print(f"Teste: {len(p):,} matrículas · limiar {LIMIAR:.2f} · evasão real {p['evadiu'].mean():.1%} "
       f"· taxa de alerta {p['alerta'].mean():.1%}")
