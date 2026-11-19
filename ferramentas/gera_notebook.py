@@ -87,6 +87,19 @@ md("""
 **Maria Ingrid Xavier Sousa** · Projeto final de Inteligência Artificial · Ciência da Computação, UFPI, 2026.2 ·
 prof. Pedro Almir
 
+**Pergunta de pesquisa.** Com informações disponíveis na matrícula, é possível estimar o risco de evasão de
+alunos de cursos técnicos e de graduação da Rede Federal do Nordeste melhor do que a taxa histórica do curso, e o
+modelo erra de forma igual entre grupos de estudantes (sexo, cor/raça, renda declarada, idade)?
+
+**Tipo de aprendizado.** Supervisionado: classificação binária (evadiu ou concluiu), com probabilidades calibradas.
+
+**Problema e relevância.** Mais da metade das matrículas encerradas nos Institutos Federais do Nordeste termina em
+evasão (58,4% nesta base). Identificar cedo os perfis com maior risco ajuda equipes pedagógicas e de assistência
+estudantil a priorizar acompanhamento desde o ingresso. **Público beneficiado:** gestores, equipes pedagógicas e
+de assistência estudantil e os próprios estudantes. **Limites do escopo:** o modelo descreve o histórico de alunos
+com perfil parecido, não prevê o destino de uma pessoa; usa só dados do ingresso; cobre o Nordeste, edições 2021 a
+2023, cursos técnicos e de graduação; e não deve ser usado para negar vagas, bolsas ou direitos.
+
 Este notebook reproduz o trabalho inteiro, dos microdados brutos aos resultados do artigo:
 
 1. Dados e histórico do pré-processamento (v1 com Matrículas, v2 com Eficiência Acadêmica)
@@ -100,6 +113,7 @@ Este notebook reproduz o trabalho inteiro, dos microdados brutos aos resultados 
 9. Retidos: análise de sensibilidade
 
 **Links:** [site](https://mingridxs.github.io/evasao-rede-federal-ne/) ·
+[notebook no Kaggle](https://www.kaggle.com/code/mariaingridxavier/evasao-na-rede-federal-do-ne-previsao-e-vies) ·
 [repositório](https://github.com/mingridxs/evasao-rede-federal-ne) ·
 [dataset no Kaggle](https://www.kaggle.com/datasets/mariaingridxavier/evasao-na-rede-federal-do-nordeste-pnp-2021-2023) ·
 dados: Plataforma Nilo Peçanha (MEC), licença ODbL.
