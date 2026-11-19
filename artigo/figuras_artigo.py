@@ -26,7 +26,7 @@ rows = [("Majority class", "Classe majoritária"),
         ("GB, no missingness indicators", "Gradient boosting (sem indicadores) · calibrado"),
         ("GB, declared income and race values", "Gradient boosting (completo) · calibrado"),
         ("GB, final model", "Gradient boosting (principal) · calibrado")]
-fig, ax = plt.subplots(figsize=(5.6, 2.4))
+fig, ax = plt.subplots(figsize=(5.6, 1.9))
 for i, (label, key) in enumerate(rows):
     auc, lo, hi = m.loc[key, ["AUC", "AUC IC inf", "AUC IC sup"]]
     final = label.endswith("final model")

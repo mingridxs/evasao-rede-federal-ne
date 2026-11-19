@@ -50,49 +50,36 @@ mostra que excluir os alunos retidos, como é usual, deixa de fora 20\% das matr
 Brazil's Federal Network of Professional, Scientific and Technological Education offers technical courses
 (integrated with or after secondary school) and undergraduate programs. Dropout is one of its most persistent
 problems: in the data used here, 58.4\% of the enrollments in the Northeast whose expected end date had passed
-ended in dropout, around 51\% in technical courses and 79\% in undergraduate programs. Each dropout represents a
-student who left without a diploma and a public seat that did not produce a graduate.
+ended in dropout, around 51\% in technical courses and 79\% in undergraduate programs. 
 
-Institutions can only act on dropout if they know where to look. A risk estimate available at enrollment could
-help pedagogical and student-assistance teams prioritize follow-up before problems accumulate. However, risk
-models built on socio-economic data raise a second question: do they err in the same way for every group of
-students? A model that misses dropouts of one group, or flags another group too often, can redirect support
+A risk estimate available at enrollment could help pedagogical and student-assistance teams prioritize
+follow-up early. But a model that misses the dropouts of one group, or flags another too often, can redirect support
 unfairly~\cite{baker2022,kizilcec2022}.
 
-This work asks two questions. First, using only information available at enrollment, can dropout in the
-federal network of the Northeast be predicted better than with the historical dropout rate of the course?
-Second, are the model's errors and probabilities equally reliable across sex, race, declared income and age? The
-approach is supervised binary classification on public microdata from the Nilo Peçanha
-Platform~\cite{pnp}, with a gradient boosting model, probability calibration, a group-level fairness audit and
-three further analyses: the role of undeclared income and race, a regional versus a single-institution model,
-and the effect of excluding students still enrolled after the expected end date (retained students). The model
-is also available in a public website that computes the estimate in the browser.
+This work asks two questions: using only enrollment data, can dropout be predicted better than with the historical
+rate of the course, and are the model's errors and probabilities equally reliable across sex, race, declared income
+and age? We use supervised classification on public microdata of the Nilo Peçanha Platform (PNP)~\cite{pnp}, with calibrated gradient boosting, a
+group fairness audit and three further analyses: undeclared income and race, a regional versus a single-institution
+model, and the exclusion of students still enrolled after the expected end (retained students).
 
 \section{Related Work}
 
-Several Brazilian studies predict dropout with data from the Nilo Peçanha Platform (PNP).
+Several Brazilian studies predict dropout with PNP data.
 \cite{oliveira2022} used the PNP enrollment microdata for 2019 and 2020, for the whole federal network and for the
 Federal Institute of Paraíba (IFPB), with Random Forest for feature selection and classification. They report
-accuracies between 0.86 and 0.90, with workload, race, age group and municipality among the most relevant
-features. Like us, they excluded students still enrolled. Their data, however, are yearly snapshots of the
-enrollment file, which mostly contain students active in that year; we use the Academic Efficiency files, which
-follow complete cohorts to their final status, and we report AUC and calibration rather than accuracy alone, so
-the figures are not directly comparable. \cite{barbosa2023} compared several algorithms on academic records of
-one campus of the Federal Institute of Pernambuco and found XGBoost to perform best, and \cite{cabral2025} used
-PNP records from 2017 to 2023 of one IFPB campus, with a prospective test on 2023 data, finding Random Forest
-the best model by AUC and recall. These studies focus on one institution or campus and on overall performance;
+accuracies between 0.86 and 0.90, but on yearly snapshots of the enrollment file, which mostly contain students
+active in that year; we use the Academic Efficiency files, which follow complete cohorts to their final status, so
+the figures are not directly comparable. On single campuses, \cite{barbosa2023} found XGBoost the best model for
+the Federal Institute of Pernambuco, and \cite{cabral2025}, with PNP records of an IFPB campus from 2017 to 2023
+and a prospective test on 2023, found Random Forest the best by AUC and recall. These studies focus on one institution or campus and on overall performance;
 none of them examines whether the errors are evenly distributed across groups of students.
 
-The fairness literature in education points exactly to that gap. \cite{baker2022} review the evidence of
-algorithmic bias in education and \cite{kizilcec2022} discuss how bias enters through measurement, model learning
-and action. \cite{gardner2019} propose slicing analysis, evaluating the model separately for each group, which is
-the approach we follow. \cite{yu2021} studied college dropout prediction with and without protected attributes
-(gender, minority status, first-generation status and financial need) in a large U.S. university and found that
-including them did not change overall performance and only marginally improved fairness. Our results agree on
-performance, but in our data the strongest socio-economic signal is whether the attribute was declared at all.
-Finally, \cite{kleinberg2017} and \cite{chouldechova2017} show that when base rates differ between groups, a
-calibrated model cannot also equalize error rates such as the false positive rate~\cite{hardt2016}; this result
-frames how we interpret the group differences in Section~\ref{sec:results}.
+The fairness literature in education points exactly to that gap. \cite{baker2022} and \cite{kizilcec2022} review algorithmic bias in
+education, and \cite{gardner2019} propose slicing analysis, evaluating the model separately for each group, as we
+do. \cite{yu2021} found that adding protected attributes to a U.S. college dropout model did not
+change overall performance and only marginally improved fairness. 
+Finally, when base rates differ, a calibrated model cannot also equalize error rates such as the false positive
+rate~\cite{kleinberg2017,chouldechova2017,hardt2016}.
 
 \section{Methodology}
 
@@ -101,17 +88,14 @@ frames how we interpret the group differences in Section~\ref{sec:results}.
 We used the Academic Efficiency microdata of the PNP~\cite{pnp}, editions 2021, 2022 and 2023, published under the
 Open Data Commons Open Database License. Each edition contains one row per enrollment in a course cycle whose
 expected end date fell in the previous year, with the final status of the student: completed, dropped out or still
-enrolled (retained). We kept the Northeast (region derived from the state, since the region column is not
-reliable), and technical, technology, teacher-education (licenciatura) and bachelor's courses. Internal transfers
-were not counted as dropout. The label is 1 for dropout and 0 for completion; retained students were excluded from
-the main base because their outcome is still unknown, and analyzed separately (Section~\ref{sec:retained}). The
-resulting base has 178,484 enrollments from 23 institutions, 219 campuses and 203 courses, with a dropout rate of
-58.4\% (57.9\%, 60.9\% and 56.4\% in the three editions).
+enrolled (retained). We kept the Northeast and technical, technology, teacher-education and bachelor's courses;
+internal transfers were not counted as dropout. The label is 1 for dropout and 0 for completion; retained students were excluded from
+the main base because their outcome is still unknown, and analyzed separately (Section~\ref{sec:retained}). The base has 178,484 enrollments from 23 institutions, 219 campuses and 203 courses, with
+58.4\% dropout (57.9\%, 60.9\% and 56.4\% by edition).
 
-Two data-quality steps were necessary. The age at enrollment was recomputed from the age on December 31 of the
-edition year and the year of entry. Institution names changed between editions (acronyms in 2021 and 2022, full
-names in 2023), so the same institution appeared as two categories that also encoded the edition; the names were
-standardized, which lowered the test AUC from 0.832 to 0.829, the honest value, since the edition is not known at
+The age at enrollment was recomputed from the age on December 31 of the edition year. Institution names
+changed between editions (acronyms in 2021--2022, full names in 2023), so the name also encoded the edition; after
+standardizing them, the test AUC fell from 0.832 to 0.829, the honest value, since the edition is unknown at
 prediction time.
 
 \subsection{Features and protocol}
@@ -120,17 +104,15 @@ The model uses 19 features known at enrollment: institution, campus, state, cour
 (integrated, concurrent, subsequent, adult education), modality, shift, technological area and sub-area, funding
 program, workload, expected duration, month of entry, age at entry, sex, race, and two indicators of whether income
 and race were left undeclared. The enrollments were randomly split into training (70\%, 124,938), validation (20\%,
-35,697) and test (10\%, 17,849) sets, stratified by edition and label with a fixed seed (42). All encoders and models
-were fitted on the training set; hyperparameters, calibration and decision thresholds were chosen on the validation
-set; the test set was used once, after all decisions.
+35,697) and test (10\%, 17,849) sets, stratified by edition and label with a fixed seed (42). Models were fitted on
+training data, tuned, calibrated and thresholded on validation; the test set was used once, at the end.
 
 \subsection{Models}
 
-We compared five references: the majority class; the historical dropout rate of the course in the campus, smoothed
-toward the rate of the course type (a strong rule an institution could compute without machine learning); logistic
-regression with one-hot encoding; and gradient boosting with and without the missingness indicators and with the
-declared income and race values. The main model is scikit-learn's histogram gradient boosting~\cite{pedregosa2011},
-inspired by LightGBM~\cite{ke2017}, with native categorical features, early stopping and L2 regularization of 1.0.
+The references are the majority class; the historical dropout rate of the course in the campus, smoothed toward the
+rate of the course type (a rule an institution could compute without machine learning); logistic regression with
+one-hot encoding; and gradient boosting variants without the missingness indicators or with the declared income and
+race values. The main model is scikit-learn's histogram gradient boosting~\cite{pedregosa2011}, with native categorical features, early stopping and L2 regularization of 1.0.
 Twelve combinations of learning rate (0.05, 0.1), maximum leaves (15, 31, 63) and minimum samples per leaf (20, 100)
 were compared by validation AUC; the final model uses 0.05, 63 and 100, with 519 trees. Probabilities were
 calibrated with isotonic regression~\cite{zadrozny2002} on the validation set. Because the levels have very different
@@ -156,35 +138,24 @@ Figure~\ref{fig:models} compares the models on the test set. The final model rea
 (0.823--0.835) and a Brier score of 0.165, against 0.761 and 0.195 for the historical course rate and 0.788 and
 0.183 for logistic regression. With the per-level thresholds it classifies 72.5\% of the test enrollments correctly
 (balanced accuracy 72.4\%), against 68.0\% for the historical course rate. Accuracy is not uniform: in the 10\% of
-students on whom the model is most confident it is right 88\% of the time, and 85\% in the top 30\%
-(Figure~\ref{fig:coverage}). In practice, a confident estimate deserves more weight than one near the threshold. The
-learning curve was still rising (validation AUC 0.819 with half of the training data and 0.831 with all of it), so
-more editions or regions are likely to help.
+students on whom the model is most confident it is right 88\% of the time, and 85\% in the top 30\%. The learning curve was still rising (validation AUC 0.819 with half of the
+training data, 0.831 with all of it), so more data is likely to help.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.82\textwidth]{fig_models.pdf}
+\includegraphics[width=.6\textwidth]{fig_models.pdf}
 \caption{Test AUC of the references and of the gradient boosting (GB) variants, with 95\% bootstrap intervals.}
 \label{fig:models}
 \end{figure}
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=.62\textwidth]{fig_coverage.pdf}
-\caption{Accuracy when the model decides only on the share of students on whom it is most confident.}
-\label{fig:coverage}
-\end{figure}
-
 \subsection{Undeclared income and race}
 
-Missing information was the strongest socio-economic signal. In the 2023 enrollment file, which covers students who
-entered between 2015 and 2023, the share without declared income among students still enrolled is about the same
-for every entry year (around 24\% for 2023 entrants), which indicates that income is recorded, or not, at enrollment
-and is not filled in later as an effect of the outcome. Within the same institution, students without declared
+Missing information was the strongest socio-economic signal. In the 2023 enrollment file (entrants from 2015 to 2023),
+the share without declared income among students still enrolled is similar for every entry year (24\% for 2023
+entrants), so income is recorded, or not, at enrollment and does not leak the outcome. Within the same institution, students without declared
 income dropped out more in 15 of 16 comparable institutions (median difference of 11.9 points), and students without
-declared race in 15 of 16 (13.8 points). On the validation set, the two missingness indicators alone added 0.018 of
-AUC, more than the full declared values (106\% of their gain), and among students who declared both, adding the
-values changed the AUC by $-0.004$. Race was adopted as an input because it reduced the underestimation of the risk
+declared race in 15 of 16 (13.8 points). On validation, the two missingness indicators alone added 0.018 of AUC,
+106\% of the gain of the full declared values, which add nothing ($-0.004$) among students who declared both. Race was adopted as an input because it reduced the underestimation of the risk
 of Indigenous students from 5.8 to 3.0 points on validation (10.4 to 6.6 on test) at a cost of 0.0005 of AUC. The
 declared income bracket was not adopted: the model was already calibrated across income brackets (largest error 3.3
 points), and the bracket reduced it by only 1.2 points.
@@ -192,18 +163,16 @@ points), and the bracket reduced it by only 1.2 points.
 \subsection{Group fairness}
 
 Figure~\ref{fig:fairness} shows the slicing analysis of the final model. Calibration is good for almost every group
-(errors within $\pm$3 points), so a predicted probability means roughly the same for men and women, for each race and
-for each income group. Error rates, however, differ: men have higher recall (77.1\% vs.\ 67.5\%) but also more false
+(errors within $\pm$3 points). Error rates, however, differ: men have higher recall (77.1\% vs.\ 67.5\%) but also more false
 positives (33.6\% vs.\ 23.1\%), and the same pattern separates students with and without declared income. These
 differences follow from different base rates, as predicted by \cite{kleinberg2017} and \cite{chouldechova2017}: a
-calibrated model gives more alerts where dropout is more frequent. Two groups need attention. Indigenous students are
-still underestimated by 6.6 points, a small group (98 test enrollments) for which the estimate is uncertain.
-Students aged 17 or less, almost all in technical courses, have a low dropout rate and only 39\% of their
-dropouts are flagged; for them the model should not be the only screening tool.
+calibrated model gives more alerts where dropout is more frequent. Two groups need attention: Indigenous students
+are still underestimated by 6.6 points (98 test enrollments), and only 39\% of the dropouts of students aged 17 or
+less are flagged, so the model should not be their only screening tool.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=\textwidth]{fig_fairness.pdf}
+\includegraphics[width=.74\textwidth]{fig_fairness.pdf}
 \caption{Slicing analysis of the final model on the test set, with per-level thresholds. The false positive rate
 of Indigenous students is omitted because the group has fewer than 30 students who completed.}
 \label{fig:fairness}
@@ -211,18 +180,18 @@ of Indigenous students is omitted because the group has fewer than 30 students w
 
 \subsection{Regional model or institution-specific model?}
 
-Institutions differ in dropout, which raises the question of whether a local model would serve them better. For the
-Federal Institute of Piauí (IFPI), with 13,066 training and 1,952 test enrollments, we compared the regional model
-with a model trained only on IFPI data, the regional model recalibrated on IFPI validation data, and the regional
-model without institution and campus (Table~\ref{tab:ifpi}). All four tie: the paired bootstrap differences in AUC
-include zero, and the regional model is already calibrated for IFPI (mean error of 0.8 points). Removing institution
-and campus does not hurt the ranking within IFPI, which suggests that differences between institutions come mostly
-from their mix of courses, offers and students. A single regional model is therefore adequate.
+For the Federal Institute of Piauí (IFPI), with 13,066 training and 1,952 test enrollments, we compared the
+regional model with a model trained only on IFPI data, the regional model recalibrated on IFPI, and the regional model
+without institution and campus (Table~\ref{tab:ifpi}). All four tie (paired differences include zero), and the
+regional model is already calibrated for IFPI (mean error of 0.8 points). Since removing institution and campus does
+not hurt, differences between institutions seem to come from their mix of courses and students; a single regional
+model is adequate.
 
 \begin{table}[ht]
 \centering
 \caption{Models evaluated on the IFPI test enrollments (n = 1,952). Difference: paired bootstrap, 95\% CI.}
 \label{tab:ifpi}
+\small
 \begin{tabular}{lcc}
 \toprule
 Model & AUC & Difference from regional \\
@@ -238,21 +207,22 @@ Regional without institution and campus & 0.810 & $+0.002$ ($-0.006$ to $+0.010$
 \subsection{Retained students}
 \label{sec:retained}
 
-Retained students are commonly excluded from dropout studies~\cite{oliveira2022}, as in our main model. They are
-44,723 enrollments, 20.0\% of all those whose expected end had passed (29.2\% in undergraduate programs). They
-resemble dropouts more than graduates: their median age at entry is 21, as for dropouts (17 for graduates), and the
-final model assigns them an average risk of 65\%, close to dropouts (72\%) and far from graduates (40\%). We trained a
-second model for ``did not complete on time'' (dropout or retained). Each model performs about as well on its own
-question (Table~\ref{tab:retained}), but the second one has smaller gaps between groups: the recall gap between
+Retained students are usually excluded from dropout studies~\cite{oliveira2022}, as in our main model. They are
+44,723 enrollments, 20.0\% of all whose expected end had passed (29.2\% in undergraduate programs), and resemble
+dropouts: median age at entry of 21, as for dropouts (17 for graduates), and an average predicted risk of 65\%, close
+to dropouts (72\%) and far from graduates (40\%). We trained a
+second model for ``did not complete on time'' (dropout or retained). Both perform alike on their own question
+(Table~\ref{tab:retained}), but the second has smaller gaps between groups: the recall gap between
 students with and without declared income falls from 17.3 to 11.9 points, the false positive gap between levels from
 6.4 to 1.4, and the calibration error for Indigenous students from $-6.6$ to $-4.1$. Excluding retained students
 therefore probably underestimates non-completion and slightly increases group disparities. We kept dropout as the
-main target because it is a definitive outcome and the one used by the PNP indicators.
+main target because it is a definitive outcome.
 
 \begin{table}[ht]
 \centering
 \caption{Each model evaluated on its own question in the test set.}
 \label{tab:retained}
+\small
 \begin{tabular}{lcc}
 \toprule
  & Dropout (main) & Did not complete on time \\
@@ -265,34 +235,29 @@ Recall / false positive rate & 72.8\% / 28.0\% & 70.7\% / 26.4\% \\
 \end{tabular}
 \end{table}
 
-\subsection{Limitations and risks}
-
-The estimate describes the history of students with a similar profile, not the future of a person, and uses only
-enrollment data, without grades or attendance, which limits accuracy. The cohorts went through the COVID-19
-pandemic, and the data cover only the Northeast, so the model should not be applied to universities or other
-regions without validation. Small groups have wide uncertainty. The model must be used to offer support, never to
-deny seats, scholarships or rights.
+\textbf{Limitations and risks.} The estimate describes students with a similar profile, not the future of a person;
+it uses no grades or attendance, the cohorts went through the COVID-19 pandemic, and it covers only the Northeast. It
+must be used to offer support, never to deny seats, scholarships or rights.
 
 \section{Conclusion}
 
-Using only information available at enrollment, a calibrated gradient boosting model predicts dropout in the
-federal network of the Northeast clearly better than the historical rate of the course (AUC 0.829 vs.\ 0.761), and
-a regional model serves an individual institute as well as a local one. Its probabilities are reliable across
-groups, but error rates follow the different base rates, Indigenous students remain underestimated and young
-technical students are hard to flag. The strongest socio-economic signal is not income or race themselves but
-whether they were declared, and the common exclusion of retained students hides a fifth of the cohort. Future work
-includes adding grades and attendance from the first semester, more editions and regions, a temporal validation, and
-fairness-aware thresholds for the groups with larger gaps. A demonstration website computes the estimate in the
-browser and shows, through group Shapley values~\cite{lundberg2017}, which characteristics moved each estimate.
+With enrollment data only, a calibrated gradient boosting model predicts dropout clearly better than the historical
+course rate (AUC 0.829 vs.\ 0.761), and a regional model serves an institute as well as a local one. Probabilities
+are reliable across groups, but error rates follow base rates, Indigenous students remain underestimated and young
+technical students are hard to flag. The strongest socio-economic signal is whether income and race were declared,
+and excluding retained students hides a fifth of the cohort. Future work
+includes first-semester grades and attendance, more editions and regions, temporal validation and fairness-aware
+thresholds. A demonstration website computes the estimate in the browser and explains it with group Shapley
+values~\cite{lundberg2017}.
 
 \section*{Data and Code Availability}
 
-\begin{itemize}
-\item Dataset (raw PNP microdata and cleaned base, ODbL): \url{https://www.kaggle.com/datasets/mariaingridxavier/evasao-na-rede-federal-do-nordeste-pnp-2021-2023}
-\item Notebook, executed end to end: \url{https://www.kaggle.com/code/mariaingridxavier/evasao-na-rede-federal-do-ne-previsao-e-vies}
-\item Code repository: \url{https://github.com/mingridxs/evasao-rede-federal-ne}
-\item Demonstration website: \url{https://mingridxs.github.io/evasao-rede-federal-ne/}
-\end{itemize}
+\noindent Dataset (raw PNP microdata and cleaned base, ODbL):\\
+\url{https://www.kaggle.com/datasets/mariaingridxavier/evasao-na-rede-federal-do-nordeste-pnp-2021-2023}\\
+Notebook, executed end to end:\\
+\url{https://www.kaggle.com/code/mariaingridxavier/evasao-na-rede-federal-do-ne-previsao-e-vies}\\
+Code: \url{https://github.com/mingridxs/evasao-rede-federal-ne}\\
+Demonstration website: \url{https://mingridxs.github.io/evasao-rede-federal-ne/}
 
 \section*{Use of Large Language Models}
 
