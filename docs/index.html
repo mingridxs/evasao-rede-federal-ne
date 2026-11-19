@@ -117,7 +117,16 @@
     .menu-rolagem { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--lateral)); padding: 0 var(--lateral); }
     .menu-rolagem::-webkit-scrollbar { display: none; }
     .menu-rolagem a { white-space: nowrap; padding: 7px 12px; }
-    .ajustes summary { display: inline-flex; padding: 7px 12px; }
+    /* No celular: só um botão redondo com o símbolo, no canto superior direito */
+    .ajustes { position: absolute; top: 14px; right: var(--lateral); z-index: 6; }
+    .ajustes summary { width: 44px; height: 44px; padding: 0; justify-content: center; border-radius: 50%;
+                       background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .4); }
+    .ajustes summary svg { width: 24px; height: 24px; }
+    .ajustes .rotulo-ajustes { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .ajustes .opcoes { position: absolute; right: 0; top: 52px; width: min(320px, calc(100vw - 24px)); background: var(--capa);
+                       border: 1px solid rgba(255, 255, 255, .25); border-radius: 12px; padding: 16px;
+                       box-shadow: 0 12px 32px rgba(0, 0, 0, .35); }
+    .marca { padding-right: 56px; }
   }
   .cabeca { padding: 34px 0 18px; }
   .cabeca h1 { font-size: clamp(1.7rem, 4.6vw, 2.5rem); line-height: 1.15; margin: 0 0 10px; color: var(--destaque); letter-spacing: -0.01em; }
@@ -345,7 +354,7 @@
     <details class="ajustes" id="ajustes">
       <summary><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="2" fill="currentColor"/>
         <path d="M5 8.5l7 1.5 7-1.5M12 10v5m0 0l-3.5 6.5M12 15l3.5 6.5" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round"/></svg>Acessibilidade e tema</summary>
+          stroke-linecap="round" stroke-linejoin="round"/></svg><span class="rotulo-ajustes">Acessibilidade e tema</span></summary>
       <div class="opcoes">
         <div>
           <span class="titulo-opcao" id="r-tema">Tema</span>
