@@ -5,151 +5,200 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Qual o risco de evasão no seu curso?</title>
 <meta name="description" content="Estime o risco de evasão de alunos com o seu perfil de ingresso, com um modelo treinado em dados públicos da Plataforma Nilo Peçanha.">
-<meta name="theme-color" content="#1f4e9c">
+<meta name="theme-color" content="#0f2a4f">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Literata:opsz,wght@7..72,600;7..72,700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --tinta: #14213d; --suave: #4a5876; --linha: #d6dfee; --fundo: #eef3fa; --papel: #fff;
-    --azul: #1f4e9c; --azul-escuro: #163a76; --azul-claro: #e4edfb; --azul-medio: #8fb4ec;
-    --borda-campo: #b5c3dc; --baixo: #2e7d52; --duvida: #a86a12; --alto: #b23a2e; --raio: 12px;
+    --marinho: #0f2a4f; --marinho-2: #1b3d6e; --marinho-claro: #e7edf6; --marinho-medio: #9fb4d4;
+    --tinta: #13203a; --suave: #4b5873; --linha: #d9e1ee; --papel: #fff; --fundo: #f6f8fb;
+    --pauta: #dfe7f2; --margem: rgba(200, 70, 70, .32); --marca: #ffc94a;
+    --borda-campo: #b4c1d6; --baixo: #2e7d52; --duvida: #9a6410; --alto: #b23a2e; --raio: 12px;
+    --lateral: clamp(18px, 4vw, 56px);
   }
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
-  body { margin: 0; background: var(--fundo); color: var(--tinta);
+  /* Folha de caderno: pauta azul-clara e a linha vermelha da margem */
+  body { margin: 0; color: var(--tinta); background-color: var(--fundo);
+         background-image:
+           linear-gradient(90deg, transparent calc(var(--lateral) - 10px), var(--margem) calc(var(--lateral) - 10px),
+                           var(--margem) calc(var(--lateral) - 8px), transparent calc(var(--lateral) - 8px)),
+           repeating-linear-gradient(180deg, transparent 0 31px, var(--pauta) 31px 32px);
          font: 17px/1.55 "Atkinson Hyperlegible", system-ui, sans-serif; }
-  .coluna { max-width: 680px; margin: 0 auto; padding-left: 18px; padding-right: 18px; }
+  .largura { max-width: 1360px; margin: 0 auto; padding-left: var(--lateral); padding-right: var(--lateral); }
+  h1, h2, h3 { font-family: Literata, Georgia, serif; font-weight: 700; }
 
-  /* Cabeçalho azul; os cartões sobem um pouco sobre ele */
-  .topo { background: var(--azul); color: #fff; padding-bottom: 72px; }
-  .topo .coluna { padding-top: 36px; }
-  .marca { display: flex; align-items: center; gap: 10px; font-size: .95rem; color: #cfe0fa; margin-bottom: 18px; }
-  .marca img { width: 30px; height: 30px; border-radius: 8px; box-shadow: 0 0 0 2px rgba(255, 255, 255, .45); }
-  h1 { font-size: clamp(1.8rem, 6.4vw, 2.6rem); line-height: 1.1; margin: 0 0 12px; letter-spacing: -0.01em; }
-  .abertura { margin: 0; color: #dbe7fb; max-width: 34em; }
-  main.coluna { margin-top: -52px; }
+  /* Cabeçalho: capa de caderno azul-marinho com a espiral no alto */
+  .topo { position: relative; background: var(--marinho); color: #fff; padding: 46px 0 76px; }
+  .topo::before { content: ""; position: absolute; left: 0; right: 0; top: 12px; height: 12px;
+                  background: radial-gradient(circle at 14px 6px, var(--fundo) 0 4px, transparent 4.6px) 0 0 / 28px 12px repeat-x;
+                  opacity: .95; }
+  .marca { display: flex; align-items: center; gap: 10px; font-size: .95rem; color: #c4d3ea; margin-bottom: 16px; }
+  .marca img { width: 30px; height: 30px; border-radius: 8px; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .35); }
+  h1 { font-size: clamp(1.85rem, 5.6vw, 3rem); line-height: 1.12; margin: 0 0 12px; letter-spacing: -0.01em; max-width: 18em; }
+  .abertura { margin: 0; color: #d6e1f2; max-width: 38em; }
+  main.largura { position: relative; z-index: 1; margin-top: -52px; }
 
   .passo { margin: 0 0 20px; padding: 22px 20px 24px; background: var(--papel); border-radius: var(--raio);
-           box-shadow: 0 1px 3px rgba(20, 33, 61, .08), 0 8px 24px rgba(20, 33, 61, .06); }
-  .passo > h2 { display: flex; align-items: center; gap: 12px; font-size: 1.22rem; margin: 0 0 16px; }
-  .passo > h2 .n { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--azul); color: #fff;
-                   display: grid; place-items: center; font-size: .95rem; }
-  .passo.inativo { opacity: .6; }
+           border: 1px solid #e3e9f2; box-shadow: 0 1px 2px rgba(15, 42, 79, .06), 0 10px 28px rgba(15, 42, 79, .07); }
+  .passo > h2 { display: flex; align-items: flex-start; gap: 12px; font-size: 1.25rem; margin: 0 0 14px; line-height: 1.25; }
+  .passo > h2 .n { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--marinho); color: #fff;
+                   display: grid; place-items: center; font: 700 .95rem "Atkinson Hyperlegible", sans-serif; margin-top: -2px; }
+  .passo.inativo > h2 .n { background: var(--marinho-medio); }
 
   label, .rotulo { display: block; font-weight: 700; font-size: .95rem; margin: 16px 0 6px; }
   .ajuda { display: block; font-weight: 400; color: var(--suave); font-size: .88rem; margin-top: 2px; }
   select, input[type=number], textarea {
     width: 100%; min-height: 48px; padding: 10px 12px; font: inherit; font-size: 17px; color: var(--tinta);
     background: var(--papel); border: 1.5px solid var(--borda-campo); border-radius: 8px; }
-  select { appearance: none; padding-right: 40px;
-           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a5876' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  select { appearance: none; padding-right: 40px; text-overflow: ellipsis;
+           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234b5873' stroke-width='2' fill='none'/%3E%3C/svg%3E");
            background-repeat: no-repeat; background-position: right 14px center; }
-  select:disabled { background-color: #f2f5fa; color: #8a96ad; }
+  select:disabled { background-color: #f1f4f9; color: #8a96ad; }
   textarea { min-height: 84px; resize: vertical; }
-  :focus-visible { outline: 3px solid #f2b705; outline-offset: 2px; }
+  select:hover:not(:disabled), input:hover, textarea:hover { border-color: var(--marinho-2); }
+  :focus-visible { outline: 3px solid var(--marca); outline-offset: 2px; }
   .duas { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
   @media (max-width: 480px) { .duas.empilha { grid-template-columns: 1fr; } }
 
-  .alternar { display: grid; grid-template-columns: 1fr 1fr; background: var(--azul-claro); border-radius: 10px; padding: 4px; gap: 4px; }
+  .alternar { display: grid; grid-template-columns: 1fr 1fr; background: var(--marinho-claro); border-radius: 10px; padding: 4px; gap: 4px; }
   .alternar.tres { grid-template-columns: 1fr 1fr 1fr; }
-  .alternar button { min-height: 50px; border: 0; border-radius: 8px; background: transparent; font: inherit; font-size: .95rem;
+  .alternar button { min-height: 48px; border: 0; border-radius: 8px; background: transparent; font: inherit; font-size: .95rem;
                      color: var(--suave); cursor: pointer; padding: 6px 8px; line-height: 1.25; }
-  .alternar button[aria-checked="true"] { background: var(--papel); color: var(--azul-escuro); font-weight: 700;
-                                          box-shadow: 0 1px 3px rgba(20, 33, 61, .2); }
+  .alternar button:hover { color: var(--marinho); }
+  .alternar button[aria-checked="true"] { background: var(--papel); color: var(--marinho); font-weight: 700;
+                                          box-shadow: 0 1px 3px rgba(15, 42, 79, .22); }
   .detalhe { color: var(--suave); font-size: .9rem; margin: 8px 0 0; }
-  .so-coleta { font-size: .85rem; color: var(--azul-escuro); background: var(--azul-claro); border-radius: 6px;
+  .so-coleta { font-size: .85rem; color: var(--marinho); background: var(--marinho-claro); border-radius: 6px;
                padding: 2px 8px; display: inline-block; margin-top: 4px; font-weight: 400; }
 
-  .acao { width: 100%; min-height: 54px; margin-top: 22px; border: 0; border-radius: 10px; background: var(--azul);
+  .acao { width: 100%; min-height: 54px; margin-top: 22px; border: 0; border-radius: 10px; background: var(--marinho);
           color: #fff; font: inherit; font-weight: 700; font-size: 1.05rem; cursor: pointer; }
-  .acao:hover:not(:disabled) { background: var(--azul-escuro); }
-  .acao:disabled { background: #a9b6cc; cursor: not-allowed; }
+  .acao:hover:not(:disabled) { background: var(--marinho-2); }
+  .acao:disabled { background: #a7b3c7; cursor: not-allowed; }
   .privacidade { color: var(--suave); font-size: .85rem; margin: 10px 0 0; }
 
-  /* Resultado: a régua é o elemento principal */
-  .valor { font-size: clamp(3.6rem, 18vw, 5rem); font-weight: 700; line-height: 1; letter-spacing: -0.02em;
-           font-variant-numeric: tabular-nums; margin: 4px 0 2px; color: var(--azul-escuro); }
+  /* Resultado: o número e a régua */
+  .espera { display: grid; gap: 10px; justify-items: start; color: var(--suave); }
+  .espera svg { width: 100%; max-width: 360px; height: auto; }
+  .valor { font: 700 clamp(3.6rem, 16vw, 5.2rem)/1 Literata, Georgia, serif; letter-spacing: -0.02em;
+           font-variant-numeric: lining-nums tabular-nums; margin: 6px 0 4px; color: var(--marinho); }
   .frase { margin: 0; font-size: 1.05rem; }
-  .selo { display: inline-block; font-weight: 700; font-size: .9rem; padding: 3px 10px; border-radius: 6px; margin-bottom: 8px; }
+  .selo { display: inline-block; font-weight: 700; font-size: .9rem; padding: 3px 10px; border-radius: 6px; }
   .selo.baixo { color: var(--baixo); background: #e2f0e7; }
   .selo.duvida { color: var(--duvida); background: #f7ecd9; }
   .selo.alto { color: var(--alto); background: #f6e1de; }
-  .regua { margin: 26px 0 8px; }
+  .regua { margin: 26px 0 8px; max-width: 520px; }
   .regua svg { display: block; width: 100%; height: auto; overflow: visible; }
   .leitura { margin: 18px 0 0; }
-  .nota { margin: 16px 0 0; padding: 12px 14px; border-left: 4px solid var(--azul); background: var(--azul-claro);
+  .nota { margin: 16px 0 0; padding: 12px 14px; border-left: 4px solid var(--marinho); background: var(--marinho-claro);
           border-radius: 0 8px 8px 0; font-size: .95rem; }
   .nota.cautela { border-color: var(--duvida); background: #fbf3e6; }
 
   /* Avaliação e consentimento */
   .escala { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 8px; }
-  .escala button { min-height: 52px; border: 1.5px solid var(--borda-campo); border-radius: 8px; background: var(--papel);
+  .escala button { min-height: 50px; border: 1.5px solid var(--borda-campo); border-radius: 8px; background: var(--papel);
                    font: inherit; font-weight: 700; font-size: 1.1rem; color: var(--tinta); cursor: pointer; }
-  .escala button[aria-checked="true"] { background: var(--azul); border-color: var(--azul); color: #fff; }
+  .escala button:hover { border-color: var(--marinho); }
+  .escala button[aria-checked="true"] { background: var(--marinho); border-color: var(--marinho); color: #fff; }
   .extremos { display: flex; justify-content: space-between; color: var(--suave); font-size: .85rem; margin-top: 6px; }
   .consentimento { margin-top: 20px; border: 1.5px solid var(--linha); border-radius: 10px; padding: 14px; }
   .consentimento h3 { font-size: 1rem; margin: 0 0 8px; }
   .aceite { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 0; font-size: .92rem; font-weight: 400; }
-  .aceite input { width: 22px; height: 22px; margin: 2px 0 0; flex: none; accent-color: var(--azul); }
-  .aceite.sensivel { background: #fff8e8; border-radius: 8px; padding: 10px; }
-  .termo summary { cursor: pointer; color: var(--azul); font-size: .92rem; padding: 4px 0; }
+  .aceite input { width: 22px; height: 22px; margin: 2px 0 0; flex: none; accent-color: var(--marinho); }
+  .aceite.sensivel { background: #fff7e2; border-radius: 8px; padding: 10px; }
+  .termo summary { cursor: pointer; color: var(--marinho-2); font-size: .92rem; padding: 4px 0; }
   .termo dl { font-size: .88rem; margin: 8px 0 0; }
   .termo dt { font-weight: 700; margin-top: 8px; }
   .termo dd { margin: 2px 0 0; color: var(--suave); }
   .enviado { font-weight: 700; color: var(--baixo); margin: 14px 0 0; }
-  .codigo { font-variant-numeric: tabular-nums; letter-spacing: .06em; background: var(--azul-claro); padding: 1px 6px; border-radius: 4px; }
+  .codigo { font-variant-numeric: tabular-nums; letter-spacing: .06em; background: var(--marinho-claro); padding: 1px 6px; border-radius: 4px; }
   .erro { color: var(--alto); }
 
-  /* Abas com informações do trabalho */
-  .sobre { padding: 0; overflow: hidden; }
+  /* Sobre o trabalho */
+  .passo.sobre { padding: 0; overflow: hidden; }
   .sobre > h2 { padding: 22px 20px 0; }
-  .abas { display: flex; gap: 4px; overflow-x: auto; padding: 0 16px; border-bottom: 1px solid var(--linha);
-          scrollbar-width: none; }
+  .abas { display: flex; gap: 4px; overflow-x: auto; padding: 0 16px; border-bottom: 1px solid var(--linha); scrollbar-width: none; }
   .abas::-webkit-scrollbar { display: none; }
-  .abas button { flex: none; border: 0; background: none; font: inherit; font-size: .95rem; color: var(--suave);
+  .abas button { flex: none; border: 0; background: none; font: inherit; font-size: .95rem; color: var(--suave); text-align: left;
                  padding: 12px 10px; border-bottom: 3px solid transparent; cursor: pointer; }
-  .abas button[aria-selected="true"] { color: var(--azul-escuro); font-weight: 700; border-bottom-color: var(--azul); }
-  .painel { padding: 18px 20px 22px; font-size: .95rem; }
-  .painel h3 { font-size: 1.02rem; margin: 18px 0 6px; }
+  .abas button:hover { color: var(--marinho); }
+  .abas button[aria-selected="true"] { color: var(--marinho); font-weight: 700; border-bottom-color: var(--marinho); }
+  .painel { padding: 18px 20px 22px; font-size: .97rem; }
+  .painel h3 { font-size: 1.05rem; margin: 18px 0 6px; }
   .painel h3:first-child { margin-top: 0; }
   .painel p { margin: 0 0 10px; }
   .painel ul { padding-left: 20px; margin: 6px 0 10px; }
-  .tabela { width: 100%; border-collapse: collapse; font-size: .9rem; margin: 8px 0 12px; }
+  .painel li { margin-bottom: 6px; }
+  .tabela { width: 100%; border-collapse: collapse; font-size: .92rem; margin: 8px 0 12px; }
   .tabela td, .tabela th { text-align: left; padding: 7px 4px; border-bottom: 1px solid var(--linha); vertical-align: top; }
   .tabela th { color: var(--suave); font-weight: 700; }
   .tabela .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .tabela tr.destaque td { font-weight: 700; color: var(--azul-escuro); }
+  .tabela tr.destaque td { font-weight: 700; color: var(--marinho); background: #fff6dc; }
   .etiquetas { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; padding: 0; list-style: none; }
-  .etiquetas li { background: var(--azul-claro); color: var(--azul-escuro); border-radius: 6px; padding: 3px 9px; font-size: .88rem; }
+  .etiquetas li { background: var(--marinho-claro); color: var(--marinho); border-radius: 6px; padding: 3px 9px; font-size: .88rem; margin: 0; }
 
-  footer.coluna { color: var(--suave); font-size: .85rem; padding-top: 8px; padding-bottom: 40px; }
-  a { color: var(--azul); }
+  footer.largura { color: var(--suave); font-size: .85rem; padding-top: 8px; padding-bottom: 40px; }
+  a { color: var(--marinho-2); }
   [hidden] { display: none !important; }
 
   @media (min-width: 700px) {
-    .topo .coluna { padding-top: 52px; }
-    .passo { padding: 28px 30px 30px; }
-    .sobre > h2 { padding: 28px 30px 0; }
-    .abas { padding: 0 26px; }
-    .painel { padding: 22px 30px 28px; }
+    .passo { padding: 26px 28px 28px; }
+    .sobre > h2 { padding: 26px 28px 0; }
+    .abas { padding: 0 24px; }
+    .painel { padding: 22px 28px 28px; }
+  }
+
+  /* Tablet e notebook pequeno: os dois passos do formulário lado a lado */
+  @media (min-width: 820px) {
+    .topo { padding: 56px 0 84px; }
+    .formulario { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; align-items: start; }
+  }
+
+  /* Notebook e monitor: formulário à esquerda, resultado fixo à direita, ocupando a largura da tela */
+  @media (min-width: 1180px) {
+    .topo .largura { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 40px; align-items: end; }
+    main.largura { display: grid; grid-template-columns: minmax(0, 1fr) minmax(380px, 440px); gap: 0 24px; align-items: start; }
+    .lateral .passo:last-child { margin-bottom: 0; }
+    .formulario .passo { min-height: 100%; }
+    .sobre { display: grid; grid-template-columns: 240px minmax(0, 1fr); margin-top: 8px; }
+    .sobre > h2 { grid-column: 1 / -1; padding: 28px 32px 8px; }
+    .abas { flex-direction: column; overflow: visible; border-bottom: 0; border-right: 1px solid var(--linha);
+            padding: 8px 0 28px 20px; gap: 2px; }
+    .abas button { border-bottom: 0; border-left: 3px solid transparent; border-radius: 0; padding: 10px 14px; }
+    .abas button[aria-selected="true"] { border-left-color: var(--marinho); background: var(--marinho-claro); }
+    .painel { padding: 10px 40px 32px; max-width: 78ch; }
+  }
+  .topo .lado { display: none; }
+  @media (min-width: 1180px) {
+    .topo .lado { display: block; color: #c4d3ea; font-size: .92rem; border-left: 2px solid rgba(255, 201, 74, .7);
+                  padding-left: 16px; margin: 0; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .resultado-novo { animation: aparece .35s ease-out; }
+    @keyframes aparece { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   }
 </style>
 </head>
 <body>
 <header class="topo">
-  <div class="coluna">
-    <div class="marca"><img src="favicon.svg" alt="">Projeto de Inteligência Artificial, UFPI</div>
-    <h1>Qual o risco de evasão no seu curso?</h1>
-    <p class="abertura">Informe seu curso e como você entrou. O site mostra quantos alunos com perfil parecido deixaram
-      o curso sem concluir, segundo 178 mil matrículas da Rede Federal no Nordeste.</p>
+  <div class="largura">
+    <div>
+      <div class="marca"><img src="favicon.svg" alt="">Projeto de Inteligência Artificial, UFPI</div>
+      <h1>Qual o risco de evasão no seu curso?</h1>
+      <p class="abertura">Informe seu curso e como você entrou. O site mostra quantos alunos com perfil parecido deixaram
+        o curso sem concluir, segundo 178 mil matrículas da Rede Federal no Nordeste.</p>
+    </div>
+    <p class="lado">Leva cerca de um minuto. O cálculo acontece no seu aparelho, e no fim você diz se o resultado combina
+      com o que vive no curso.</p>
   </div>
 </header>
 
-<main class="coluna">
-  <form id="formulario" novalidate>
+<main class="largura">
+  <form id="formulario" class="formulario" novalidate>
     <section class="passo" aria-labelledby="t1">
       <h2 id="t1"><span class="n" aria-hidden="true">1</span>Seu curso</h2>
 
@@ -228,11 +277,6 @@
         <button type="button" role="radio" aria-checked="false" data-valor="1">Não</button>
         <button type="button" role="radio" aria-checked="false" data-valor="">Não lembro</button>
       </div>
-      <div id="bloco-renda" hidden>
-        <label for="renda">Qual renda por pessoa da família você declarou? <span class="ajuda">Opcional.</span>
-          <span class="so-coleta">Não entra no cálculo. Só é enviada se você autorizar no fim.</span></label>
-        <select id="renda"></select>
-      </div>
 
       <span class="rotulo" id="r-cor">Você informou sua cor ou raça na matrícula?</span>
       <div class="alternar tres" role="radiogroup" aria-labelledby="r-cor" data-campo="cor_nao_declarada">
@@ -251,65 +295,76 @@
     </section>
   </form>
 
-  <section class="passo inativo" id="bloco-resultado" aria-labelledby="t3" aria-live="polite">
-    <h2 id="t3"><span class="n" aria-hidden="true">3</span>Resultado</h2>
-    <div id="resultado"><p class="detalhe">Preencha os passos 1 e 2 para ver o resultado.</p></div>
-  </section>
-
-  <section class="passo" id="bloco-avaliacao" aria-labelledby="t4" hidden>
-    <h2 id="t4"><span class="n" aria-hidden="true">4</span>Esse resultado faz sentido para você?</h2>
-    <span class="rotulo" id="r-escala">Quanto ele combina com o que você vive no curso</span>
-    <div class="escala" role="radiogroup" aria-labelledby="r-escala">
-      <button type="button" role="radio" aria-checked="false" data-nota="1" aria-label="1, não combina nada">1</button>
-      <button type="button" role="radio" aria-checked="false" data-nota="2" aria-label="2">2</button>
-      <button type="button" role="radio" aria-checked="false" data-nota="3" aria-label="3">3</button>
-      <button type="button" role="radio" aria-checked="false" data-nota="4" aria-label="4">4</button>
-      <button type="button" role="radio" aria-checked="false" data-nota="5" aria-label="5, combina muito">5</button>
-    </div>
-    <div class="extremos" aria-hidden="true"><span>Não combina nada</span><span>Combina muito</span></div>
-    <label for="comentario">Quer explicar? <span class="ajuda">Opcional. Não escreva seu nome nem o de colegas.</span></label>
-    <textarea id="comentario" maxlength="400"></textarea>
-
-    <div id="bloco-envio">
-      <div class="consentimento">
-        <h3>Autorização para envio (LGPD)</h3>
-        <details class="termo">
-          <summary>Ler o termo de consentimento</summary>
-          <dl>
-            <dt>Para que</dt>
-            <dd>Avaliar se o modelo faz sentido para estudantes reais, como parte do trabalho final da disciplina de
-              Inteligência Artificial da UFPI. Os dados não são usados para nenhuma outra finalidade nem vendidos.</dd>
-            <dt>O que é enviado</dt>
-            <dd>As respostas dos passos 1 e 2, a faixa de renda declarada (se você informou), o resultado do modelo,
-              a nota e o comentário. Cor ou raça só se você marcar a segunda caixa. Não pedimos nome, e-mail nem documento,
-              e o site não registra seu endereço de internet.</dd>
-            <dt>Quem acessa e por quanto tempo</dt>
-            <dd>Só a responsável pelo trabalho, Maria Ingrid Xavier Sousa, numa planilha privada. Os dados são apagados
-              até o fim do semestre letivo. Publicações mostram só contagens e médias, nunca respostas individuais.</dd>
-            <dt>Seus direitos</dt>
-            <dd>Você pode pedir acesso, correção ou exclusão da sua resposta a qualquer momento (LGPD, art. 18), informando
-              o código que aparece depois do envio. Contato: <span id="contato"></span>.</dd>
-            <dt>Base legal</dt>
-            <dd>Consentimento (LGPD, art. 7º, I) e, para cor ou raça, consentimento específico e destacado (art. 11, I).
-              Negar não muda nada no uso do site.</dd>
-          </dl>
-        </details>
-        <label class="aceite" for="aceite">
-          <input type="checkbox" id="aceite">
-          <span>Li o termo e autorizo o envio das minhas respostas, sem nome nem e-mail, para este trabalho acadêmico.</span>
-        </label>
-        <label class="aceite sensivel" for="aceite-cor" id="linha-aceite-cor">
-          <input type="checkbox" id="aceite-cor">
-          <span>Autorizo também, de forma específica, o envio da minha cor ou raça, que é um dado pessoal sensível. Opcional.</span>
-        </label>
+  <aside class="lateral" aria-label="Resultado e avaliação">
+    <section class="passo inativo" id="bloco-resultado" aria-labelledby="t3" aria-live="polite">
+      <h2 id="t3"><span class="n" aria-hidden="true">3</span>Resultado</h2>
+      <div id="resultado">
+        <div class="espera">
+          <svg viewBox="0 0 400 60" aria-hidden="true">
+            <rect x="8" y="22" width="384" height="16" rx="3" fill="#e7edf6"/>
+            <line x1="8" x2="392" y1="45" y2="45" stroke="#c3cee0" stroke-width="1.5" stroke-dasharray="2 6"/>
+          </svg>
+          <p class="detalhe">Preencha seu curso e como você entrou. O risco aparece aqui.</p>
+        </div>
       </div>
-      <button type="button" id="enviar" class="acao" disabled>Enviar avaliação</button>
-    </div>
-    <p class="detalhe" id="sem-coleta" hidden>O envio de avaliações ainda não está ligado neste site.</p>
-    <p class="enviado" id="enviado" hidden></p>
-    <p class="erro" id="falha-envio" hidden>Não foi possível enviar. Confira a conexão e tente de novo.</p>
-  </section>
+    </section>
 
+    <section class="passo" id="bloco-avaliacao" aria-labelledby="t4" hidden>
+      <h2 id="t4"><span class="n" aria-hidden="true">4</span>Esse resultado faz sentido para você?</h2>
+      <span class="rotulo" id="r-escala">Quanto ele combina com o que você vive no curso</span>
+      <div class="escala" role="radiogroup" aria-labelledby="r-escala">
+        <button type="button" role="radio" aria-checked="false" data-nota="1" aria-label="1, não combina nada">1</button>
+        <button type="button" role="radio" aria-checked="false" data-nota="2" aria-label="2">2</button>
+        <button type="button" role="radio" aria-checked="false" data-nota="3" aria-label="3">3</button>
+        <button type="button" role="radio" aria-checked="false" data-nota="4" aria-label="4">4</button>
+        <button type="button" role="radio" aria-checked="false" data-nota="5" aria-label="5, combina muito">5</button>
+      </div>
+      <div class="extremos" aria-hidden="true"><span>Não combina nada</span><span>Combina muito</span></div>
+      <label for="comentario">Quer explicar? <span class="ajuda">Opcional. Não escreva seu nome nem o de colegas.</span></label>
+      <textarea id="comentario" maxlength="400"></textarea>
+
+      <div id="bloco-envio">
+        <div class="consentimento">
+          <h3>Autorização para envio</h3>
+          <details class="termo">
+            <summary>Ler o termo de consentimento</summary>
+            <dl>
+              <dt>Para que</dt>
+              <dd>Avaliar se o modelo faz sentido para estudantes reais, como parte do trabalho final da disciplina de
+                Inteligência Artificial da UFPI. Os dados não são usados para nenhuma outra finalidade nem vendidos.</dd>
+              <dt>O que é enviado</dt>
+              <dd>As respostas dos passos 1 e 2, o resultado do modelo, a nota e o comentário. Cor ou raça só se você
+                marcar a segunda caixa. Não pedimos nome, e-mail nem documento, e o site não registra seu endereço de internet.</dd>
+              <dt>Quem acessa e por quanto tempo</dt>
+              <dd>Só a responsável pelo trabalho, Maria Ingrid Xavier Sousa, numa planilha privada. Os dados são apagados
+                até o fim do semestre letivo. Publicações mostram só contagens e médias, nunca respostas individuais.</dd>
+              <dt>Seus direitos</dt>
+              <dd>Você pode pedir acesso, correção ou exclusão da sua resposta a qualquer momento (LGPD, art. 18), informando
+                o código que aparece depois do envio. Contato: <span id="contato"></span>.</dd>
+              <dt>Base legal</dt>
+              <dd>Consentimento (LGPD, art. 7º, I) e, para cor ou raça, consentimento específico e destacado (art. 11, I).
+                Negar não muda nada no uso do site.</dd>
+            </dl>
+          </details>
+          <label class="aceite" for="aceite">
+            <input type="checkbox" id="aceite">
+            <span>Li o termo e autorizo o envio das minhas respostas, sem nome nem e-mail, para este trabalho acadêmico.</span>
+          </label>
+          <label class="aceite sensivel" for="aceite-cor" id="linha-aceite-cor">
+            <input type="checkbox" id="aceite-cor">
+            <span>Autorizo também, de forma específica, o envio da minha cor ou raça, que é um dado pessoal sensível. Opcional.</span>
+          </label>
+        </div>
+        <button type="button" id="enviar" class="acao" disabled>Enviar avaliação</button>
+      </div>
+      <p class="detalhe" id="sem-coleta" hidden>O envio de avaliações ainda não está ligado neste site.</p>
+      <p class="enviado" id="enviado" hidden></p>
+      <p class="erro" id="falha-envio" hidden>Não foi possível enviar. Confira a conexão e tente de novo.</p>
+    </section>
+  </aside>
+</main>
+
+<div class="largura">
   <section class="passo sobre" aria-labelledby="t-sobre">
     <h2 id="t-sobre">Sobre o trabalho</h2>
     <div class="abas" role="tablist" aria-label="Informações do trabalho">
@@ -426,9 +481,9 @@
         do envio, o site mostra um código que permite pedir a exclusão da resposta.</p>
     </div>
   </section>
-</main>
+</div>
 
-<footer class="coluna">
+<footer class="largura">
   Dados: Plataforma Nilo Peçanha (MEC), licença ODbL.
   <a href="https://github.com/mingridxs/evasao-rede-federal-ne">Código, análises e artigo</a>.
 </footer>
@@ -443,10 +498,6 @@ const SEXOS = { F: "Feminino", M: "Masculino" };
 const UFS = { AL: "Alagoas", BA: "Bahia", CE: "Ceará", MA: "Maranhão", PB: "Paraíba", PE: "Pernambuco",
               PI: "Piauí", RN: "Rio Grande do Norte", SE: "Sergipe" };
 const TIPOS = ["Bacharelado", "Licenciatura", "Tecnologia", "Técnico"];
-// Faixas de renda familiar per capita, em salários mínimos, como na Plataforma Nilo Peçanha.
-const RENDAS = [["0<RFP<=0,5", "Até meio salário mínimo"], ["0,5<RFP<=1", "De meio a 1 salário mínimo"],
-                ["1<RFP<=1,5", "De 1 a 1,5 salário mínimo"], ["1,5<RFP<=2,5", "De 1,5 a 2,5 salários mínimos"],
-                ["2,5<RFP<=3,5", "De 2,5 a 3,5 salários mínimos"], ["RFP>3,5", "Mais de 3,5 salários mínimos"]];
 const NOMES = {
   instituicao: "Instituição", unidade_de_ensino: "Campus", uf: "Estado", nome_de_curso: "Nome do curso",
   tipo_de_curso: "Nível do curso", tipo_de_oferta: "Forma de oferta", modalidade_de_ensino: "Modalidade",
@@ -480,7 +531,7 @@ function preencher(select, itens, rotulo = v => v, vazio = "Selecione") {
   select.disabled = itens.length === 0;
 }
 
-/* ---------- Cor/raça e renda ---------- */
+/* ---------- Cor/raça ---------- */
 // Quem não registrou a cor/raça entra como "Não declarada", igual aos dados de treino;
 // "Prefiro não informar" vira valor ausente para o modelo.
 function corRaca() {
@@ -489,11 +540,6 @@ function corRaca() {
   return v === "" || v === PREFIRO_NAO ? null : v;
 }
 const corRespondida = () => declaracao.cor_nao_declarada === 1 || $("cor").value !== "";
-function rendaDeclarada() {
-  if (declaracao.renda_nao_declarada !== 0) return null;
-  const v = $("renda").value;
-  return v === "" || v === PREFIRO_NAO ? null : v;
-}
 
 /* ---------- Modo "Instituto Federal ou CEFET" ---------- */
 function listaCampus() {
@@ -575,7 +621,6 @@ function atualizar() {
   const curso = cursoEscolhido();
   $("detalhe-curso").textContent = curso && curso.carga_horaria
     ? `Carga horária típica de ${curso.carga_horaria} horas, com duração prevista de ${curso.duracao_prevista_meses} meses.` : "";
-  $("bloco-renda").hidden = declaracao.renda_nao_declarada !== 0;
   $("bloco-cor").hidden = declaracao.cor_nao_declarada === undefined || declaracao.cor_nao_declarada === 1;
   const idade = Number($("idade").value);
   const respondeu = Object.values(declaracao).every(v => v !== undefined) && corRespondida();
@@ -601,11 +646,11 @@ function regua(prob, limiar) {
     <rect x="${x(0)}" y="30" width="${(x(ini) - x(0)).toFixed(1)}" height="16" rx="3" fill="#e2f0e7"/>
     <rect x="${x(ini)}" y="30" width="${(x(fim) - x(ini)).toFixed(1)}" height="16" fill="#f7ecd9"/>
     <rect x="${x(fim)}" y="30" width="${(x(1) - x(fim)).toFixed(1)}" height="16" rx="3" fill="#f6e1de"/>
-    ${marcas.map(v => `<line x1="${x(v)}" x2="${x(v)}" y1="46" y2="${Math.round(v * 10) % 5 === 0 ? 58 : 53}" stroke="#4a5876" stroke-width="1.5"/>`).join("")}
-    ${[0, 0.5, 1].map(v => `<text x="${x(v)}" y="78" text-anchor="${v === 0 ? "start" : v === 1 ? "end" : "middle"}" font-size="13" fill="#4a5876">${v * 100}%</text>`).join("")}
-    <line x1="${x(limiar)}" x2="${x(limiar)}" y1="22" y2="52" stroke="#14213d" stroke-width="2" stroke-dasharray="4 3"/>
-    <text x="${x(limiar)}" y="15" text-anchor="${ancora}" font-size="13" fill="#14213d">alerta a partir de ${pct(limiar)}</text>
-    <circle cx="${x(prob)}" cy="38" r="10" fill="#1f4e9c" stroke="#fff" stroke-width="3"/>
+    ${marcas.map(v => `<line x1="${x(v)}" x2="${x(v)}" y1="46" y2="${Math.round(v * 10) % 5 === 0 ? 58 : 53}" stroke="#4b5873" stroke-width="1.5"/>`).join("")}
+    ${[0, 0.5, 1].map(v => `<text x="${x(v)}" y="78" text-anchor="${v === 0 ? "start" : v === 1 ? "end" : "middle"}" font-size="13" fill="#4b5873">${v * 100}%</text>`).join("")}
+    <line x1="${x(limiar)}" x2="${x(limiar)}" y1="22" y2="52" stroke="#13203a" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="${x(limiar)}" y="15" text-anchor="${ancora}" font-size="13" fill="#13203a">alerta a partir de ${pct(limiar)}</text>
+    <circle cx="${x(prob)}" cy="38" r="10" fill="#0f2a4f" stroke="#fff" stroke-width="3"/>
   </svg>`;
 }
 
@@ -616,7 +661,7 @@ function calcular(evento) {
                     mes_ingresso: Number($("mes").value), ...declaracao, cor_raca: corRaca() };
   const { prob } = probabilidade(modelo, entrada);
   const limiar = limiarDoNivel(modelo, curso.tipo_de_curso);
-  const nivel = nivelDoCurso(curso.tipo_de_curso) === "Técnico" ? "cursos técnicos" : "graduações";
+  const nivel = nivelDoCurso(curso.tipo_de_curso) === "Técnico" ? "dos cursos técnicos" : "das graduações";
   const alerta = prob >= limiar, duvida = Math.abs(prob - limiar) < 0.10;
   const [classe, selo] = duvida ? ["duvida", "Perto do limite"] : alerta ? ["alto", "Risco alto"] : ["baixo", "Risco abaixo do alerta"];
   const valor = Math.round(prob * 100) === Math.round(limiar * 100) ? `${(prob * 100).toFixed(1).replace(".", ",")}%` : pct(prob);
@@ -627,17 +672,21 @@ function calcular(evento) {
     <p class="frase">dos alunos com perfil parecido com o seu deixaram o curso sem concluir.</p>
     <div class="regua">${regua(prob, limiar)}</div>
     <p class="leitura">${alerta
-      ? `Passa do limite de alerta das ${nivel}: o modelo recomendaria acompanhamento desde a matrícula.`
-      : `Fica abaixo do limite de alerta das ${nivel}: o modelo não emitiria alerta.`}
+      ? `Passa do limite de alerta ${nivel}: o modelo recomendaria acompanhamento desde a matrícula.`
+      : `Fica abaixo do limite de alerta ${nivel}: o modelo não emitiria alerta.`}
       ${duvida ? "Como está perto do limite, aqui o modelo está pouco seguro." : ""}</p>
     ${modo === "outra" ? `<p class="nota cautela">Sua instituição não está na base de treino. O resultado usa só o curso,
       a forma de oferta e o seu perfil, então vale como uma aproximação.</p>` : ""}
     <p class="nota">Isto descreve o histórico de alunos parecidos, não o seu futuro. Se você pensa em deixar o curso,
       a assistência estudantil e a coordenação do seu campus podem ajudar.</p>`;
+  $("resultado").classList.remove("resultado-novo"); void $("resultado").offsetWidth;
+  $("resultado").classList.add("resultado-novo");
   $("bloco-resultado").classList.remove("inativo");
-  ultimo = { entrada, prob, limiar, alerta, renda: rendaDeclarada() };
+  ultimo = { entrada, prob, limiar, alerta };
   mostrarAvaliacao();
-  $("bloco-resultado").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  // No celular, rola até o resultado; no notebook, ele está ao lado e só rola se estiver fora da tela.
+  $("bloco-resultado").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+                                        block: matchMedia("(min-width: 1180px)").matches ? "nearest" : "start" });
 }
 
 /* ---------- Avaliação e envio ---------- */
@@ -668,11 +717,11 @@ async function enviar() {
   const e = ultimo.entrada, comCor = $("aceite-cor").checked && !$("linha-aceite-cor").hidden;
   const codigo = codigoResposta();
   const dados = {
-    codigo, versao_site: "3", modo, instituicao: e.instituicao, campus: e.unidade_de_ensino, uf: e.uf,
+    codigo, versao_site: "4", modo, instituicao: e.instituicao, campus: e.unidade_de_ensino, uf: e.uf,
     curso: e.nome_de_curso, tipo_de_curso: e.tipo_de_curso, tipo_de_oferta: e.tipo_de_oferta,
     turno: e.turno, modalidade: e.modalidade_de_ensino, eixo: e.eixo_tecnologico,
     sexo: e.sexo, idade: e.idade_ingresso, mes: e.mes_ingresso,
-    renda_nao_declarada: e.renda_nao_declarada, renda_faixa_declarada: ultimo.renda,
+    renda_nao_declarada: e.renda_nao_declarada,
     cor_nao_declarada: e.cor_nao_declarada, cor_raca: comCor ? e.cor_raca : null,
     consentimento: true, consentimento_cor: comCor,
     probabilidade: Number(ultimo.prob.toFixed(4)), limiar: Number(ultimo.limiar.toFixed(2)), alerta: ultimo.alerta,
@@ -706,7 +755,7 @@ function abas() {
   lista.forEach((aba, i) => {
     aba.addEventListener("click", () => ativar(aba));
     aba.addEventListener("keydown", e => {
-      const j = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? lista.length - 1 : null;
+      const j = ["ArrowRight", "ArrowDown"].includes(e.key) ? i + 1 : ["ArrowLeft", "ArrowUp"].includes(e.key) ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? lista.length - 1 : null;
       if (j === null) return;
       e.preventDefault(); ativar(lista[(j + lista.length) % lista.length]);
     });
@@ -732,7 +781,6 @@ async function iniciar() {
   preencher($("sexo"), opcoes.sexos.filter(s => SEXOS[s]), s => SEXOS[s]);
   preencher($("mes"), opcoes.meses, m => MESES[m - 1]);
   preencher($("cor"), [...(opcoes.cores || []), [PREFIRO_NAO, "Prefiro não informar"]]);
-  preencher($("renda"), [...RENDAS, [PREFIRO_NAO, "Prefiro não informar"]]);
   preencher($("o-uf"), [...Object.entries(UFS), ["fora", "Fora do Nordeste"]]);
   preencher($("o-tipo"), TIPOS);
   outraTipo();
@@ -750,7 +798,7 @@ async function iniciar() {
   $("curso").addEventListener("change", listaOfertas);
   $("o-tipo").addEventListener("change", outraTipo);
   $("o-curso").addEventListener("change", outraCurso);
-  for (const id of ["oferta", "o-uf", "o-eixo", "o-oferta", "o-turno", "o-modalidade", "idade", "sexo", "mes", "cor", "renda"])
+  for (const id of ["oferta", "o-uf", "o-eixo", "o-oferta", "o-turno", "o-modalidade", "idade", "sexo", "mes", "cor"])
     $(id).addEventListener("input", atualizar);
   for (const b of document.querySelectorAll("[data-modo]")) b.addEventListener("click", () => trocarModo(b.dataset.modo));
   for (const grupo of document.querySelectorAll("[data-campo]")) {
