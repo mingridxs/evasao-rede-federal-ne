@@ -100,7 +100,7 @@ def risco(modelo, calibrador, cats, d):
     return calibrador.predict(modelo.predict_proba(d[cats + NUM])[:, 1])
 
 
-teste = principal[principal["particao"] == "teste"]
+teste = principal[principal["particao"] == "teste"].copy()
 grupos = {"Concluiu (teste)": teste[teste["evadiu"] == 0], "Evadiu (teste)": teste[teste["evadiu"] == 1],
           "Retido": retidos}
 linhas, probs = [], {}
@@ -149,7 +149,7 @@ retidos.loc[idx_va, "particao"] = "validacao"
 retidos.loc[idx_te, "particao"] = "teste"
 base2 = pd.concat([principal, retidos], ignore_index=True)
 base2["nao_concluiu"] = ((base2["evadiu"] == 1) | (base2["retido"].fillna(0) == 1)).astype(int)
-partes2 = {p: base2[base2["particao"] == p] for p in ["treino", "validacao", "teste"]}
+partes2 = {p: base2[base2["particao"] == p].copy() for p in ["treino", "validacao", "teste"]}
 print("Taxa de 'não concluiu no prazo':", {p: f"{d['nao_concluiu'].mean():.1%}" for p, d in partes2.items()})
 
 pre2 = ColumnTransformer([
@@ -188,6 +188,86 @@ for nome_modelo, (m, c) in {"atual (evasão)": (final["modelo"], final["calibrad
 comparacao = pd.DataFrame(comparacao).set_index(["pergunta avaliada", "modelo"]).sort_index()
 print(comparacao.round(4).to_string())
 
+# %% [markdown]
+# ## 4. Comparação completa: cada modelo na sua própria pergunta
+#
+# Modelo de evasão (o do site) no teste original e modelo "não concluiu no
+# prazo" no teste com retidos. Os limiares de alerta são um por nível, como no
+# site: os do modelo final para o primeiro e, para o segundo, escolhidos na
+# validação com retidos, maximizando a acurácia balanceada. Depois, os mesmos
+# indicadores de justiça do script 05, por grupo.
+
+# %%
+from sklearn.metrics import balanced_accuracy_score, brier_score_loss
+
+va2 = partes2["validacao"]
+p_va2 = risco(modelo2, cal2, CAT, va2)
+grade = np.linspace(0.05, 0.95, 91)
+LIMIAR2 = {}
+for nivel in ["Técnico", "Graduação"]:
+    m = (va2["nivel"] == nivel).to_numpy()
+    LIMIAR2[nivel] = float(grade[int(np.argmax([balanced_accuracy_score(va2["nao_concluiu"].to_numpy()[m],
+                                                                       (p_va2[m] >= t).astype(int)) for t in grade]))])
+print("Limiares · evasão:", {k: round(v, 2) for k, v in LIMIAR.items()}, "· não concluiu no prazo:", LIMIAR2)
+
+MODELOS = {
+    "Evasão (site)": dict(dados=teste, y=teste["evadiu"].to_numpy(), p=risco(final["modelo"], final["calibrador"], CAT, teste),
+                          limiar=LIMIAR),
+    "Não concluiu no prazo": dict(dados=te2, y=te2["nao_concluiu"].to_numpy(), p=risco(modelo2, cal2, CAT, te2),
+                                  limiar=LIMIAR2),
+}
+for m in MODELOS.values():
+    m["alerta"] = (m["p"] >= m["dados"]["nivel"].map(m["limiar"]).to_numpy()).astype(int)
+
+
+def medidas(y, p, alerta):
+    pos, neg = y == 1, y == 0
+    return {"n": len(y), "taxa real (%)": y.mean() * 100, "previsto médio (%)": p.mean() * 100,
+            "erro de calibração (pontos)": (p.mean() - y.mean()) * 100,
+            "taxa de alerta (%)": alerta.mean() * 100,
+            "recall (%)": alerta[pos].mean() * 100 if pos.sum() >= 30 else np.nan,
+            "falsos positivos (%)": alerta[neg].mean() * 100 if neg.sum() >= 30 else np.nan}
+
+
+geral = []
+for nome, m in MODELOS.items():
+    linha = {"modelo": nome, "AUC": roc_auc_score(m["y"], m["p"]), "Brier": brier_score_loss(m["y"], m["p"]),
+             "acurácia (%)": (m["alerta"] == m["y"]).mean() * 100,
+             "acurácia balanceada (%)": balanced_accuracy_score(m["y"], m["alerta"]) * 100}
+    linha.update(medidas(m["y"], m["p"], m["alerta"]))
+    geral.append(linha)
+geral = pd.DataFrame(geral).set_index("modelo")
+print("\nDesempenho geral, cada modelo na própria pergunta:")
+print(geral.round(3).T.to_string())
+
+for d in (teste, te2):
+    d["faixa_idade"] = pd.cut(d["idade_ingresso"], [0, 17, 20, 24, 29, 120],
+                              labels=["até 17", "18–20", "21–24", "25–29", "30 ou mais"]).astype(str)
+    d["renda"] = np.where(d["renda_nao_declarada"] == 1, "não declarou", "declarou")
+GRUPOS = {"nivel": "Nível", "sexo": "Sexo", "cor_raca": "Cor/raça", "renda": "Renda", "faixa_idade": "Idade no ingresso"}
+linhas = []
+for coluna, titulo in GRUPOS.items():
+    for nome, m in MODELOS.items():
+        d = m["dados"].reset_index(drop=True)
+        for grupo, idx in d.groupby(coluna).groups.items():
+            if len(idx) < 50 or grupo == "nan":
+                continue
+            linhas.append({"atributo": titulo, "grupo": grupo, "modelo": nome,
+                           **medidas(m["y"][idx], m["p"][idx], m["alerta"][idx])})
+por_grupo = pd.DataFrame(linhas).set_index(["atributo", "grupo", "modelo"]).sort_index()
+print("\nPor grupo:")
+print(por_grupo.round(1).to_string())
+
+resumo = (por_grupo.reset_index().groupby(["atributo", "modelo"])
+          .agg(maior_erro_calibracao=("erro de calibração (pontos)", lambda s: s.abs().max()),
+               diferenca_recall=("recall (%)", lambda s: s.max() - s.min()),
+               diferenca_falsos_positivos=("falsos positivos (%)", lambda s: s.max() - s.min())))
+print("\nResumo de justiça (pontos percentuais; quanto menor, mais parecido entre grupos):")
+print(resumo.round(1).to_string())
+
 tab_risco.round(3).to_csv(PASTA_RES / "retidos_risco.csv")
 comparacao.round(4).to_csv(PASTA_RES / "retidos_modelo.csv")
-print("\nSalvos resultados/retidos_risco.csv e resultados/retidos_modelo.csv")
+geral.round(4).to_csv(PASTA_RES / "retidos_comparacao_geral.csv")
+por_grupo.round(4).to_csv(PASTA_RES / "retidos_comparacao_grupos.csv")
+print("\nSalvos em resultados/: retidos_risco.csv, retidos_modelo.csv, retidos_comparacao_geral.csv, "
+      "retidos_comparacao_grupos.csv")
