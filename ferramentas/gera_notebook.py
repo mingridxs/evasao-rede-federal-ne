@@ -138,12 +138,12 @@ if NO_KAGGLE:
 
 EDICOES = [2021, 2022, 2023]
 BRUTOS_EF = {ano: Path(f"dados/brutos/microdados_eficiencia_academica_{ano}.csv") for ano in EDICOES}
-BRUTOS_MAT = sorted(Path("dados/brutos").glob("microdados_matriculas_*.csv"))
+BRUTO_MAT = Path("dados/brutos/microdados_matriculas_2023.csv")
 TEM_BRUTOS = all(p.exists() for p in BRUTOS_EF.values())
 print("Python", sys.version.split()[0], "· pandas", pd.__version__, "· scikit-learn", sklearn.__version__,
       "· matplotlib", matplotlib.__version__)
 print("Brutos de Eficiência Acadêmica:", {a: p.exists() for a, p in BRUTOS_EF.items()})
-print("Brutos de Matrículas (v1):", [p.name for p in BRUTOS_MAT] or "nenhum")
+print("Bruto de Matrículas 2023:", BRUTO_MAT.exists())
 if not TEM_BRUTOS:
     assert Path("dados/processados/ef_2021_2023.csv").exists(), \\
         "Sem os brutos e sem a base limpa: anexe o dataset do Kaggle ou coloque os arquivos em dados/brutos/."
@@ -158,22 +158,31 @@ Microdados da [Plataforma Nilo Peçanha](https://dadosabertos.mec.gov.br/pnp) (P
 Open Data Commons Open Database License (ODbL). O recorte é o Nordeste, em cursos técnicos e de graduação
 (tecnologia, licenciatura e bacharelado).
 
-### 1.1 Histórico: a versão 1 usava o arquivo de Matrículas
+### 1.1 Histórico: a versão 1 do pré-processamento
 
-A primeira versão do pré-processamento usava os microdados de **Matrículas**, que trazem a situação de
-cada aluno **no ano-base**. O problema apareceu nos testes: quem evade cedo sai da base no ano seguinte, então
-um arquivo anual mostra sobretudo quem ainda está estudando, e a taxa de evasão por coorte fica distorcida.
-Além disso, o arquivo de Matrículas não diz qual foi o desfecho final de quem saiu antes.
+A versão 1 foi testada primeiro com os microdados de **Matrículas 2023**, que trazem a situação de cada aluno
+**no ano-base**. O problema apareceu nesse teste: quem evade cedo já saiu da base, então o arquivo mostra
+sobretudo quem ainda está estudando, e ele não diz o desfecho final de quem saiu antes. Por isso a fonte passou a
+ser a **Eficiência Acadêmica**, e a mesma versão 1 foi aplicada às edições 2021, 2022 e 2023.
 
-O código da v1 fica aqui como registro e roda nos arquivos de Matrículas, se eles estiverem no dataset.
+A versão 2 (seção 1.2) acrescentou as colunas de demanda (inscritos por vaga), que só existem no arquivo de
+Matrículas, e a opção de guardar os retidos. Nas edições de Eficiência Acadêmica, ela gera as mesmas bases que a
+versão 1, o que é conferido no fim da seção 1.2.
 """)
 code(modulo_sem_main("historico/preprocessa_pnp_v1.py", renomear={"preprocessa": "preprocessa_v1"}))
 code('''
-if BRUTOS_MAT:
-    v1 = preprocessa_v1({int(p.stem.split("_")[-1]): str(p) for p in BRUTOS_MAT}, regiao="Nordeste")
-    print(f"\\nv1 (Matrículas): {len(v1):,} matrículas com desfecho, evasão de {v1['evadiu'].mean():.1%}")
+if BRUTO_MAT.exists():
+    print("========== v1 com Matrículas 2023 (teste que levou à troca de fonte) ==========")
+    v1_mat = preprocessa_v1({2023: str(BRUTO_MAT)}, regiao="Nordeste")
+    print(f"\\nv1 (Matrículas 2023): {len(v1_mat):,} matrículas com desfecho, evasão de {v1_mat['evadiu'].mean():.1%}")
 else:
-    print("Arquivos de Matrículas não encontrados: a v1 não roda aqui.")
+    print("Arquivo de Matrículas 2023 não encontrado: o teste da v1 com Matrículas não roda aqui.")
+
+v1_ef = {}
+if TEM_BRUTOS:
+    for ano, caminho in BRUTOS_EF.items():
+        print(f"\\n========== v1 com Eficiência Acadêmica {ano} ==========")
+        v1_ef[ano] = preprocessa_v1({ano: str(caminho)}, regiao="Nordeste")
 ''')
 md("""
 ### 1.2 Versão 2: Eficiência Acadêmica
@@ -200,6 +209,9 @@ if TEM_BRUTOS:
         # A base principal é a mesma, sem os retidos e sem a coluna que os marca.
         principal = com_retidos[com_retidos["retido"] == 0].drop(columns="retido")
         principal.to_csv(f"dados/processados/ef_{ano}.csv", index=False)
+        if ano in v1_ef:
+            igual = v1_ef[ano].reset_index(drop=True).equals(principal.reset_index(drop=True))
+            print(f"v1 e v2 geram a mesma base em {ano}: {'sim' if igual else 'NÃO, conferir'}")
         print(f"Base principal de {ano}: {len(principal):,} matrículas · retidos guardados à parte: "
               f"{int(com_retidos['retido'].sum()):,}")
 ''')
