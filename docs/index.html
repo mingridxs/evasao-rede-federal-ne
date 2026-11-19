@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Qual o risco de evasão no seu curso?</title>
+<title>Evasão na Rede Federal: o que diz o histórico</title>
 <meta name="description" content="Estime o risco de evasão de alunos com o seu perfil de ingresso, com um modelo treinado em dados públicos da Plataforma Nilo Peçanha.">
 <meta name="theme-color" content="#0f2a4f">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -23,24 +23,41 @@
   html { -webkit-text-size-adjust: 100%; }
   /* Folha de caderno: pauta azul-clara e a linha vermelha da margem */
   body { margin: 0; color: var(--tinta); background-color: var(--fundo);
-         background-image:
+         font: 17px/1.55 "Atkinson Hyperlegible", system-ui, sans-serif; }
+  .conteudo { display: block; min-width: 0; background-image:
            linear-gradient(90deg, transparent calc(var(--lateral) - 10px), var(--margem) calc(var(--lateral) - 10px),
                            var(--margem) calc(var(--lateral) - 8px), transparent calc(var(--lateral) - 8px)),
-           repeating-linear-gradient(180deg, transparent 0 31px, var(--pauta) 31px 32px);
-         font: 17px/1.55 "Atkinson Hyperlegible", system-ui, sans-serif; }
+           repeating-linear-gradient(180deg, transparent 0 31px, var(--pauta) 31px 32px); }
   .largura { max-width: 1360px; margin: 0 auto; padding-left: var(--lateral); padding-right: var(--lateral); }
   h1, h2, h3 { font-family: Literata, Georgia, serif; font-weight: 700; }
 
-  /* Cabeçalho: capa de caderno azul-marinho com a espiral no alto */
-  .topo { position: relative; background: var(--marinho); color: #fff; padding: 46px 0 76px; }
-  .topo::before { content: ""; position: absolute; left: 0; right: 0; top: 12px; height: 12px;
-                  background: radial-gradient(circle at 14px 6px, var(--fundo) 0 4px, transparent 4.6px) 0 0 / 28px 12px repeat-x;
-                  opacity: .95; }
-  .marca { display: flex; align-items: center; gap: 10px; font-size: .95rem; color: #c4d3ea; margin-bottom: 16px; }
-  .marca img { width: 30px; height: 30px; border-radius: 8px; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .35); }
-  h1 { font-size: clamp(1.85rem, 5.6vw, 3rem); line-height: 1.12; margin: 0 0 12px; letter-spacing: -0.01em; max-width: 18em; }
-  .abertura { margin: 0; color: #d6e1f2; max-width: 38em; }
-  main.largura { position: relative; z-index: 1; margin-top: -52px; }
+  /* Menu: capa de caderno azul-marinho; no computador vira uma coluna fixa com a espiral na borda */
+  .menu { background: var(--marinho); color: #fff; padding: 16px var(--lateral) 0; position: relative; z-index: 5; }
+  .marca { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; }
+  .marca img { width: 38px; height: 38px; border-radius: 9px; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .35); flex: none; }
+  .nome-site { font: 700 1.05rem/1.2 Literata, Georgia, serif; }
+  .nome-site span { display: block; font: 400 .88rem/1.3 "Atkinson Hyperlegible", sans-serif; color: #c4d3ea; }
+  .menu-lista { list-style: none; margin: 0; padding: 0; }
+  .menu-lista a { display: block; color: #d6e1f2; text-decoration: none; padding: 9px 12px; border-radius: 8px; font-size: .95rem; }
+  .menu-lista a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+  .menu-lista a[aria-current="page"] { background: #fff; color: var(--marinho); font-weight: 700; }
+  .menu-grupo { margin: 18px 12px 4px; font-size: .8rem; color: #9fb4d4; }
+  .menu-rodape { display: none; }
+  /* No celular: o menu fica no alto, com os links rolando para o lado */
+  @media (max-width: 1023px) {
+    .menu { display: grid; gap: 10px; padding-bottom: 10px; }
+    .menu-grupo { display: none; }
+    .menu-lista { display: contents; }
+    .menu-rolagem { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--lateral)); padding: 0 var(--lateral); }
+    .menu-rolagem::-webkit-scrollbar { display: none; }
+    .menu-rolagem a { white-space: nowrap; padding: 7px 12px; }
+  }
+  .cabeca { padding: 34px 0 18px; }
+  .cabeca h1 { font-size: clamp(1.7rem, 4.6vw, 2.5rem); line-height: 1.15; margin: 0 0 10px; color: var(--marinho); letter-spacing: -0.01em; }
+  .abertura { margin: 0; color: var(--suave); max-width: 44em; }
+  .passo.texto { max-width: 78ch; }
+  .passo.texto.largo { max-width: none; }
+  .passo.texto > p:last-child { margin-bottom: 0; }
 
   .passo { margin: 0 0 20px; padding: 22px 20px 24px; background: var(--papel); border-radius: var(--raio);
            border: 1px solid #e3e9f2; box-shadow: 0 1px 2px rgba(15, 42, 79, .06), 0 10px 28px rgba(15, 42, 79, .07); }
@@ -118,21 +135,11 @@
   .codigo { font-variant-numeric: tabular-nums; letter-spacing: .06em; background: var(--marinho-claro); padding: 1px 6px; border-radius: 4px; }
   .erro { color: var(--alto); }
 
-  /* Sobre o trabalho */
-  .passo.sobre { padding: 0; overflow: hidden; }
-  .sobre > h2 { padding: 22px 20px 0; }
-  .abas { display: flex; gap: 4px; overflow-x: auto; padding: 0 16px; border-bottom: 1px solid var(--linha); scrollbar-width: none; }
-  .abas::-webkit-scrollbar { display: none; }
-  .abas button { flex: none; border: 0; background: none; font: inherit; font-size: .95rem; color: var(--suave); text-align: left;
-                 padding: 12px 10px; border-bottom: 3px solid transparent; cursor: pointer; }
-  .abas button:hover { color: var(--marinho); }
-  .abas button[aria-selected="true"] { color: var(--marinho); font-weight: 700; border-bottom-color: var(--marinho); }
-  .painel { padding: 18px 20px 22px; font-size: .97rem; }
-  .painel h3 { font-size: 1.05rem; margin: 18px 0 6px; }
-  .painel h3:first-child { margin-top: 0; }
-  .painel p { margin: 0 0 10px; }
-  .painel ul { padding-left: 20px; margin: 6px 0 10px; }
-  .painel li { margin-bottom: 6px; }
+  .painel h3, .texto h3 { font-size: 1.05rem; margin: 18px 0 6px; }
+  .texto h3:first-child { margin-top: 0; }
+  .texto p { margin: 0 0 10px; }
+  .texto ul { padding-left: 20px; margin: 6px 0 10px; }
+  .texto li { margin-bottom: 6px; }
   .tabela { width: 100%; border-collapse: collapse; font-size: .92rem; margin: 8px 0 12px; }
   .tabela td, .tabela th { text-align: left; padding: 7px 4px; border-bottom: 1px solid var(--linha); vertical-align: top; }
   .tabela th { color: var(--suave); font-weight: 700; }
@@ -183,49 +190,46 @@
   .pesos .barra.sobe { --cor: #e08a2e; border-radius: 0 4px 4px 0; }
   .pesos .barra.desce { --cor: #1f4f8f; border-radius: 4px 0 0 4px; }
 
-  footer.largura { color: var(--suave); font-size: .85rem; padding-top: 8px; padding-bottom: 40px; }
+  .rodape { color: var(--suave); font-size: .85rem; padding-top: 8px; padding-bottom: 40px; }
   a { color: var(--marinho-2); }
   [hidden] { display: none !important; }
 
   @media (min-width: 700px) {
     .passo { padding: 26px 28px 28px; }
-    .sobre > h2 { padding: 26px 28px 0; }
-    .abas { padding: 0 24px; }
-    .painel { padding: 22px 28px 28px; }
   }
 
   /* Tablet e notebook pequeno: os dois passos do formulário lado a lado */
   @media (min-width: 820px) {
-    .topo { padding: 56px 0 84px; }
     .formulario { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; align-items: start; }
   }
 
-  /* Notebook e monitor: formulário à esquerda, resultado fixo à direita, ocupando a largura da tela */
-  @media (min-width: 1180px) {
-    .topo .largura { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 40px; align-items: end; }
-    /* Três colunas: curso | como entrou e, logo abaixo, o registro | resultado */
-    main.largura { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(380px, 440px);
-                   grid-template-rows: auto 1fr; grid-template-areas: "curso perfil resultado" "curso registro resultado";
-                   gap: 0 20px; align-items: start; }
-    main.largura .formulario, main.largura .lateral { display: contents; }
+  /* Computador: menu fixo à esquerda */
+  @media (min-width: 1024px) {
+    .app { display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100vh; }
+    .menu { position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 28px 20px 24px 18px; display: flex; flex-direction: column; gap: 6px; }
+    .menu::after { content: ""; position: absolute; top: 0; bottom: 0; right: 8px; width: 10px;
+                   background: radial-gradient(circle at 5px 14px, var(--fundo) 0 3.6px, transparent 4.2px) 0 0 / 10px 28px repeat-y; }
+    .marca { margin: 0 12px 22px 0; }
+    .menu-lista a { margin-right: 14px; }
+    .menu-rodape { display: block; margin: auto 14px 0 12px; padding-top: 24px; font-size: .8rem; color: #9fb4d4; }
+    .cabeca { padding: 44px 0 22px; }
+    /* Formulário à esquerda (curso, entrada e registro) e resultado à direita */
+    .grade { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
+             grid-template-areas: "curso resultado" "perfil resultado" "registro resultado";
+             grid-template-rows: auto auto 1fr; gap: 0 20px; align-items: start; }
+    .grade .formulario, .grade .lateral { display: contents; }
     #passo-curso { grid-area: curso; }
     #passo-perfil { grid-area: perfil; }
     #bloco-avaliacao { grid-area: registro; }
     #bloco-resultado { grid-area: resultado; }
-    .sobre { display: grid; grid-template-columns: 240px minmax(0, 1fr); margin-top: 8px; }
-    .sobre > h2 { grid-column: 1 / -1; padding: 28px 32px 8px; }
-    .abas { flex-direction: column; overflow: visible; border-bottom: 0; border-right: 1px solid var(--linha);
-            padding: 8px 0 28px 20px; gap: 2px; }
-    .abas button { border-bottom: 0; border-left: 3px solid transparent; border-radius: 0; padding: 10px 14px; }
-    .abas button[aria-selected="true"] { border-left-color: var(--marinho); background: var(--marinho-claro); }
-    .painel { padding: 10px 40px 32px; max-width: 78ch; }
-    .painel.largo { max-width: none; }
-    .multiplos { grid-template-columns: 1fr 1fr; }
   }
-  .topo .lado { display: none; }
+  /* Tela larga: três colunas, curso | entrada e registro | resultado */
+  @media (min-width: 1600px) {
+    .grade { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(380px, 440px);
+             grid-template-rows: auto 1fr; grid-template-areas: "curso perfil resultado" "curso registro resultado"; }
+  }
   @media (min-width: 1180px) {
-    .topo .lado { display: block; color: #c4d3ea; font-size: .92rem; border-left: 2px solid rgba(255, 201, 74, .7);
-                  padding-left: 16px; margin: 0; }
+    .multiplos { grid-template-columns: 1fr 1fr; }
   }
   @media (prefers-reduced-motion: no-preference) {
     .resultado-novo { animation: aparece .35s ease-out; }
@@ -234,20 +238,41 @@
 </style>
 </head>
 <body>
-<header class="topo">
-  <div class="largura">
-    <div>
-      <div class="marca"><img src="favicon.svg" alt="">Projeto de Inteligência Artificial, UFPI</div>
-      <h1>Qual o risco de evasão no seu curso?</h1>
-      <p class="abertura">Informe seu curso e os dados da sua entrada. O site mostra quantos alunos com perfil parecido deixaram
-        o curso sem concluir, segundo 178 mil matrículas dos Institutos Federais e CEFETs do Nordeste.</p>
+<div class="app">
+  <nav class="menu" aria-label="Seções do site">
+    <a class="marca" href="#simulador">
+      <img src="favicon.svg" alt="">
+      <span class="nome-site">Evasão na Rede Federal<span>o que diz o histórico</span></span>
+    </a>
+    <div class="menu-rolagem">
+    <ul class="menu-lista">
+      <li><a href="#simulador" data-pagina="simulador">Alunos como você concluem?</a></li>
+    </ul>
+    <p class="menu-grupo">Sobre o trabalho</p>
+    <ul class="menu-lista">
+        <li><a href="#numeros" data-pagina="numeros">Em números</a></li>
+        <li><a href="#porque" data-pagina="porque">Por quê</a></li>
+        <li><a href="#modelo" data-pagina="modelo">Como funciona</a></li>
+        <li><a href="#dados" data-pagina="dados">Dados</a></li>
+        <li><a href="#parametros" data-pagina="parametros">Parâmetros</a></li>
+        <li><a href="#resultados" data-pagina="resultados">Resultados</a></li>
+        <li><a href="#limites" data-pagina="limites">Limites e ética</a></li>
+        <li><a href="#privacidade" data-pagina="privacidade">Privacidade</a></li>
+    </ul>
     </div>
-    <p class="lado">Leva cerca de um minuto. O cálculo acontece no seu aparelho, e no fim você diz se o resultado combina
-      com o que vive no curso.</p>
-  </div>
-</header>
+    <p class="menu-rodape">Projeto final de Inteligência Artificial, UFPI, 2026.2</p>
+  </nav>
 
-<main class="largura">
+<main class="conteudo">
+  <section class="pagina" id="simulador" aria-labelledby="h-simulador">
+    <div class="largura">
+      <header class="cabeca">
+        <h1 id="h-simulador">Alunos como você concluem?</h1>
+        <p class="abertura">Informe seu curso e os dados da sua entrada. O site mostra quantos alunos com perfil parecido
+          deixaram o curso sem concluir, segundo 178 mil matrículas dos Institutos Federais e CEFETs do Nordeste.</p>
+      </header>
+
+      <div class="grade">
   <form id="formulario" class="formulario" novalidate>
     <section class="passo" id="passo-curso" aria-labelledby="t1">
       <h2 id="t1"><span class="n" aria-hidden="true">1</span>Seu curso</h2>
@@ -382,166 +407,194 @@
       </div>
     </section>
   </aside>
-</main>
-
-<div class="largura">
-  <section class="passo sobre" aria-labelledby="t-sobre">
-    <h2 id="t-sobre">Sobre o trabalho</h2>
-    <div class="abas" role="tablist" aria-label="Informações do trabalho">
-      <button role="tab" id="aba-porque" aria-controls="p-porque" aria-selected="true">Por quê</button>
-      <button role="tab" id="aba-numeros" aria-controls="p-numeros" aria-selected="false" tabindex="-1">Em números</button>
-      <button role="tab" id="aba-modelo" aria-controls="p-modelo" aria-selected="false" tabindex="-1">Como funciona</button>
-      <button role="tab" id="aba-dados" aria-controls="p-dados" aria-selected="false" tabindex="-1">Dados</button>
-      <button role="tab" id="aba-parametros" aria-controls="p-parametros" aria-selected="false" tabindex="-1">Parâmetros</button>
-      <button role="tab" id="aba-resultados" aria-controls="p-resultados" aria-selected="false" tabindex="-1">Resultados</button>
-      <button role="tab" id="aba-limites" aria-controls="p-limites" aria-selected="false" tabindex="-1">Limites e ética</button>
-      <button role="tab" id="aba-privacidade" aria-controls="p-privacidade" aria-selected="false" tabindex="-1">Privacidade</button>
-    </div>
-
-    <div class="painel" role="tabpanel" id="p-porque" aria-labelledby="aba-porque">
-      <p>Nos cursos técnicos e de graduação da Rede Federal do Nordeste, 58% das matrículas que chegaram ao fim do prazo
-        previsto terminaram em evasão: abandono, desligamento, cancelamento, reprovação ou transferência para outra
-        instituição. Na graduação, a taxa passa de 70%.</p>
-      <p>Quanto mais cedo uma instituição sabe quem corre mais risco, mais cedo pode oferecer assistência estudantil,
-        monitoria ou acompanhamento. Este trabalho testa se dá para estimar esse risco já na matrícula, só com dados de
-        cadastro, e se a estimativa é igualmente confiável para todos os grupos de estudantes.</p>
-      <p>É o projeto final da disciplina de Inteligência Artificial do curso de Ciência da Computação da Universidade
-        Federal do Piauí (2026.2), feito por Maria Ingrid Xavier Sousa.</p>
-    </div>
-
-    <div class="painel largo" role="tabpanel" id="p-numeros" aria-labelledby="aba-numeros" hidden>
-      <div class="filtro">
-        <label for="escopo">Comparar o Nordeste com</label>
-        <select id="escopo"></select>
       </div>
-      <h3>Quantos deixam o curso</h3>
-      <p class="detalhe" id="frase-segmentos"></p>
-      <div class="segmentos" id="g-segmentos"></div>
-      <ul class="legenda"><li class="evadiu"><span class="chave"></span>Evadiu</li><li class="concluiu"><span class="chave"></span>Concluiu</li></ul>
-
-      <h3>Evasão por instituição</h3>
-      <p class="detalhe">A linha escura marca a média do Nordeste. Passe o mouse ou toque numa linha para ver o total de matrículas.</p>
-      <div class="barras" id="g-instituicoes"></div>
-
-      <h3 id="t-multiplos">Onde a evasão é maior</h3>
-      <ul class="legenda" id="legenda-multiplos"><li><span class="chave" style="--cor: var(--marinho)"></span><span id="nome-escopo"></span></li>
-        <li><span class="chave marca-ref"></span>Média do Nordeste no mesmo grupo</li></ul>
-      <div class="multiplos">
-        <div><h4>Nível do curso</h4><div class="barras" id="g-nivel"></div></div>
-        <div><h4>Forma de oferta</h4><div class="barras" id="g-oferta"></div></div>
-        <div><h4>Idade ao entrar</h4><div class="barras" id="g-idade"></div></div>
-        <div><h4>Edição da Plataforma Nilo Peçanha</h4><div class="barras" id="g-edicao"></div></div>
-      </div>
-      <p class="detalhe">Todas as 178 mil matrículas com desfecho, edições 2021 a 2023. Grupos com menos de 30 matrículas
-        não aparecem.</p>
-    </div>
-
-    <div class="painel" role="tabpanel" id="p-modelo" aria-labelledby="aba-modelo" hidden>
-      <h3>Gradient boosting</h3>
-      <p>O modelo é um conjunto de <span id="n-arvores">várias centenas de</span> árvores de decisão pequenas. Cada árvore
-        faz perguntas simples ("o curso é uma licenciatura?", "a idade ao entrar passa de 20 anos?") e corrige parte do erro
-        das anteriores. A soma de todas dá o risco. A implementação é o HistGradientBoostingClassifier do scikit-learn.</p>
-      <h3>Calibração</h3>
-      <p>Depois do treino, as probabilidades passam por uma calibração isotônica: se o modelo diz 70%, cerca de 70% dos
-        alunos com aquele perfil de fato evadiram. É isso que permite ler o número como uma porcentagem.</p>
-      <h3>Alerta</h3>
-      <p>O alerta usa um limite para cada nível de curso, escolhido para equilibrar os acertos entre quem evade e quem
-        conclui. Sem isso, quase todo aluno de graduação receberia alerta.</p>
-      <h3>O que mais pesou</h3>
-      <p>Depois do resultado, o site mostra quanto cada grupo de informações (curso, instituição, idade, cor/raça e
-        outros) empurrou o risco para cima ou para baixo. O cálculo compara a pessoa com 40 perfis típicos da base, trocando
-        um grupo de cada vez em todas as combinações possíveis (valores de Shapley). As contribuições somam exatamente a
-        diferença entre o risco da pessoa e o de um perfil típico.</p>
-      <h3>No seu aparelho</h3>
-      <p>O modelo foi exportado para um arquivo e roda em JavaScript no navegador. Um teste automático confere que o site
-        calcula a mesma probabilidade que o Python em 2.000 casos.</p>
-    </div>
-
-    <div class="painel" role="tabpanel" id="p-dados" aria-labelledby="aba-dados" hidden>
-      <p>Microdados de Eficiência Acadêmica da <a href="https://dadosabertos.mec.gov.br/pnp">Plataforma Nilo Peçanha</a>
-        (MEC), edições 2021, 2022 e 2023, sob licença Open Data Commons Open Database License (ODbL). Cada edição traz as
-        turmas cujo prazo de conclusão terminou e a situação final de cada aluno.</p>
-      <table class="tabela">
-        <tr><th>Recorte</th><th class="num">Matrículas</th></tr>
-        <tr><td>Nordeste, cursos técnicos e de graduação, com desfecho</td><td class="num">178.484</td></tr>
-        <tr><td>Treino (70%)</td><td class="num">124.938</td></tr>
-        <tr><td>Validação (20%): escolha de parâmetros e calibração</td><td class="num">35.697</td></tr>
-        <tr><td>Teste (10%): usado uma vez, para medir o resultado</td><td class="num">17.849</td></tr>
-      </table>
-      <p>A divisão é aleatória e mantém em cada parte a mesma proporção de edições e de evasão. Ficaram de fora cursos
-        de qualificação (FIC), pós-graduação e alunos que ainda estavam cursando após o prazo.</p>
-    </div>
-
-    <div class="painel" role="tabpanel" id="p-parametros" aria-labelledby="aba-parametros" hidden>
-      <h3>O que o modelo usa</h3>
-      <ul class="etiquetas" id="lista-atributos"></ul>
-      <p>O valor da renda não é usado: não melhorou a previsão. O que o modelo usa é se a renda e a cor/raça foram
-        registradas na matrícula, porque quem não teve esses registros evadiu mais, mesmo comparando alunos da mesma
-        instituição. A cor/raça em si entra porque, sem ela, o risco de estudantes indígenas era subestimado.</p>
-      <h3>Hiperparâmetros</h3>
-      <table class="tabela">
-        <tr><td>Taxa de aprendizado</td><td class="num">0,1</td></tr>
-        <tr><td>Folhas por árvore (máximo)</td><td class="num">31</td></tr>
-        <tr><td>Alunos por folha (mínimo)</td><td class="num">20</td></tr>
-        <tr><td>Regularização L2</td><td class="num">1,0</td></tr>
-        <tr><td>Número de árvores (parada antecipada)</td><td class="num" id="t-arvores">–</td></tr>
-        <tr><td>Limite de alerta no técnico</td><td class="num" id="t-limiar-tecnico">–</td></tr>
-        <tr><td>Limite de alerta na graduação</td><td class="num" id="t-limiar-graduacao">–</td></tr>
-      </table>
-      <p>Os hiperparâmetros saíram de 12 combinações testadas na validação; todas ficaram a menos de 0,002 de AUC umas
-        das outras, então o resultado não depende de ajuste fino.</p>
-    </div>
-
-    <div class="painel" role="tabpanel" id="p-resultados" aria-labelledby="aba-resultados" hidden>
-      <p>Medido nas 17.849 matrículas de teste, que o modelo nunca viu. A AUC é a chance de, num par com um aluno que
-        evadiu e um que concluiu, o que evadiu receber risco maior; 0,5 é o acaso.</p>
-      <table class="tabela">
-        <tr><th>Estratégia</th><th class="num">AUC</th><th class="num">Acerto</th></tr>
-        <tr><td>Dizer que todos evadem</td><td class="num">0,500</td><td class="num">58%</td></tr>
-        <tr><td>Taxa histórica do curso no campus</td><td class="num">0,761</td><td class="num">68%</td></tr>
-        <tr><td>Regressão logística</td><td class="num">0,789</td><td class="num">72%</td></tr>
-        <tr class="destaque"><td>Gradient boosting (este site)</td><td class="num">0,832</td><td class="num">73%</td></tr>
-      </table>
-      <ul>
-        <li>Nos 30% de casos em que o modelo está mais seguro, ele acerta 86%; em 60% dos alunos, acerta 80% ou mais.</li>
-        <li>As probabilidades estão bem calibradas: o erro médio fica abaixo de 3 pontos para quase todos os grupos.</li>
-        <li>Mais dados ainda ajudariam: cada vez que a base de treino dobrou, a AUC subiu cerca de 0,01.</li>
-      </ul>
-    </div>
-
-    <div class="painel" role="tabpanel" id="p-limites" aria-labelledby="aba-limites" hidden>
-      <ul>
-        <li>O modelo só conhece dados de matrícula. Notas, frequência, trabalho e a vida de cada aluno, que pesam muito
-          na evasão, não estão na base.</li>
-        <li>Grupos com mais evasão (homens, pessoas pretas, quem não declarou renda) recebem mais alertas, inclusive
-          errados. Isso acontece porque o modelo é calibrado; não é possível ter, ao mesmo tempo, calibração e as mesmas
-          taxas de erro para todos quando as taxas de evasão diferem.</li>
-        <li>Mesmo com a cor/raça, o risco de estudantes indígenas ainda é subestimado em cerca de 6 pontos, e há poucos
-          casos para medir com precisão.</li>
-        <li>Quem entra com até 17 anos (quase sempre no técnico integrado) evade menos, e o modelo encontra só cerca de
-          40% desses casos de evasão.</li>
-        <li>As turmas da base passaram pela pandemia, e a base cobre só os Institutos Federais e CEFETs do Nordeste.
-          Por isso o site não aceita universidades nem outras instituições: o resultado seria uma extrapolação.</li>
-        <li>O uso pretendido é orientar apoio. Usar o risco para negar vaga, bolsa ou qualquer direito seria um uso
-          indevido.</li>
-      </ul>
-    </div>
-
-    <div class="painel" role="tabpanel" id="p-privacidade" aria-labelledby="aba-privacidade" hidden>
-      <p>O cálculo acontece inteiro no seu navegador: o site baixa o modelo e não envia o que você preenche.</p>
-      <p>Só a avaliação do passo 4 pode sair do seu aparelho, e só se você marcar a autorização. Cor ou raça exige uma
-        segunda autorização, específica. Não há nome, e-mail, documento nem registro do seu endereço de internet. Depois
-        do envio, o site mostra um código que permite pedir a exclusão da resposta.</p>
     </div>
   </section>
-</div>
+
+  <section class="pagina" id="numeros" aria-labelledby="h-numeros" hidden>
+    <div class="largura">
+      <header class="cabeca"><h1 id="h-numeros">Em números</h1></header>
+      <div class="passo texto largo">
+    <div class="filtro">
+      <label for="escopo">Comparar o Nordeste com</label>
+      <select id="escopo"></select>
+    </div>
+    <h3>Quantos deixam o curso</h3>
+    <p class="detalhe" id="frase-segmentos"></p>
+    <div class="segmentos" id="g-segmentos"></div>
+    <ul class="legenda"><li class="evadiu"><span class="chave"></span>Evadiu</li><li class="concluiu"><span class="chave"></span>Concluiu</li></ul>
+
+    <h3>Evasão por instituição</h3>
+    <p class="detalhe">A linha escura marca a média do Nordeste. Passe o mouse ou toque numa linha para ver o total de matrículas.</p>
+    <div class="barras" id="g-instituicoes"></div>
+
+    <h3 id="t-multiplos">Onde a evasão é maior</h3>
+    <ul class="legenda" id="legenda-multiplos"><li><span class="chave" style="--cor: var(--marinho)"></span><span id="nome-escopo"></span></li>
+      <li><span class="chave marca-ref"></span>Média do Nordeste no mesmo grupo</li></ul>
+    <div class="multiplos">
+      <div><h4>Nível do curso</h4><div class="barras" id="g-nivel"></div></div>
+      <div><h4>Forma de oferta</h4><div class="barras" id="g-oferta"></div></div>
+      <div><h4>Idade ao entrar</h4><div class="barras" id="g-idade"></div></div>
+      <div><h4>Edição da Plataforma Nilo Peçanha</h4><div class="barras" id="g-edicao"></div></div>
+    </div>
+    <p class="detalhe">Todas as 178 mil matrículas com desfecho, edições 2021 a 2023. Grupos com menos de 30 matrículas
+      não aparecem.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="pagina" id="porque" aria-labelledby="h-porque" hidden>
+    <div class="largura">
+      <header class="cabeca"><h1 id="h-porque">Por quê</h1></header>
+      <div class="passo texto">
+    <p>Nos cursos técnicos e de graduação da Rede Federal do Nordeste, 58% das matrículas que chegaram ao fim do prazo
+      previsto terminaram em evasão: abandono, desligamento, cancelamento, reprovação ou transferência para outra
+      instituição. Na graduação, a taxa passa de 70%.</p>
+    <p>Quanto mais cedo uma instituição sabe quem corre mais risco, mais cedo pode oferecer assistência estudantil,
+      monitoria ou acompanhamento. Este trabalho testa se dá para estimar esse risco já na matrícula, só com dados de
+      cadastro, e se a estimativa é igualmente confiável para todos os grupos de estudantes.</p>
+    <p>É o projeto final da disciplina de Inteligência Artificial do curso de Ciência da Computação da Universidade
+      Federal do Piauí (2026.2), feito por Maria Ingrid Xavier Sousa.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="pagina" id="modelo" aria-labelledby="h-modelo" hidden>
+    <div class="largura">
+      <header class="cabeca"><h1 id="h-modelo">Como funciona</h1></header>
+      <div class="passo texto">
+    <h3>Gradient boosting</h3>
+    <p>O modelo é um conjunto de <span id="n-arvores">várias centenas de</span> árvores de decisão pequenas. Cada árvore
+      faz perguntas simples ("o curso é uma licenciatura?", "a idade ao entrar passa de 20 anos?") e corrige parte do erro
+      das anteriores. A soma de todas dá o risco. A implementação é o HistGradientBoostingClassifier do scikit-learn.</p>
+    <h3>Calibração</h3>
+    <p>Depois do treino, as probabilidades passam por uma calibração isotônica: se o modelo diz 70%, cerca de 70% dos
+      alunos com aquele perfil de fato evadiram. É isso que permite ler o número como uma porcentagem.</p>
+    <h3>Alerta</h3>
+    <p>O alerta usa um limite para cada nível de curso, escolhido para equilibrar os acertos entre quem evade e quem
+      conclui. Sem isso, quase todo aluno de graduação receberia alerta.</p>
+    <h3>O que mais pesou</h3>
+    <p>Depois do resultado, o site mostra quanto cada grupo de informações (curso, instituição, idade, cor/raça e
+      outros) empurrou o risco para cima ou para baixo. O cálculo compara a pessoa com 40 perfis típicos da base, trocando
+      um grupo de cada vez em todas as combinações possíveis (valores de Shapley). As contribuições somam exatamente a
+      diferença entre o risco da pessoa e o de um perfil típico.</p>
+    <h3>No seu aparelho</h3>
+    <p>O modelo foi exportado para um arquivo e roda em JavaScript no navegador. Um teste automático confere que o site
+      calcula a mesma probabilidade que o Python em 2.000 casos.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="pagina" id="dados" aria-labelledby="h-dados" hidden>
+    <div class="largura">
+      <header class="cabeca"><h1 id="h-dados">Dados</h1></header>
+      <div class="passo texto">
+    <p>Microdados de Eficiência Acadêmica da <a href="https://dadosabertos.mec.gov.br/pnp">Plataforma Nilo Peçanha</a>
+      (MEC), edições 2021, 2022 e 2023, sob licença Open Data Commons Open Database License (ODbL). Cada edição traz as
+      turmas cujo prazo de conclusão terminou e a situação final de cada aluno.</p>
+    <table class="tabela">
+      <tr><th>Recorte</th><th class="num">Matrículas</th></tr>
+      <tr><td>Nordeste, cursos técnicos e de graduação, com desfecho</td><td class="num">178.484</td></tr>
+      <tr><td>Treino (70%)</td><td class="num">124.938</td></tr>
+      <tr><td>Validação (20%): escolha de parâmetros e calibração</td><td class="num">35.697</td></tr>
+      <tr><td>Teste (10%): usado uma vez, para medir o resultado</td><td class="num">17.849</td></tr>
+    </table>
+    <p>A divisão é aleatória e mantém em cada parte a mesma proporção de edições e de evasão. Ficaram de fora cursos
+      de qualificação (FIC), pós-graduação e alunos que ainda estavam cursando após o prazo.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="pagina" id="parametros" aria-labelledby="h-parametros" hidden>
+    <div class="largura">
+      <header class="cabeca"><h1 id="h-parametros">Parâmetros</h1></header>
+      <div class="passo texto">
+    <h3>O que o modelo usa</h3>
+    <ul class="etiquetas" id="lista-atributos"></ul>
+    <p>O valor da renda não é usado: não melhorou a previsão. O que o modelo usa é se a renda e a cor/raça foram
+      registradas na matrícula, porque quem não teve esses registros evadiu mais, mesmo comparando alunos da mesma
+      instituição. A cor/raça em si entra porque, sem ela, o risco de estudantes indígenas era subestimado.</p>
+    <h3>Hiperparâmetros</h3>
+    <table class="tabela">
+      <tr><td>Taxa de aprendizado</td><td class="num">0,1</td></tr>
+      <tr><td>Folhas por árvore (máximo)</td><td class="num">31</td></tr>
+      <tr><td>Alunos por folha (mínimo)</td><td class="num">20</td></tr>
+      <tr><td>Regularização L2</td><td class="num">1,0</td></tr>
+      <tr><td>Número de árvores (parada antecipada)</td><td class="num" id="t-arvores">–</td></tr>
+      <tr><td>Limite de alerta no técnico</td><td class="num" id="t-limiar-tecnico">–</td></tr>
+      <tr><td>Limite de alerta na graduação</td><td class="num" id="t-limiar-graduacao">–</td></tr>
+    </table>
+    <p>Os hiperparâmetros saíram de 12 combinações testadas na validação; todas ficaram a menos de 0,002 de AUC umas
+      das outras, então o resultado não depende de ajuste fino.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="pagina" id="resultados" aria-labelledby="h-resultados" hidden>
+    <div class="largura">
+      <header class="cabeca"><h1 id="h-resultados">Resultados</h1></header>
+      <div class="passo texto">
+    <p>Medido nas 17.849 matrículas de teste, que o modelo nunca viu. A AUC é a chance de, num par com um aluno que
+      evadiu e um que concluiu, o que evadiu receber risco maior; 0,5 é o acaso.</p>
+    <table class="tabela">
+      <tr><th>Estratégia</th><th class="num">AUC</th><th class="num">Acerto</th></tr>
+      <tr><td>Dizer que todos evadem</td><td class="num">0,500</td><td class="num">58%</td></tr>
+      <tr><td>Taxa histórica do curso no campus</td><td class="num">0,761</td><td class="num">68%</td></tr>
+      <tr><td>Regressão logística</td><td class="num">0,789</td><td class="num">72%</td></tr>
+      <tr class="destaque"><td>Gradient boosting (este site)</td><td class="num">0,832</td><td class="num">73%</td></tr>
+    </table>
+    <ul>
+      <li>Nos 30% de casos em que o modelo está mais seguro, ele acerta 86%; em 60% dos alunos, acerta 80% ou mais.</li>
+      <li>As probabilidades estão bem calibradas: o erro médio fica abaixo de 3 pontos para quase todos os grupos.</li>
+      <li>Mais dados ainda ajudariam: cada vez que a base de treino dobrou, a AUC subiu cerca de 0,01.</li>
+    </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="pagina" id="limites" aria-labelledby="h-limites" hidden>
+    <div class="largura">
+      <header class="cabeca"><h1 id="h-limites">Limites e ética</h1></header>
+      <div class="passo texto">
+    <ul>
+      <li>O modelo só conhece dados de matrícula. Notas, frequência, trabalho e a vida de cada aluno, que pesam muito
+        na evasão, não estão na base.</li>
+      <li>Grupos com mais evasão (homens, pessoas pretas, quem não declarou renda) recebem mais alertas, inclusive
+        errados. Isso acontece porque o modelo é calibrado; não é possível ter, ao mesmo tempo, calibração e as mesmas
+        taxas de erro para todos quando as taxas de evasão diferem.</li>
+      <li>Mesmo com a cor/raça, o risco de estudantes indígenas ainda é subestimado em cerca de 6 pontos, e há poucos
+        casos para medir com precisão.</li>
+      <li>Quem entra com até 17 anos (quase sempre no técnico integrado) evade menos, e o modelo encontra só cerca de
+        40% desses casos de evasão.</li>
+      <li>As turmas da base passaram pela pandemia, e a base cobre só os Institutos Federais e CEFETs do Nordeste.
+        Por isso o site não aceita universidades nem outras instituições: o resultado seria uma extrapolação.</li>
+      <li>O uso pretendido é orientar apoio. Usar o risco para negar vaga, bolsa ou qualquer direito seria um uso
+        indevido.</li>
+    </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="pagina" id="privacidade" aria-labelledby="h-privacidade" hidden>
+    <div class="largura">
+      <header class="cabeca"><h1 id="h-privacidade">Privacidade</h1></header>
+      <div class="passo texto">
+    <p>O cálculo acontece inteiro no seu navegador: o site baixa o modelo e não envia o que você preenche.</p>
+    <p>Só a avaliação do passo 4 pode sair do seu aparelho, e só se você marcar a autorização. Cor ou raça exige uma
+      segunda autorização, específica. Não há nome, e-mail, documento nem registro do seu endereço de internet. Depois
+      do envio, o site mostra um código que permite pedir a exclusão da resposta.</p>
+      </div>
+    </div>
+  </section>
 
 <div class="dica" id="dica" role="tooltip" hidden></div>
 
-<footer class="largura">
-  Dados: Plataforma Nilo Peçanha (MEC), licença ODbL.
-  <a href="https://github.com/mingridxs/evasao-rede-federal-ne">Código, análises e artigo</a>.
-</footer>
+  <footer class="largura rodape">
+    Dados: Plataforma Nilo Peçanha (MEC), licença ODbL.
+    <a href="https://github.com/mingridxs/evasao-rede-federal-ne">Código, análises e artigo</a>.
+  </footer>
+</main>
+</div>
 
 <script type="module">
 import { probabilidade, explicar, nivelDoCurso, limiarDoNivel } from "./modelo.js";
@@ -703,7 +756,7 @@ function calcular(evento) {
   mostrarAvaliacao();
   // No celular, rola até o resultado; no notebook, ele está ao lado e só rola se estiver fora da tela.
   $("bloco-resultado").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-                                        block: matchMedia("(min-width: 1180px)").matches ? "nearest" : "start" });
+                                        block: matchMedia("(min-width: 1024px)").matches ? "nearest" : "start" });
 }
 
 /* ---------- Dica ao passar o mouse ou focar uma linha ---------- */
@@ -883,34 +936,28 @@ async function enviar() {
   }
 }
 
-/* ---------- Abas ---------- */
-function abas() {
-  const lista = [...document.querySelectorAll('[role="tab"]')];
-  const ativar = aba => {
-    for (const a of lista) {
-      const sel = a === aba;
-      a.setAttribute("aria-selected", String(sel));
-      a.tabIndex = sel ? 0 : -1;
-      $(a.getAttribute("aria-controls")).hidden = !sel;
-    }
-    aba.focus({ preventScroll: true });
-    aba.scrollIntoView({ block: "nearest", inline: "nearest" });
-  };
-  lista.forEach(aba => {
-    aba.addEventListener("click", () => ativar(aba));
-    aba.addEventListener("keydown", e => {
-      const visiveis = lista.filter(a => !a.hidden), i = visiveis.indexOf(aba);
-      const j = ["ArrowRight", "ArrowDown"].includes(e.key) ? i + 1 : ["ArrowLeft", "ArrowUp"].includes(e.key) ? i - 1
-              : e.key === "Home" ? 0 : e.key === "End" ? visiveis.length - 1 : null;
-      if (j === null) return;
-      e.preventDefault(); ativar(visiveis[(j + visiveis.length) % visiveis.length]);
-    });
-  });
+/* ---------- Páginas (menu lateral) ---------- */
+function mostrarPagina() {
+  const paginas = [...document.querySelectorAll(".pagina")];
+  const pedida = location.hash.slice(1);
+  const atual = paginas.find(p => p.id === pedida && !$(`${p.id}`).dataset.oculta) ? pedida : "simulador";
+  for (const p of paginas) p.hidden = p.id !== atual;
+  for (const a of document.querySelectorAll("[data-pagina]")) {
+    if (a.dataset.pagina === atual) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+  }
+  const titulo = $(`h-${atual}`).textContent;
+  document.title = atual === "simulador" ? "Evasão na Rede Federal: o que diz o histórico"
+                                         : `${titulo} | Evasão na Rede Federal`;
+  return atual;
+}
+function iniciarPaginas() {
+  addEventListener("hashchange", () => { mostrarPagina(); scrollTo(0, 0); $("dica").hidden = true; });
+  mostrarPagina();
 }
 
 /* ---------- Início ---------- */
 async function iniciar() {
-  abas();
+  iniciarPaginas();
   $("contato").innerHTML = CONTATO
     ? `<a href="mailto:${CONTATO}">${CONTATO}</a>`
     : `pelo <a href="https://github.com/mingridxs/evasao-rede-federal-ne">repositório do projeto</a>`;
@@ -929,7 +976,9 @@ async function iniciar() {
   if (painel) {
     iniciarPainel();
   } else {
-    $("aba-numeros").hidden = true;
+    $("numeros").dataset.oculta = "1";
+    document.querySelector('[data-pagina="numeros"]').parentElement.hidden = true;
+    mostrarPagina();
   }
   preencher($("instituicao"), unicos(ofertas.map(o => o.instituicao)));
   preencher($("sexo"), opcoes.sexos.filter(s => SEXOS[s]), s => SEXOS[s]);
