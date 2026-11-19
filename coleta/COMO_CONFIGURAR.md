@@ -8,9 +8,10 @@ O site funciona sem isto: calcula o risco e mostra a avaliação, mas avisa que 
    - Executar como: **Eu**
    - Quem pode acessar: **Qualquer pessoa**
 4. Clique em **Implantar**, autorize o acesso à planilha e copie o endereço que termina em `/exec`.
-5. Cole esse endereço em `docs/coleta.js`:
+5. Cole esse endereço em `docs/coleta.js` e, na mesma linha de baixo, um e-mail de contato para pedidos de exclusão (a LGPD exige um canal):
    ```js
    export const ENDERECO_COLETA = "https://script.google.com/macros/s/.../exec";
+   export const CONTATO = "seu.email@exemplo.com";
    ```
 6. Faça commit e push. Em um ou dois minutos o site passa a mostrar a caixa de consentimento e o botão de envio.
 
@@ -18,7 +19,9 @@ Para testar, abra o site, calcule um risco, avalie, marque o consentimento e env
 
 ## O que é guardado
 
-Data e hora do envio, o curso e a forma de entrada informados (inclusive cor ou raça), o resultado do modelo, a nota de 1 a 5 e o comentário opcional. Não há nome, e-mail nem endereço IP. Só é enviado quem marca o consentimento.
+Data e hora do envio, um código aleatório da resposta, o curso e a forma de entrada informados, a faixa de renda declarada (se a pessoa informou), o resultado do modelo, a nota de 1 a 5 e o comentário opcional. A cor ou raça só é enviada com uma segunda autorização, específica. Não há nome, e-mail nem endereço IP. Só é enviado quem marca o consentimento.
+
+Para atender um pedido de exclusão, procure a linha pelo código que a pessoa informar e apague-a.
 
 ## Cuidados antes de usar os dados
 

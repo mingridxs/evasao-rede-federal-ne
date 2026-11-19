@@ -2,10 +2,10 @@
 // Instalação: veja coleta/COMO_CONFIGURAR.md.
 
 const COLUNAS = [
-  "recebido_em", "versao_site", "modo", "instituicao", "campus", "uf", "curso", "tipo_de_curso",
+  "recebido_em", "codigo", "versao_site", "modo", "instituicao", "campus", "uf", "curso", "tipo_de_curso",
   "tipo_de_oferta", "turno", "modalidade", "eixo", "sexo", "idade", "mes",
-  "renda_nao_declarada", "cor_nao_declarada", "cor_raca",
-  "probabilidade", "limiar", "alerta", "avaliacao", "comentario",
+  "renda_nao_declarada", "renda_faixa_declarada", "cor_nao_declarada", "cor_raca",
+  "consentimento", "consentimento_cor", "probabilidade", "limiar", "alerta", "avaliacao", "comentario",
 ];
 
 // Impede que um texto enviado seja interpretado como fórmula pela planilha.

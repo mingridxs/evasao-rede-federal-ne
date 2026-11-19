@@ -5,65 +5,73 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Qual o risco de evasão no seu curso?</title>
 <meta name="description" content="Estime o risco de evasão de alunos com o seu perfil de ingresso, com um modelo treinado em dados públicos da Plataforma Nilo Peçanha.">
-<meta name="theme-color" content="#1e6b4f">
+<meta name="theme-color" content="#1f4e9c">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --tinta: #1c2b27; --suave: #52625c; --linha: #d3ddd6; --fundo: #eef2ee; --papel: #fff;
-    --verde: #1e6b4f; --verde-escuro: #154d39; --verde-claro: #e3efe8;
-    --baixo: #2e7d52; --duvida: #a86a12; --alto: #b23a2e;
-    --raio: 10px;
+    --tinta: #14213d; --suave: #4a5876; --linha: #d6dfee; --fundo: #eef3fa; --papel: #fff;
+    --azul: #1f4e9c; --azul-escuro: #163a76; --azul-claro: #e4edfb; --azul-medio: #8fb4ec;
+    --borda-campo: #b5c3dc; --baixo: #2e7d52; --duvida: #a86a12; --alto: #b23a2e; --raio: 12px;
   }
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body { margin: 0; background: var(--fundo); color: var(--tinta);
          font: 17px/1.55 "Atkinson Hyperlegible", system-ui, sans-serif; }
-  .coluna { max-width: 640px; margin: 0 auto; padding: 0 18px; }
+  .coluna { max-width: 680px; margin: 0 auto; padding-left: 18px; padding-right: 18px; }
 
-  header.coluna { padding-top: 40px; padding-bottom: 8px; }
-  h1 { font-size: clamp(1.75rem, 6vw, 2.35rem); line-height: 1.12; margin: 0 0 12px; letter-spacing: -0.01em; }
-  .abertura { margin: 0; color: var(--suave); max-width: 34em; }
+  /* Cabeçalho azul; os cartões sobem um pouco sobre ele */
+  .topo { background: var(--azul); color: #fff; padding-bottom: 72px; }
+  .topo .coluna { padding-top: 36px; }
+  .marca { display: flex; align-items: center; gap: 10px; font-size: .95rem; color: #cfe0fa; margin-bottom: 18px; }
+  .marca img { width: 30px; height: 30px; border-radius: 8px; box-shadow: 0 0 0 2px rgba(255, 255, 255, .45); }
+  h1 { font-size: clamp(1.8rem, 6.4vw, 2.6rem); line-height: 1.1; margin: 0 0 12px; letter-spacing: -0.01em; }
+  .abertura { margin: 0; color: #dbe7fb; max-width: 34em; }
+  main.coluna { margin-top: -52px; }
 
-  .passo { margin: 28px 0 0; padding: 22px 20px 24px; background: var(--papel); border-radius: var(--raio);
-           border: 1px solid var(--linha); }
-  .passo > h2 { display: flex; align-items: center; gap: 12px; font-size: 1.2rem; margin: 0 0 16px; }
-  .passo > h2 .n { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--verde); color: #fff;
+  .passo { margin: 0 0 20px; padding: 22px 20px 24px; background: var(--papel); border-radius: var(--raio);
+           box-shadow: 0 1px 3px rgba(20, 33, 61, .08), 0 8px 24px rgba(20, 33, 61, .06); }
+  .passo > h2 { display: flex; align-items: center; gap: 12px; font-size: 1.22rem; margin: 0 0 16px; }
+  .passo > h2 .n { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--azul); color: #fff;
                    display: grid; place-items: center; font-size: .95rem; }
-  .passo.inativo { opacity: .55; }
+  .passo.inativo { opacity: .6; }
 
   label, .rotulo { display: block; font-weight: 700; font-size: .95rem; margin: 16px 0 6px; }
   .ajuda { display: block; font-weight: 400; color: var(--suave); font-size: .88rem; margin-top: 2px; }
   select, input[type=number], textarea {
     width: 100%; min-height: 48px; padding: 10px 12px; font: inherit; font-size: 17px; color: var(--tinta);
-    background: var(--papel); border: 1.5px solid #b9c7be; border-radius: 8px; }
+    background: var(--papel); border: 1.5px solid var(--borda-campo); border-radius: 8px; }
   select { appearance: none; padding-right: 40px;
-           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2352625c' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a5876' stroke-width='2' fill='none'/%3E%3C/svg%3E");
            background-repeat: no-repeat; background-position: right 14px center; }
-  select:disabled { background-color: #f1f4f2; color: #8a9a93; }
+  select:disabled { background-color: #f2f5fa; color: #8a96ad; }
   textarea { min-height: 84px; resize: vertical; }
   :focus-visible { outline: 3px solid #f2b705; outline-offset: 2px; }
   .duas { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
   @media (max-width: 480px) { .duas.empilha { grid-template-columns: 1fr; } }
 
-  .alternar { display: grid; grid-template-columns: 1fr 1fr; background: var(--fundo); border-radius: 10px; padding: 4px; gap: 4px; }
-  .alternar button { min-height: 52px; border: 0; border-radius: 8px; background: transparent; font: inherit; font-size: .95rem;
-                     color: var(--suave); cursor: pointer; padding: 6px 8px; line-height: 1.25; }
+  .alternar { display: grid; grid-template-columns: 1fr 1fr; background: var(--azul-claro); border-radius: 10px; padding: 4px; gap: 4px; }
   .alternar.tres { grid-template-columns: 1fr 1fr 1fr; }
-  .alternar button[aria-checked="true"] { background: var(--papel); color: var(--tinta); font-weight: 700;
-                                          box-shadow: 0 1px 2px rgba(28, 43, 39, .18); }
+  .alternar button { min-height: 50px; border: 0; border-radius: 8px; background: transparent; font: inherit; font-size: .95rem;
+                     color: var(--suave); cursor: pointer; padding: 6px 8px; line-height: 1.25; }
+  .alternar button[aria-checked="true"] { background: var(--papel); color: var(--azul-escuro); font-weight: 700;
+                                          box-shadow: 0 1px 3px rgba(20, 33, 61, .2); }
   .detalhe { color: var(--suave); font-size: .9rem; margin: 8px 0 0; }
+  .so-coleta { font-size: .85rem; color: var(--azul-escuro); background: var(--azul-claro); border-radius: 6px;
+               padding: 2px 8px; display: inline-block; margin-top: 4px; font-weight: 400; }
 
-  .acao { width: 100%; min-height: 54px; margin-top: 22px; border: 0; border-radius: 8px; background: var(--verde);
+  .acao { width: 100%; min-height: 54px; margin-top: 22px; border: 0; border-radius: 10px; background: var(--azul);
           color: #fff; font: inherit; font-weight: 700; font-size: 1.05rem; cursor: pointer; }
-  .acao:hover:not(:disabled) { background: var(--verde-escuro); }
-  .acao:disabled { background: #a9b8b0; cursor: not-allowed; }
+  .acao:hover:not(:disabled) { background: var(--azul-escuro); }
+  .acao:disabled { background: #a9b6cc; cursor: not-allowed; }
   .privacidade { color: var(--suave); font-size: .85rem; margin: 10px 0 0; }
 
-  /* Resultado: a régua é o elemento principal da página */
+  /* Resultado: a régua é o elemento principal */
   .valor { font-size: clamp(3.6rem, 18vw, 5rem); font-weight: 700; line-height: 1; letter-spacing: -0.02em;
-           font-variant-numeric: tabular-nums; margin: 4px 0 2px; }
+           font-variant-numeric: tabular-nums; margin: 4px 0 2px; color: var(--azul-escuro); }
   .frase { margin: 0; font-size: 1.05rem; }
   .selo { display: inline-block; font-weight: 700; font-size: .9rem; padding: 3px 10px; border-radius: 6px; margin-bottom: 8px; }
   .selo.baixo { color: var(--baixo); background: #e2f0e7; }
@@ -72,48 +80,72 @@
   .regua { margin: 26px 0 8px; }
   .regua svg { display: block; width: 100%; height: auto; overflow: visible; }
   .leitura { margin: 18px 0 0; }
-  .nota { margin: 16px 0 0; padding: 12px 14px; border-left: 4px solid var(--verde); background: var(--verde-claro);
+  .nota { margin: 16px 0 0; padding: 12px 14px; border-left: 4px solid var(--azul); background: var(--azul-claro);
           border-radius: 0 8px 8px 0; font-size: .95rem; }
   .nota.cautela { border-color: var(--duvida); background: #fbf3e6; }
 
-  /* Avaliação */
+  /* Avaliação e consentimento */
   .escala { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 8px; }
-  .escala button { min-height: 52px; border: 1.5px solid #b9c7be; border-radius: 8px; background: var(--papel);
+  .escala button { min-height: 52px; border: 1.5px solid var(--borda-campo); border-radius: 8px; background: var(--papel);
                    font: inherit; font-weight: 700; font-size: 1.1rem; color: var(--tinta); cursor: pointer; }
-  .escala button[aria-checked="true"] { background: var(--verde); border-color: var(--verde); color: #fff; }
+  .escala button[aria-checked="true"] { background: var(--azul); border-color: var(--azul); color: #fff; }
   .extremos { display: flex; justify-content: space-between; color: var(--suave); font-size: .85rem; margin-top: 6px; }
-  .consentimento { display: flex; gap: 10px; align-items: flex-start; margin-top: 18px; font-size: .92rem; }
-  .consentimento input { width: 22px; height: 22px; margin: 2px 0 0; flex: none; accent-color: var(--verde); }
+  .consentimento { margin-top: 20px; border: 1.5px solid var(--linha); border-radius: 10px; padding: 14px; }
+  .consentimento h3 { font-size: 1rem; margin: 0 0 8px; }
+  .aceite { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 0; font-size: .92rem; font-weight: 400; }
+  .aceite input { width: 22px; height: 22px; margin: 2px 0 0; flex: none; accent-color: var(--azul); }
+  .aceite.sensivel { background: #fff8e8; border-radius: 8px; padding: 10px; }
+  .termo summary { cursor: pointer; color: var(--azul); font-size: .92rem; padding: 4px 0; }
+  .termo dl { font-size: .88rem; margin: 8px 0 0; }
+  .termo dt { font-weight: 700; margin-top: 8px; }
+  .termo dd { margin: 2px 0 0; color: var(--suave); }
   .enviado { font-weight: 700; color: var(--baixo); margin: 14px 0 0; }
+  .codigo { font-variant-numeric: tabular-nums; letter-spacing: .06em; background: var(--azul-claro); padding: 1px 6px; border-radius: 4px; }
   .erro { color: var(--alto); }
 
-  details { margin: 28px 0 0; background: var(--papel); border: 1px solid var(--linha); border-radius: var(--raio); padding: 0 20px; }
-  summary { cursor: pointer; font-weight: 700; padding: 18px 0; list-style-position: outside; }
-  details[open] { padding-bottom: 18px; }
-  details p, details li { font-size: .95rem; }
-  details ul { padding-left: 20px; }
-  .tabela { width: 100%; border-collapse: collapse; font-size: .9rem; margin: 8px 0; }
-  .tabela td, .tabela th { text-align: left; padding: 7px 4px; border-bottom: 1px solid var(--linha); }
-  .tabela td:last-child, .tabela th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  /* Abas com informações do trabalho */
+  .sobre { padding: 0; overflow: hidden; }
+  .sobre > h2 { padding: 22px 20px 0; }
+  .abas { display: flex; gap: 4px; overflow-x: auto; padding: 0 16px; border-bottom: 1px solid var(--linha);
+          scrollbar-width: none; }
+  .abas::-webkit-scrollbar { display: none; }
+  .abas button { flex: none; border: 0; background: none; font: inherit; font-size: .95rem; color: var(--suave);
+                 padding: 12px 10px; border-bottom: 3px solid transparent; cursor: pointer; }
+  .abas button[aria-selected="true"] { color: var(--azul-escuro); font-weight: 700; border-bottom-color: var(--azul); }
+  .painel { padding: 18px 20px 22px; font-size: .95rem; }
+  .painel h3 { font-size: 1.02rem; margin: 18px 0 6px; }
+  .painel h3:first-child { margin-top: 0; }
+  .painel p { margin: 0 0 10px; }
+  .painel ul { padding-left: 20px; margin: 6px 0 10px; }
+  .tabela { width: 100%; border-collapse: collapse; font-size: .9rem; margin: 8px 0 12px; }
+  .tabela td, .tabela th { text-align: left; padding: 7px 4px; border-bottom: 1px solid var(--linha); vertical-align: top; }
+  .tabela th { color: var(--suave); font-weight: 700; }
+  .tabela .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tabela tr.destaque td { font-weight: 700; color: var(--azul-escuro); }
+  .etiquetas { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; padding: 0; list-style: none; }
+  .etiquetas li { background: var(--azul-claro); color: var(--azul-escuro); border-radius: 6px; padding: 3px 9px; font-size: .88rem; }
 
-  footer.coluna { color: var(--suave); font-size: .85rem; padding-top: 26px; padding-bottom: 40px; }
-  a { color: var(--verde); }
+  footer.coluna { color: var(--suave); font-size: .85rem; padding-top: 8px; padding-bottom: 40px; }
+  a { color: var(--azul); }
   [hidden] { display: none !important; }
 
   @media (min-width: 700px) {
-    header.coluna { padding-top: 64px; }
+    .topo .coluna { padding-top: 52px; }
     .passo { padding: 28px 30px 30px; }
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .regua .preenchido { transition: width .6s ease-out; }
+    .sobre > h2 { padding: 28px 30px 0; }
+    .abas { padding: 0 26px; }
+    .painel { padding: 22px 30px 28px; }
   }
 </style>
 </head>
 <body>
-<header class="coluna">
-  <h1>Qual o risco de evasão no seu curso?</h1>
-  <p class="abertura">Informe seu curso e como você entrou. O site mostra quantos alunos com perfil parecido deixaram o curso
-    sem concluir, segundo 178 mil matrículas da Rede Federal no Nordeste.</p>
+<header class="topo">
+  <div class="coluna">
+    <div class="marca"><img src="favicon.svg" alt="">Projeto de Inteligência Artificial, UFPI</div>
+    <h1>Qual o risco de evasão no seu curso?</h1>
+    <p class="abertura">Informe seu curso e como você entrou. O site mostra quantos alunos com perfil parecido deixaram
+      o curso sem concluir, segundo 178 mil matrículas da Rede Federal no Nordeste.</p>
+  </div>
 </header>
 
 <main class="coluna">
@@ -190,11 +222,16 @@
       <select id="mes" disabled></select>
 
       <span class="rotulo" id="r-renda">Você informou sua renda familiar na matrícula?
-        <span class="ajuda">No questionário socioeconômico ou no cadastro do curso. Não precisa dizer o valor.</span></span>
+        <span class="ajuda">No questionário socioeconômico ou no cadastro do curso.</span></span>
       <div class="alternar tres" role="radiogroup" aria-labelledby="r-renda" data-campo="renda_nao_declarada">
         <button type="button" role="radio" aria-checked="false" data-valor="0">Sim</button>
         <button type="button" role="radio" aria-checked="false" data-valor="1">Não</button>
         <button type="button" role="radio" aria-checked="false" data-valor="">Não lembro</button>
+      </div>
+      <div id="bloco-renda" hidden>
+        <label for="renda">Qual renda por pessoa da família você declarou? <span class="ajuda">Opcional.</span>
+          <span class="so-coleta">Não entra no cálculo. Só é enviada se você autorizar no fim.</span></label>
+        <select id="renda"></select>
       </div>
 
       <span class="rotulo" id="r-cor">Você informou sua cor ou raça na matrícula?</span>
@@ -203,13 +240,14 @@
         <button type="button" role="radio" aria-checked="false" data-valor="1">Não</button>
         <button type="button" role="radio" aria-checked="false" data-valor="">Não lembro</button>
       </div>
-
       <div id="bloco-cor" hidden>
-        <label for="cor">Sua cor ou raça <span class="ajuda">Como no IBGE. Usada só no cálculo, no seu aparelho.</span></label>
+        <label for="cor">Qual cor ou raça você declarou? <span class="ajuda">Categorias do IBGE.</span>
+          <span class="so-coleta">Entra no cálculo, no seu aparelho. Só é enviada se você autorizar no fim.</span></label>
         <select id="cor" disabled></select>
       </div>
+
       <button id="calcular" class="acao" type="submit" disabled>Ver o risco</button>
-      <p class="privacidade">O cálculo acontece no seu aparelho. Nada sai dele, a não ser que você escolha enviar a avaliação no fim.</p>
+      <p class="privacidade">O cálculo acontece no seu aparelho. Nada sai dele, a não ser que você autorize o envio no fim.</p>
     </section>
   </form>
 
@@ -231,55 +269,173 @@
     <div class="extremos" aria-hidden="true"><span>Não combina nada</span><span>Combina muito</span></div>
     <label for="comentario">Quer explicar? <span class="ajuda">Opcional. Não escreva seu nome nem o de colegas.</span></label>
     <textarea id="comentario" maxlength="400"></textarea>
+
     <div id="bloco-envio">
-      <label class="consentimento" for="aceite">
-        <input type="checkbox" id="aceite">
-        <span>Concordo em enviar, sem nome nem e-mail, minhas respostas dos passos 1 e 2, inclusive cor ou raça,
-          o resultado e esta avaliação, para uso no trabalho acadêmico que testa este modelo.</span>
-      </label>
+      <div class="consentimento">
+        <h3>Autorização para envio (LGPD)</h3>
+        <details class="termo">
+          <summary>Ler o termo de consentimento</summary>
+          <dl>
+            <dt>Para que</dt>
+            <dd>Avaliar se o modelo faz sentido para estudantes reais, como parte do trabalho final da disciplina de
+              Inteligência Artificial da UFPI. Os dados não são usados para nenhuma outra finalidade nem vendidos.</dd>
+            <dt>O que é enviado</dt>
+            <dd>As respostas dos passos 1 e 2, a faixa de renda declarada (se você informou), o resultado do modelo,
+              a nota e o comentário. Cor ou raça só se você marcar a segunda caixa. Não pedimos nome, e-mail nem documento,
+              e o site não registra seu endereço de internet.</dd>
+            <dt>Quem acessa e por quanto tempo</dt>
+            <dd>Só a responsável pelo trabalho, Maria Ingrid Xavier Sousa, numa planilha privada. Os dados são apagados
+              até o fim do semestre letivo. Publicações mostram só contagens e médias, nunca respostas individuais.</dd>
+            <dt>Seus direitos</dt>
+            <dd>Você pode pedir acesso, correção ou exclusão da sua resposta a qualquer momento (LGPD, art. 18), informando
+              o código que aparece depois do envio. Contato: <span id="contato"></span>.</dd>
+            <dt>Base legal</dt>
+            <dd>Consentimento (LGPD, art. 7º, I) e, para cor ou raça, consentimento específico e destacado (art. 11, I).
+              Negar não muda nada no uso do site.</dd>
+          </dl>
+        </details>
+        <label class="aceite" for="aceite">
+          <input type="checkbox" id="aceite">
+          <span>Li o termo e autorizo o envio das minhas respostas, sem nome nem e-mail, para este trabalho acadêmico.</span>
+        </label>
+        <label class="aceite sensivel" for="aceite-cor" id="linha-aceite-cor">
+          <input type="checkbox" id="aceite-cor">
+          <span>Autorizo também, de forma específica, o envio da minha cor ou raça, que é um dado pessoal sensível. Opcional.</span>
+        </label>
+      </div>
       <button type="button" id="enviar" class="acao" disabled>Enviar avaliação</button>
     </div>
     <p class="detalhe" id="sem-coleta" hidden>O envio de avaliações ainda não está ligado neste site.</p>
-    <p class="enviado" id="enviado" hidden>Avaliação enviada. Obrigada por ajudar a testar o modelo.</p>
+    <p class="enviado" id="enviado" hidden></p>
     <p class="erro" id="falha-envio" hidden>Não foi possível enviar. Confira a conexão e tente de novo.</p>
   </section>
 
-  <details>
-    <summary>Como o modelo funciona e onde ele erra</summary>
-    <p>O modelo usa se a renda e a cor/raça foram registradas na matrícula: nos dados da Rede Federal, quem não
-      teve esses registros evadiu mais, e eles são feitos no ingresso. O valor da renda não é usado, porque não
-      melhorou a previsão. A cor/raça é usada porque, sem ela, o modelo subestimava o risco de estudantes
-      indígenas; com ela, esse erro diminui. A intenção é orientar apoio, nunca restringir acesso.</p>
-    <p>O número é a proporção de alunos com perfil parecido que evadiram, ou seja, que saíram do curso sem concluir:
-      abandono, desligamento, cancelamento, reprovação ou transferência para outra instituição. Ele não diz se uma pessoa
-      vai evadir. O modelo só conhece dados de matrícula; notas, frequência e a vida de cada aluno, que pesam muito, não
-      estão na base.</p>
-    <table class="tabela">
-      <tr><th>Como o modelo se saiu em 17.849 matrículas que ele não viu</th><th></th></tr>
-      <tr><td>Acerto ao classificar quem evade e quem conclui</td><td>73%</td></tr>
-      <tr><td>Acerto só usando a taxa histórica do curso, sem modelo</td><td>68%</td></tr>
-      <tr><td>Acerto nos 30% de casos em que o modelo está mais seguro</td><td>86%</td></tr>
-    </table>
-    <ul>
-      <li>O alerta aparece quando o risco passa do limite do nível do curso: <span id="limiar-tecnico">–</span> no técnico e
-        <span id="limiar-graduacao">–</span> na graduação.</li>
-      <li>Perto desse limite o modelo erra mais, e a opinião de quem conhece o aluno vale mais que o número.</li>
-      <li>Mesmo usando a cor/raça, ele ainda subestima em cerca de 6 pontos o risco de estudantes indígenas, e encontra só cerca de 40% dos casos de evasão de quem entra com até 17 anos.</li>
-      <li>Foi treinado com turmas do Nordeste que passaram pela pandemia. Para universidades, que não estão na base, o
-        resultado é uma extrapolação.</li>
-    </ul>
-    <p>Dados: Plataforma Nilo Peçanha (MEC), Eficiência Acadêmica 2021 a 2023, licença ODbL.
-      <a href="https://github.com/mingridxs/evasao-rede-federal-ne">Código, análises e artigo</a>.</p>
-  </details>
+  <section class="passo sobre" aria-labelledby="t-sobre">
+    <h2 id="t-sobre">Sobre o trabalho</h2>
+    <div class="abas" role="tablist" aria-label="Informações do trabalho">
+      <button role="tab" id="aba-porque" aria-controls="p-porque" aria-selected="true">Por quê</button>
+      <button role="tab" id="aba-modelo" aria-controls="p-modelo" aria-selected="false" tabindex="-1">Como funciona</button>
+      <button role="tab" id="aba-dados" aria-controls="p-dados" aria-selected="false" tabindex="-1">Dados</button>
+      <button role="tab" id="aba-parametros" aria-controls="p-parametros" aria-selected="false" tabindex="-1">Parâmetros</button>
+      <button role="tab" id="aba-resultados" aria-controls="p-resultados" aria-selected="false" tabindex="-1">Resultados</button>
+      <button role="tab" id="aba-limites" aria-controls="p-limites" aria-selected="false" tabindex="-1">Limites e ética</button>
+      <button role="tab" id="aba-privacidade" aria-controls="p-privacidade" aria-selected="false" tabindex="-1">Privacidade</button>
+    </div>
+
+    <div class="painel" role="tabpanel" id="p-porque" aria-labelledby="aba-porque">
+      <p>Nos cursos técnicos e de graduação da Rede Federal do Nordeste, 58% das matrículas que chegaram ao fim do prazo
+        previsto terminaram em evasão: abandono, desligamento, cancelamento, reprovação ou transferência para outra
+        instituição. Na graduação, a taxa passa de 70%.</p>
+      <p>Quanto mais cedo uma instituição sabe quem corre mais risco, mais cedo pode oferecer assistência estudantil,
+        monitoria ou acompanhamento. Este trabalho testa se dá para estimar esse risco já na matrícula, só com dados de
+        cadastro, e se a estimativa é igualmente confiável para todos os grupos de estudantes.</p>
+      <p>É o projeto final da disciplina de Inteligência Artificial do curso de Ciência da Computação da Universidade
+        Federal do Piauí (2026.2), feito por Maria Ingrid Xavier Sousa.</p>
+    </div>
+
+    <div class="painel" role="tabpanel" id="p-modelo" aria-labelledby="aba-modelo" hidden>
+      <h3>Gradient boosting</h3>
+      <p>O modelo é um conjunto de <span id="n-arvores">várias centenas de</span> árvores de decisão pequenas. Cada árvore
+        faz perguntas simples ("o curso é uma licenciatura?", "a idade ao entrar passa de 20 anos?") e corrige parte do erro
+        das anteriores. A soma de todas dá o risco. A implementação é o HistGradientBoostingClassifier do scikit-learn.</p>
+      <h3>Calibração</h3>
+      <p>Depois do treino, as probabilidades passam por uma calibração isotônica: se o modelo diz 70%, cerca de 70% dos
+        alunos com aquele perfil de fato evadiram. É isso que permite ler o número como uma porcentagem.</p>
+      <h3>Alerta</h3>
+      <p>O alerta usa um limite para cada nível de curso, escolhido para equilibrar os acertos entre quem evade e quem
+        conclui. Sem isso, quase todo aluno de graduação receberia alerta.</p>
+      <h3>No seu aparelho</h3>
+      <p>O modelo foi exportado para um arquivo e roda em JavaScript no navegador. Um teste automático confere que o site
+        calcula a mesma probabilidade que o Python em 2.000 casos.</p>
+    </div>
+
+    <div class="painel" role="tabpanel" id="p-dados" aria-labelledby="aba-dados" hidden>
+      <p>Microdados de Eficiência Acadêmica da <a href="https://dadosabertos.mec.gov.br/pnp">Plataforma Nilo Peçanha</a>
+        (MEC), edições 2021, 2022 e 2023, sob licença Open Data Commons Open Database License (ODbL). Cada edição traz as
+        turmas cujo prazo de conclusão terminou e a situação final de cada aluno.</p>
+      <table class="tabela">
+        <tr><th>Recorte</th><th class="num">Matrículas</th></tr>
+        <tr><td>Nordeste, cursos técnicos e de graduação, com desfecho</td><td class="num">178.484</td></tr>
+        <tr><td>Treino (70%)</td><td class="num">124.938</td></tr>
+        <tr><td>Validação (20%): escolha de parâmetros e calibração</td><td class="num">35.697</td></tr>
+        <tr><td>Teste (10%): usado uma vez, para medir o resultado</td><td class="num">17.849</td></tr>
+      </table>
+      <p>A divisão é aleatória e mantém em cada parte a mesma proporção de edições e de evasão. Ficaram de fora cursos
+        de qualificação (FIC), pós-graduação e alunos que ainda estavam cursando após o prazo.</p>
+    </div>
+
+    <div class="painel" role="tabpanel" id="p-parametros" aria-labelledby="aba-parametros" hidden>
+      <h3>O que o modelo usa</h3>
+      <ul class="etiquetas" id="lista-atributos"></ul>
+      <p>O valor da renda não é usado: não melhorou a previsão. O que o modelo usa é se a renda e a cor/raça foram
+        registradas na matrícula, porque quem não teve esses registros evadiu mais, mesmo comparando alunos da mesma
+        instituição. A cor/raça em si entra porque, sem ela, o risco de estudantes indígenas era subestimado.</p>
+      <h3>Hiperparâmetros</h3>
+      <table class="tabela">
+        <tr><td>Taxa de aprendizado</td><td class="num">0,1</td></tr>
+        <tr><td>Folhas por árvore (máximo)</td><td class="num">31</td></tr>
+        <tr><td>Alunos por folha (mínimo)</td><td class="num">20</td></tr>
+        <tr><td>Regularização L2</td><td class="num">1,0</td></tr>
+        <tr><td>Número de árvores (parada antecipada)</td><td class="num" id="t-arvores">–</td></tr>
+        <tr><td>Limite de alerta no técnico</td><td class="num" id="t-limiar-tecnico">–</td></tr>
+        <tr><td>Limite de alerta na graduação</td><td class="num" id="t-limiar-graduacao">–</td></tr>
+      </table>
+      <p>Os hiperparâmetros saíram de 12 combinações testadas na validação; todas ficaram a menos de 0,002 de AUC umas
+        das outras, então o resultado não depende de ajuste fino.</p>
+    </div>
+
+    <div class="painel" role="tabpanel" id="p-resultados" aria-labelledby="aba-resultados" hidden>
+      <p>Medido nas 17.849 matrículas de teste, que o modelo nunca viu. A AUC é a chance de, num par com um aluno que
+        evadiu e um que concluiu, o que evadiu receber risco maior; 0,5 é o acaso.</p>
+      <table class="tabela">
+        <tr><th>Estratégia</th><th class="num">AUC</th><th class="num">Acerto</th></tr>
+        <tr><td>Dizer que todos evadem</td><td class="num">0,500</td><td class="num">58%</td></tr>
+        <tr><td>Taxa histórica do curso no campus</td><td class="num">0,761</td><td class="num">68%</td></tr>
+        <tr><td>Regressão logística</td><td class="num">0,789</td><td class="num">72%</td></tr>
+        <tr class="destaque"><td>Gradient boosting (este site)</td><td class="num">0,832</td><td class="num">73%</td></tr>
+      </table>
+      <ul>
+        <li>Nos 30% de casos em que o modelo está mais seguro, ele acerta 86%; em 60% dos alunos, acerta 80% ou mais.</li>
+        <li>As probabilidades estão bem calibradas: o erro médio fica abaixo de 3 pontos para quase todos os grupos.</li>
+        <li>Mais dados ainda ajudariam: cada vez que a base de treino dobrou, a AUC subiu cerca de 0,01.</li>
+      </ul>
+    </div>
+
+    <div class="painel" role="tabpanel" id="p-limites" aria-labelledby="aba-limites" hidden>
+      <ul>
+        <li>O modelo só conhece dados de matrícula. Notas, frequência, trabalho e a vida de cada aluno, que pesam muito
+          na evasão, não estão na base.</li>
+        <li>Grupos com mais evasão (homens, pessoas pretas, quem não declarou renda) recebem mais alertas, inclusive
+          errados. Isso acontece porque o modelo é calibrado; não é possível ter, ao mesmo tempo, calibração e as mesmas
+          taxas de erro para todos quando as taxas de evasão diferem.</li>
+        <li>Mesmo com a cor/raça, o risco de estudantes indígenas ainda é subestimado em cerca de 6 pontos, e há poucos
+          casos para medir com precisão.</li>
+        <li>Quem entra com até 17 anos (quase sempre no técnico integrado) evade menos, e o modelo encontra só cerca de
+          40% desses casos de evasão.</li>
+        <li>As turmas da base passaram pela pandemia, e a base cobre só o Nordeste. Para universidades, que não estão na
+          base, o resultado é uma extrapolação.</li>
+        <li>O uso pretendido é orientar apoio. Usar o risco para negar vaga, bolsa ou qualquer direito seria um uso
+          indevido.</li>
+      </ul>
+    </div>
+
+    <div class="painel" role="tabpanel" id="p-privacidade" aria-labelledby="aba-privacidade" hidden>
+      <p>O cálculo acontece inteiro no seu navegador: o site baixa o modelo e não envia o que você preenche.</p>
+      <p>Só a avaliação do passo 4 pode sair do seu aparelho, e só se você marcar a autorização. Cor ou raça exige uma
+        segunda autorização, específica. Não há nome, e-mail, documento nem registro do seu endereço de internet. Depois
+        do envio, o site mostra um código que permite pedir a exclusão da resposta.</p>
+    </div>
+  </section>
 </main>
 
 <footer class="coluna">
-  Projeto final de Inteligência Artificial, UFPI, 2026.2. Maria Ingrid Xavier Sousa.
+  Dados: Plataforma Nilo Peçanha (MEC), licença ODbL.
+  <a href="https://github.com/mingridxs/evasao-rede-federal-ne">Código, análises e artigo</a>.
 </footer>
 
 <script type="module">
 import { probabilidade, nivelDoCurso, limiarDoNivel } from "./modelo.js";
-import { ENDERECO_COLETA } from "./coleta.js";
+import { ENDERECO_COLETA, CONTATO } from "./coleta.js";
 
 const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto",
                "setembro", "outubro", "novembro", "dezembro"];
@@ -287,9 +443,23 @@ const SEXOS = { F: "Feminino", M: "Masculino" };
 const UFS = { AL: "Alagoas", BA: "Bahia", CE: "Ceará", MA: "Maranhão", PB: "Paraíba", PE: "Pernambuco",
               PI: "Piauí", RN: "Rio Grande do Norte", SE: "Sergipe" };
 const TIPOS = ["Bacharelado", "Licenciatura", "Tecnologia", "Técnico"];
-const OUTRO = "__outro";
+// Faixas de renda familiar per capita, em salários mínimos, como na Plataforma Nilo Peçanha.
+const RENDAS = [["0<RFP<=0,5", "Até meio salário mínimo"], ["0,5<RFP<=1", "De meio a 1 salário mínimo"],
+                ["1<RFP<=1,5", "De 1 a 1,5 salário mínimo"], ["1,5<RFP<=2,5", "De 1,5 a 2,5 salários mínimos"],
+                ["2,5<RFP<=3,5", "De 2,5 a 3,5 salários mínimos"], ["RFP>3,5", "Mais de 3,5 salários mínimos"]];
+const NOMES = {
+  instituicao: "Instituição", unidade_de_ensino: "Campus", uf: "Estado", nome_de_curso: "Nome do curso",
+  tipo_de_curso: "Nível do curso", tipo_de_oferta: "Forma de oferta", modalidade_de_ensino: "Modalidade",
+  eixo_tecnologico: "Eixo tecnológico", subeixo_tecnologico: "Subeixo tecnológico", turno: "Turno",
+  fonte_de_financiamento: "Programa de financiamento", sexo: "Sexo", cor_raca: "Cor/raça",
+  carga_horaria: "Carga horária", duracao_prevista_meses: "Duração prevista", mes_ingresso: "Mês de ingresso",
+  idade_ingresso: "Idade ao entrar", renda_nao_declarada: "Renda registrada ou não",
+  cor_nao_declarada: "Cor/raça registrada ou não",
+};
+const OUTRO = "__outro", PREFIRO_NAO = "__prefiro_nao";
 const $ = id => document.getElementById(id);
 const pct = v => `${Math.round(v * 100)}%`;
+const dec = v => v.toFixed(2).replace(".", ",");
 const unicos = lista => [...new Set(lista)].filter(v => v !== null && v !== undefined)
   .sort((a, b) => String(a).localeCompare(String(b), "pt-BR"));
 const moda = lista => { const c = new Map(); for (const v of lista) c.set(v, (c.get(v) || 0) + 1);
@@ -299,15 +469,6 @@ const mediana = lista => { const s = [...lista].sort((a, b) => a - b); return s.
 let modelo, ofertas, modo = "lista", ultimo = null, nota = null;
 // Indicadores de não declaração: 0 = informou, 1 = não informou, null = não lembra (o modelo trata como ausente).
 const declaracao = { renda_nao_declarada: undefined, cor_nao_declarada: undefined };
-const PREFIRO_NAO = "__prefiro_nao";
-// Cor/raça como entrada (decisão de 18/11). Quem não a registrou na matrícula entra como
-// "Não declarada", igual aos dados de treino; "Prefiro não informar" vira valor ausente.
-function corRaca() {
-  if (declaracao.cor_nao_declarada === 1) return "Não declarada";
-  const v = $("cor").value;
-  return v === "" || v === PREFIRO_NAO ? null : v;
-}
-function corRespondida() { return declaracao.cor_nao_declarada === 1 || $("cor").value !== ""; }
 
 function preencher(select, itens, rotulo = v => v, vazio = "Selecione") {
   select.innerHTML = "";
@@ -317,6 +478,21 @@ function preencher(select, itens, rotulo = v => v, vazio = "Selecione") {
     select.append(new Option(texto, valor));
   }
   select.disabled = itens.length === 0;
+}
+
+/* ---------- Cor/raça e renda ---------- */
+// Quem não registrou a cor/raça entra como "Não declarada", igual aos dados de treino;
+// "Prefiro não informar" vira valor ausente para o modelo.
+function corRaca() {
+  if (declaracao.cor_nao_declarada === 1) return "Não declarada";
+  const v = $("cor").value;
+  return v === "" || v === PREFIRO_NAO ? null : v;
+}
+const corRespondida = () => declaracao.cor_nao_declarada === 1 || $("cor").value !== "";
+function rendaDeclarada() {
+  if (declaracao.renda_nao_declarada !== 0) return null;
+  const v = $("renda").value;
+  return v === "" || v === PREFIRO_NAO ? null : v;
 }
 
 /* ---------- Modo "Instituto Federal ou CEFET" ---------- */
@@ -399,9 +575,10 @@ function atualizar() {
   const curso = cursoEscolhido();
   $("detalhe-curso").textContent = curso && curso.carga_horaria
     ? `Carga horária típica de ${curso.carga_horaria} horas, com duração prevista de ${curso.duracao_prevista_meses} meses.` : "";
+  $("bloco-renda").hidden = declaracao.renda_nao_declarada !== 0;
+  $("bloco-cor").hidden = declaracao.cor_nao_declarada === undefined || declaracao.cor_nao_declarada === 1;
   const idade = Number($("idade").value);
   const respondeu = Object.values(declaracao).every(v => v !== undefined) && corRespondida();
-  $("bloco-cor").hidden = declaracao.cor_nao_declarada === undefined || declaracao.cor_nao_declarada === 1;
   $("calcular").disabled = !(curso && $("sexo").value && $("mes").value && $("idade").value !== ""
                              && idade >= 12 && idade <= 80 && respondeu);
 }
@@ -424,11 +601,11 @@ function regua(prob, limiar) {
     <rect x="${x(0)}" y="30" width="${(x(ini) - x(0)).toFixed(1)}" height="16" rx="3" fill="#e2f0e7"/>
     <rect x="${x(ini)}" y="30" width="${(x(fim) - x(ini)).toFixed(1)}" height="16" fill="#f7ecd9"/>
     <rect x="${x(fim)}" y="30" width="${(x(1) - x(fim)).toFixed(1)}" height="16" rx="3" fill="#f6e1de"/>
-    ${marcas.map(v => `<line x1="${x(v)}" x2="${x(v)}" y1="46" y2="${Math.round(v * 10) % 5 === 0 ? 58 : 53}" stroke="#52625c" stroke-width="1.5"/>`).join("")}
-    ${[0, 0.5, 1].map(v => `<text x="${x(v)}" y="78" text-anchor="${v === 0 ? "start" : v === 1 ? "end" : "middle"}" font-size="13" fill="#52625c">${v * 100}%</text>`).join("")}
-    <line x1="${x(limiar)}" x2="${x(limiar)}" y1="22" y2="52" stroke="#1c2b27" stroke-width="2" stroke-dasharray="4 3"/>
-    <text x="${x(limiar)}" y="15" text-anchor="${ancora}" font-size="13" fill="#1c2b27">alerta a partir de ${pct(limiar)}</text>
-    <circle cx="${x(prob)}" cy="38" r="10" fill="#1e6b4f" stroke="#fff" stroke-width="3"/>
+    ${marcas.map(v => `<line x1="${x(v)}" x2="${x(v)}" y1="46" y2="${Math.round(v * 10) % 5 === 0 ? 58 : 53}" stroke="#4a5876" stroke-width="1.5"/>`).join("")}
+    ${[0, 0.5, 1].map(v => `<text x="${x(v)}" y="78" text-anchor="${v === 0 ? "start" : v === 1 ? "end" : "middle"}" font-size="13" fill="#4a5876">${v * 100}%</text>`).join("")}
+    <line x1="${x(limiar)}" x2="${x(limiar)}" y1="22" y2="52" stroke="#14213d" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="${x(limiar)}" y="15" text-anchor="${ancora}" font-size="13" fill="#14213d">alerta a partir de ${pct(limiar)}</text>
+    <circle cx="${x(prob)}" cy="38" r="10" fill="#1f4e9c" stroke="#fff" stroke-width="3"/>
   </svg>`;
 }
 
@@ -458,47 +635,90 @@ function calcular(evento) {
     <p class="nota">Isto descreve o histórico de alunos parecidos, não o seu futuro. Se você pensa em deixar o curso,
       a assistência estudantil e a coordenação do seu campus podem ajudar.</p>`;
   $("bloco-resultado").classList.remove("inativo");
-  ultimo = { entrada, prob, limiar, alerta };
+  ultimo = { entrada, prob, limiar, alerta, renda: rendaDeclarada() };
   mostrarAvaliacao();
   $("bloco-resultado").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
 }
 
-/* ---------- Avaliação ---------- */
+/* ---------- Avaliação e envio ---------- */
 function mostrarAvaliacao() {
   $("bloco-avaliacao").hidden = false;
   $("enviado").hidden = true; $("falha-envio").hidden = true;
   nota = null;
   for (const b of document.querySelectorAll("[data-nota]")) b.setAttribute("aria-checked", "false");
-  $("comentario").value = ""; $("aceite").checked = false;
+  $("comentario").value = ""; $("aceite").checked = false; $("aceite-cor").checked = false;
+  // A segunda autorização só aparece se houver uma cor/raça declarada para enviar.
+  const temCor = ultimo.entrada.cor_raca && ultimo.entrada.cor_raca !== "Não declarada";
+  $("linha-aceite-cor").hidden = !temCor;
   $("bloco-envio").hidden = !ENDERECO_COLETA;
   $("sem-coleta").hidden = Boolean(ENDERECO_COLETA);
   verificarEnvio();
 }
 function verificarEnvio() { $("enviar").disabled = !(nota && $("aceite").checked && ultimo); }
 
+function codigoResposta() {
+  const letras = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  const s = Array.from(bytes, b => letras[b % letras.length]).join("");
+  return `${s.slice(0, 4)}-${s.slice(4)}`;
+}
+
 async function enviar() {
   $("enviar").disabled = true; $("falha-envio").hidden = true;
-  const e = ultimo.entrada;
+  const e = ultimo.entrada, comCor = $("aceite-cor").checked && !$("linha-aceite-cor").hidden;
+  const codigo = codigoResposta();
   const dados = {
-    versao_site: "2", modo, instituicao: e.instituicao, campus: e.unidade_de_ensino, uf: e.uf,
+    codigo, versao_site: "3", modo, instituicao: e.instituicao, campus: e.unidade_de_ensino, uf: e.uf,
     curso: e.nome_de_curso, tipo_de_curso: e.tipo_de_curso, tipo_de_oferta: e.tipo_de_oferta,
     turno: e.turno, modalidade: e.modalidade_de_ensino, eixo: e.eixo_tecnologico,
     sexo: e.sexo, idade: e.idade_ingresso, mes: e.mes_ingresso,
-    renda_nao_declarada: e.renda_nao_declarada, cor_nao_declarada: e.cor_nao_declarada, cor_raca: e.cor_raca,
+    renda_nao_declarada: e.renda_nao_declarada, renda_faixa_declarada: ultimo.renda,
+    cor_nao_declarada: e.cor_nao_declarada, cor_raca: comCor ? e.cor_raca : null,
+    consentimento: true, consentimento_cor: comCor,
     probabilidade: Number(ultimo.prob.toFixed(4)), limiar: Number(ultimo.limiar.toFixed(2)), alerta: ultimo.alerta,
     avaliacao: nota, comentario: $("comentario").value.trim().slice(0, 400),
   };
   try {
     await fetch(ENDERECO_COLETA, { method: "POST", mode: "no-cors",
                                    headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(dados) });
-    $("bloco-envio").hidden = true; $("enviado").hidden = false;
+    $("bloco-envio").hidden = true;
+    $("enviado").innerHTML = `Avaliação enviada. Obrigada por ajudar a testar o modelo.<br>
+      Código da sua resposta: <span class="codigo">${codigo}</span>. Guarde-o se quiser pedir a exclusão.`;
+    $("enviado").hidden = false;
   } catch {
     $("falha-envio").hidden = false; verificarEnvio();
   }
 }
 
+/* ---------- Abas ---------- */
+function abas() {
+  const lista = [...document.querySelectorAll('[role="tab"]')];
+  const ativar = aba => {
+    for (const a of lista) {
+      const sel = a === aba;
+      a.setAttribute("aria-selected", String(sel));
+      a.tabIndex = sel ? 0 : -1;
+      $(a.getAttribute("aria-controls")).hidden = !sel;
+    }
+    aba.focus({ preventScroll: true });
+    aba.scrollIntoView({ block: "nearest", inline: "nearest" });
+  };
+  lista.forEach((aba, i) => {
+    aba.addEventListener("click", () => ativar(aba));
+    aba.addEventListener("keydown", e => {
+      const j = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : e.key === "Home" ? 0 : e.key === "End" ? lista.length - 1 : null;
+      if (j === null) return;
+      e.preventDefault(); ativar(lista[(j + lista.length) % lista.length]);
+    });
+  });
+}
+
 /* ---------- Início ---------- */
 async function iniciar() {
+  abas();
+  $("contato").innerHTML = CONTATO
+    ? `<a href="mailto:${CONTATO}">${CONTATO}</a>`
+    : `pelo <a href="https://github.com/mingridxs/evasao-rede-federal-ne">repositório do projeto</a>`;
   let opcoes;
   try {
     const [m, op] = await Promise.all([fetch("modelo.json").then(r => r.json()), fetch("opcoes.json").then(r => r.json())]);
@@ -512,19 +732,25 @@ async function iniciar() {
   preencher($("sexo"), opcoes.sexos.filter(s => SEXOS[s]), s => SEXOS[s]);
   preencher($("mes"), opcoes.meses, m => MESES[m - 1]);
   preencher($("cor"), [...(opcoes.cores || []), [PREFIRO_NAO, "Prefiro não informar"]]);
-  preencher($("o-uf"), [...Object.entries(UFS), ["", "Fora do Nordeste"]], undefined, "Selecione");
-  $("o-uf").options[$("o-uf").options.length - 1].value = "fora";
+  preencher($("renda"), [...RENDAS, [PREFIRO_NAO, "Prefiro não informar"]]);
+  preencher($("o-uf"), [...Object.entries(UFS), ["fora", "Fora do Nordeste"]]);
   preencher($("o-tipo"), TIPOS);
   outraTipo();
-  $("limiar-tecnico").textContent = pct(modelo.limiar["Técnico"]);
-  $("limiar-graduacao").textContent = pct(modelo.limiar["Graduação"]);
+
+  $("n-arvores").textContent = String(modelo.arvores.length);
+  $("t-arvores").textContent = String(modelo.arvores.length);
+  $("t-limiar-tecnico").textContent = dec(modelo.limiar["Técnico"]);
+  $("t-limiar-graduacao").textContent = dec(modelo.limiar["Graduação"]);
+  for (const c of [...modelo.categoricas, ...modelo.numericas]) {
+    const li = document.createElement("li"); li.textContent = NOMES[c] || c; $("lista-atributos").append(li);
+  }
 
   $("instituicao").addEventListener("change", listaCampus);
   $("campus").addEventListener("change", listaCursos);
   $("curso").addEventListener("change", listaOfertas);
   $("o-tipo").addEventListener("change", outraTipo);
   $("o-curso").addEventListener("change", outraCurso);
-  for (const id of ["oferta", "o-uf", "o-eixo", "o-oferta", "o-turno", "o-modalidade", "idade", "sexo", "mes", "cor"])
+  for (const id of ["oferta", "o-uf", "o-eixo", "o-oferta", "o-turno", "o-modalidade", "idade", "sexo", "mes", "cor", "renda"])
     $(id).addEventListener("input", atualizar);
   for (const b of document.querySelectorAll("[data-modo]")) b.addEventListener("click", () => trocarModo(b.dataset.modo));
   for (const grupo of document.querySelectorAll("[data-campo]")) {
