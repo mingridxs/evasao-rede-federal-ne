@@ -11,6 +11,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Literata:opsz,wght@7..72,600;7..72,700&display=swap" rel="stylesheet">
+<script>
+// Aplica tema e acessibilidade salvos antes de desenhar a página, para não piscar.
+(function () {
+  var p = {};
+  try { p = JSON.parse(localStorage.getItem("evasao-preferencias") || "{}"); } catch (e) {}
+  var d = document.documentElement, tema = p.tema || "auto";
+  d.dataset.tema = tema === "auto" ? (matchMedia("(prefers-color-scheme: dark)").matches ? "escuro" : "claro") : tema;
+  if (p.contraste) d.dataset.contraste = "alto";
+  if (p.espaco) d.dataset.espaco = "amplo";
+  if (p.movimento) d.dataset.movimento = "reduzido";
+  if (p.escala) d.style.fontSize = (p.escala * 100) + "%";
+})();
+</script>
 <style>
   :root {
     --marinho: #0f2a4f; --marinho-2: #1b3d6e; --marinho-claro: #e7edf6; --marinho-medio: #9fb4d4;
@@ -18,12 +31,42 @@
     --pauta: #dfe7f2; --margem: rgba(200, 70, 70, .32); --marca: #ffc94a;
     --borda-campo: #b4c1d6; --baixo: #2e7d52; --duvida: #9a6410; --alto: #b23a2e; --raio: 12px;
     --lateral: clamp(18px, 4vw, 56px);
+    --capa: #0f2a4f; --destaque: #0f2a4f; --link: #1b3d6e; --borda-cartao: #e3e9f2; --sombra: rgba(15, 42, 79, .07);
+    --cor-evadiu: #e08a2e; --cor-concluiu: #1f4f8f; --apagada: #c5cedc; --eixo: #9aa6ba; --dica-fundo: #13203a;
+    --selo-baixo-fundo: #e2f0e7; --selo-duvida-fundo: #f7ecd9; --selo-alto-fundo: #f6e1de;
+    --cautela-fundo: #fbf3e6; --sensivel-fundo: #fff7e2; --destaque-linha: #fff6dc;
+    --desativado: #f1f4f9; --acao-desativada: #a7b3c7; --regua-borda: #fff;
+    color-scheme: light;
   }
+  /* Modo noturno */
+  :root[data-tema="escuro"] {
+    --capa: #071327; --marinho: #3566b0; --marinho-2: #4a7cc6; --marinho-claro: #1c2d4b; --marinho-medio: #3d5478;
+    --destaque: #a9c8f5; --link: #8fb8f2; --tinta: #e4eaf4; --suave: #a8b5cb; --linha: #2b3b59; --papel: #132039;
+    --fundo: #0b1526; --pauta: rgba(140, 170, 220, .08); --margem: rgba(240, 120, 120, .32); --borda-campo: #41557a;
+    --baixo: #7fd3a0; --duvida: #f0c26e; --alto: #f39b8f; --borda-cartao: #22314f; --sombra: rgba(0, 0, 0, .35);
+    --cor-concluiu: #5b8fd6; --apagada: #3a4a68; --eixo: #6c7c98; --dica-fundo: #020814;
+    --selo-baixo-fundo: #173a28; --selo-duvida-fundo: #3d2e12; --selo-alto-fundo: #46211c;
+    --cautela-fundo: #3a2c12; --sensivel-fundo: #33290f; --destaque-linha: #2c2a17;
+    --desativado: #1a2843; --acao-desativada: #3a4a66; --regua-borda: #132039;
+    color-scheme: dark;
+  }
+  /* Alto contraste: textos secundários na cor do texto principal, bordas mais fortes, sem pauta */
+  :root[data-contraste="alto"] { --suave: var(--tinta); --linha: #6f7d96; --borda-campo: #3f4d66; --borda-cartao: #6f7d96;
+                                 --pauta: transparent; --margem: transparent; --apagada: #8794ab; }
+  :root[data-tema="escuro"][data-contraste="alto"] { --linha: #8296b8; --borda-campo: #a9b9d6; --borda-cartao: #8296b8;
+                                                     --apagada: #7a8aa8; --fundo: #000; --papel: #0b1220; }
+  :root[data-contraste="alto"] a { text-decoration-thickness: 2px; }
+  :root[data-contraste="alto"] .passo { box-shadow: none; }
+  /* Espaçamento maior entre linhas, letras e palavras */
+  :root[data-espaco="amplo"] body { line-height: 1.85; letter-spacing: .03em; word-spacing: .12em; }
+  :root[data-espaco="amplo"] .texto p, :root[data-espaco="amplo"] .texto li { margin-bottom: 1em; }
+  /* Sem animações */
+  :root[data-movimento="reduzido"] *, :root[data-movimento="reduzido"] *::before { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   /* Folha de caderno: pauta azul-clara e a linha vermelha da margem */
   body { margin: 0; color: var(--tinta); background-color: var(--fundo);
-         font: 17px/1.55 "Atkinson Hyperlegible", system-ui, sans-serif; }
+         font: 1.0625rem/1.55 "Atkinson Hyperlegible", system-ui, sans-serif; }
   .conteudo { display: block; min-width: 0; background-image:
            linear-gradient(90deg, transparent calc(var(--lateral) - 10px), var(--margem) calc(var(--lateral) - 10px),
                            var(--margem) calc(var(--lateral) - 8px), transparent calc(var(--lateral) - 8px)),
@@ -32,7 +75,7 @@
   h1, h2, h3 { font-family: Literata, Georgia, serif; font-weight: 700; }
 
   /* Menu: capa de caderno azul-marinho; no computador vira uma coluna fixa com a espiral na borda */
-  .menu { background: var(--marinho); color: #fff; padding: 16px var(--lateral) 0; position: relative; z-index: 5; }
+  .menu { background: var(--capa); color: #fff; padding: 16px var(--lateral) 0; position: relative; z-index: 5; }
   .marca { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; }
   .marca img { width: 38px; height: 38px; border-radius: 9px; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .35); flex: none; }
   .nome-site { font: 700 1.05rem/1.2 Literata, Georgia, serif; }
@@ -43,6 +86,29 @@
   .menu-lista a[aria-current="page"] { background: #fff; color: var(--marinho); font-weight: 700; }
   .menu-grupo { margin: 18px 12px 4px; font-size: .8rem; color: #9fb4d4; }
   .menu-rodape { display: none; }
+  .pular { position: absolute; left: 8px; top: -60px; z-index: 20; background: var(--marca); color: #13203a; padding: 10px 14px;
+           border-radius: 8px; font-weight: 700; text-decoration: none; }
+  .pular:focus { top: 8px; }
+  .pagina h1:focus { outline: none; }
+  .ajustes { color: #fff; }
+  .ajustes summary { display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; padding: 9px 12px;
+                     border-radius: 8px; color: #d6e1f2; font-size: .95rem; border: 1px solid rgba(255, 255, 255, .25); }
+  .ajustes summary::-webkit-details-marker { display: none; }
+  .ajustes summary:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+  .ajustes summary svg { width: 20px; height: 20px; flex: none; }
+  .ajustes[open] summary { background: rgba(255, 255, 255, .1); color: #fff; }
+  .ajustes .opcoes { display: grid; gap: 14px; padding: 14px 4px 6px; font-size: .92rem; }
+  .ajustes .titulo-opcao { display: block; color: #c4d3ea; margin: 0 0 6px; font-size: .85rem; font-weight: 400; }
+  .ajustes .grupo-botoes { display: flex; gap: 4px; background: rgba(255, 255, 255, .08); border-radius: 8px; padding: 3px; }
+  .ajustes .grupo-botoes button { flex: 1; min-height: 38px; border: 0; border-radius: 6px; background: transparent; color: #d6e1f2;
+                                  font: inherit; font-size: .88rem; cursor: pointer; padding: 4px 6px; }
+  .ajustes .grupo-botoes button[aria-pressed="true"], .ajustes .grupo-botoes button[aria-checked="true"] { background: #fff; color: #0f2a4f; font-weight: 700; }
+  .ajustes .grupo-botoes output { flex: 1; display: grid; place-items: center; color: #fff; font-variant-numeric: tabular-nums; }
+  .ajustes .chave-opcao { display: flex; align-items: center; gap: 10px; margin: 0; font-weight: 400; color: #e4eaf4; cursor: pointer; }
+  .ajustes .chave-opcao input { width: 20px; height: 20px; margin: 0; accent-color: var(--marca); flex: none; }
+  .ajustes .restaurar { justify-self: start; background: none; border: 0; color: #c4d3ea; text-decoration: underline; font: inherit;
+                        font-size: .85rem; cursor: pointer; padding: 2px 0; }
+  .ajustes .nota-fonte { margin: 0; color: #9fb4d4; font-size: .8rem; }
   /* No celular: o menu fica no alto, com os links rolando para o lado */
   @media (max-width: 1023px) {
     .menu { display: grid; gap: 10px; padding-bottom: 10px; }
@@ -51,9 +117,10 @@
     .menu-rolagem { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--lateral)); padding: 0 var(--lateral); }
     .menu-rolagem::-webkit-scrollbar { display: none; }
     .menu-rolagem a { white-space: nowrap; padding: 7px 12px; }
+    .ajustes summary { display: inline-flex; padding: 7px 12px; }
   }
   .cabeca { padding: 34px 0 18px; }
-  .cabeca h1 { font-size: clamp(1.7rem, 4.6vw, 2.5rem); line-height: 1.15; margin: 0 0 10px; color: var(--marinho); letter-spacing: -0.01em; }
+  .cabeca h1 { font-size: clamp(1.7rem, 4.6vw, 2.5rem); line-height: 1.15; margin: 0 0 10px; color: var(--destaque); letter-spacing: -0.01em; }
   .abertura { margin: 0; color: var(--suave); max-width: 44em; }
   .passo.texto { max-width: 78ch; }
   .passo.texto.largo { max-width: none; }
@@ -65,12 +132,12 @@
   .pizza-legenda { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
   .pizza-legenda li { display: grid; grid-template-columns: 14px auto; column-gap: 10px; align-items: baseline; margin: 0; }
   .pizza-legenda .chave { width: 14px; height: 14px; border-radius: 3px; background: var(--cor); align-self: center; }
-  .pizza-legenda strong { font: 700 1.6rem/1.1 Literata, Georgia, serif; color: var(--marinho); }
+  .pizza-legenda strong { font: 700 1.6rem/1.1 Literata, Georgia, serif; color: var(--destaque); }
   .pizza-legenda span.texto-legenda { grid-column: 2; color: var(--suave); font-size: .92rem; }
-  .subtitulo { font-size: 1.25rem; margin: 0 0 12px; color: var(--marinho); }
+  .subtitulo { font-size: 1.25rem; margin: 0 0 12px; color: var(--destaque); }
 
   .passo { margin: 0 0 20px; padding: 22px 20px 24px; background: var(--papel); border-radius: var(--raio);
-           border: 1px solid #e3e9f2; box-shadow: 0 1px 2px rgba(15, 42, 79, .06), 0 10px 28px rgba(15, 42, 79, .07); }
+           border: 1px solid var(--borda-cartao); box-shadow: 0 1px 2px var(--sombra), 0 10px 28px var(--sombra); }
   .passo > h2 { display: flex; align-items: flex-start; gap: 12px; font-size: 1.25rem; margin: 0 0 14px; line-height: 1.25; }
   .passo > h2 .n { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--marinho); color: #fff;
                    display: grid; place-items: center; font: 700 .95rem "Atkinson Hyperlegible", sans-serif; margin-top: -2px; }
@@ -79,12 +146,12 @@
   label, .rotulo { display: block; font-weight: 700; font-size: .95rem; margin: 16px 0 6px; }
   .ajuda { display: block; font-weight: 400; color: var(--suave); font-size: .88rem; margin-top: 2px; }
   select, input[type=number], textarea {
-    width: 100%; min-height: 48px; padding: 10px 12px; font: inherit; font-size: 17px; color: var(--tinta);
+    width: 100%; min-height: 48px; padding: 10px 12px; font: inherit; font-size: 1.0625rem; color: var(--tinta);
     background: var(--papel); border: 1.5px solid var(--borda-campo); border-radius: 8px; }
   select { appearance: none; padding-right: 40px; text-overflow: ellipsis;
            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234b5873' stroke-width='2' fill='none'/%3E%3C/svg%3E");
            background-repeat: no-repeat; background-position: right 14px center; }
-  select:disabled { background-color: #f1f4f9; color: #8a96ad; }
+  select:disabled { background-color: var(--desativado); color: var(--suave); opacity: .75; }
   textarea { min-height: 84px; resize: vertical; }
   select:hover:not(:disabled), input:hover, textarea:hover { border-color: var(--marinho-2); }
   :focus-visible { outline: 3px solid var(--marca); outline-offset: 2px; }
@@ -95,35 +162,35 @@
   .alternar.tres { grid-template-columns: 1fr 1fr 1fr; }
   .alternar button { min-height: 48px; border: 0; border-radius: 8px; background: transparent; font: inherit; font-size: .95rem;
                      color: var(--suave); cursor: pointer; padding: 6px 8px; line-height: 1.25; }
-  .alternar button:hover { color: var(--marinho); }
-  .alternar button[aria-checked="true"] { background: var(--papel); color: var(--marinho); font-weight: 700;
+  .alternar button:hover { color: var(--destaque); }
+  .alternar button[aria-checked="true"] { background: var(--papel); color: var(--destaque); font-weight: 700;
                                           box-shadow: 0 1px 3px rgba(15, 42, 79, .22); }
   .detalhe { color: var(--suave); font-size: .9rem; margin: 8px 0 0; }
-  .so-coleta { font-size: .85rem; color: var(--marinho); background: var(--marinho-claro); border-radius: 6px;
+  .so-coleta { font-size: .85rem; color: var(--destaque); background: var(--marinho-claro); border-radius: 6px;
                padding: 2px 8px; display: inline-block; margin-top: 4px; font-weight: 400; }
 
   .acao { width: 100%; min-height: 54px; margin-top: 22px; border: 0; border-radius: 10px; background: var(--marinho);
           color: #fff; font: inherit; font-weight: 700; font-size: 1.05rem; cursor: pointer; }
   .acao:hover:not(:disabled) { background: var(--marinho-2); }
-  .acao:disabled { background: #a7b3c7; cursor: not-allowed; }
+  .acao:disabled { background: var(--acao-desativada); cursor: not-allowed; }
   .privacidade { color: var(--suave); font-size: .85rem; margin: 10px 0 0; }
 
   /* Resultado: o número e a régua */
   .espera { display: grid; gap: 10px; justify-items: start; color: var(--suave); }
   .espera svg { width: 100%; max-width: 360px; height: auto; }
   .valor { font: 700 clamp(3.6rem, 16vw, 5.2rem)/1 Literata, Georgia, serif; letter-spacing: -0.02em;
-           font-variant-numeric: lining-nums tabular-nums; margin: 6px 0 4px; color: var(--marinho); }
+           font-variant-numeric: lining-nums tabular-nums; margin: 6px 0 4px; color: var(--destaque); }
   .frase { margin: 0; font-size: 1.05rem; }
   .selo { display: inline-block; font-weight: 700; font-size: .9rem; padding: 3px 10px; border-radius: 6px; }
-  .selo.baixo { color: var(--baixo); background: #e2f0e7; }
-  .selo.duvida { color: var(--duvida); background: #f7ecd9; }
-  .selo.alto { color: var(--alto); background: #f6e1de; }
+  .selo.baixo { color: var(--baixo); background: var(--selo-baixo-fundo); }
+  .selo.duvida { color: var(--duvida); background: var(--selo-duvida-fundo); }
+  .selo.alto { color: var(--alto); background: var(--selo-alto-fundo); }
   .regua { margin: 26px 0 8px; max-width: 520px; }
   .regua svg { display: block; width: 100%; height: auto; overflow: visible; }
   .leitura { margin: 18px 0 0; }
   .nota { margin: 16px 0 0; padding: 12px 14px; border-left: 4px solid var(--marinho); background: var(--marinho-claro);
           border-radius: 0 8px 8px 0; font-size: .95rem; }
-  .nota.cautela { border-color: var(--duvida); background: #fbf3e6; }
+  .nota.cautela { border-color: var(--duvida); background: var(--cautela-fundo); }
 
   /* Avaliação e consentimento */
   .escala { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 8px; }
@@ -136,8 +203,8 @@
   .consentimento h3 { font-size: 1rem; margin: 0 0 8px; }
   .aceite { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 0; font-size: .92rem; font-weight: 400; }
   .aceite input { width: 22px; height: 22px; margin: 2px 0 0; flex: none; accent-color: var(--marinho); }
-  .aceite.sensivel { background: #fff7e2; border-radius: 8px; padding: 10px; }
-  .termo summary { cursor: pointer; color: var(--marinho-2); font-size: .92rem; padding: 4px 0; }
+  .aceite.sensivel { background: var(--sensivel-fundo); border-radius: 8px; padding: 10px; }
+  .termo summary { cursor: pointer; color: var(--link); font-size: .92rem; padding: 4px 0; }
   .termo dl { font-size: .88rem; margin: 8px 0 0; }
   .termo dt { font-weight: 700; margin-top: 8px; }
   .termo dd { margin: 2px 0 0; color: var(--suave); }
@@ -154,12 +221,12 @@
   .tabela td, .tabela th { text-align: left; padding: 7px 4px; border-bottom: 1px solid var(--linha); vertical-align: top; }
   .tabela th { color: var(--suave); font-weight: 700; }
   .tabela .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .tabela tr.destaque td { font-weight: 700; color: var(--marinho); background: #fff6dc; }
+  .tabela tr.destaque td { font-weight: 700; color: var(--destaque); background: var(--destaque-linha); }
   .etiquetas { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; padding: 0; list-style: none; }
-  .etiquetas li { background: var(--marinho-claro); color: var(--marinho); border-radius: 6px; padding: 3px 9px; font-size: .88rem; margin: 0; }
+  .etiquetas li { background: var(--marinho-claro); color: var(--destaque); border-radius: 6px; padding: 3px 9px; font-size: .88rem; margin: 0; }
 
   /* Gráficos: linhas com nome, barra e valor */
-  .evadiu { --cor: #e08a2e; } .concluiu { --cor: #1f4f8f; }
+  .evadiu { --cor: var(--cor-evadiu); } .concluiu { --cor: var(--cor-concluiu); }
   .legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 8px 0 4px; padding: 0; list-style: none;
              font-size: .88rem; color: var(--suave); }
   .legenda li { display: flex; align-items: center; gap: 6px; margin: 0; }
@@ -173,7 +240,7 @@
   .linha .valor-barra { text-align: right; font-variant-numeric: tabular-nums; color: var(--tinta); }
   .trilho { position: relative; height: 18px; }
   .trilho .barra { position: absolute; left: 0; top: 2px; bottom: 2px; background: var(--cor, var(--marinho)); border-radius: 0 4px 4px 0; }
-  .trilho .barra.apagada { background: #c5cedc; }
+  .trilho .barra.apagada { background: var(--apagada); }
   .trilho .ref { position: absolute; top: -1px; bottom: -1px; width: 3px; margin-left: -1.5px; background: var(--tinta); border-radius: 1px; }
   .linha.destaque .nome { font-weight: 700; }
   .segmentos { display: grid; gap: 10px; margin: 10px 0 4px; }
@@ -187,21 +254,22 @@
   .filtro { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 8px; }
   .filtro label { margin: 0; }
   .filtro select { width: auto; min-width: 14em; max-width: 100%; }
-  .dica { position: fixed; z-index: 10; pointer-events: none; background: var(--tinta); color: #fff; font-size: .85rem;
+  .dica { position: fixed; z-index: 10; pointer-events: none; background: var(--dica-fundo); color: #fff; font-size: .85rem;
           padding: 6px 10px; border-radius: 6px; max-width: 280px; line-height: 1.35; box-shadow: 0 4px 14px rgba(0, 0, 0, .2); }
   .dica strong { display: block; font-size: 1rem; }
 
   /* Explicação do resultado: barras para os dois lados a partir do centro */
   .pesos { margin: 22px 0 0; padding-top: 18px; border-top: 1px solid var(--linha); }
   .pesos h3 { font-size: 1.05rem; margin: 0 0 6px; }
-  .pesos .linha { grid-template-columns: minmax(8em, 42%) 1fr 4.6em; }
-  .pesos .trilho::before { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: #9aa6ba; }
+  .pesos .linha { grid-template-columns: minmax(8em, 38%) 1fr auto; }
+  .pesos .valor-barra { white-space: nowrap; }
+  .pesos .trilho::before { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--eixo); }
   .pesos .barra { border-radius: 4px; }
-  .pesos .barra.sobe { --cor: #e08a2e; border-radius: 0 4px 4px 0; }
-  .pesos .barra.desce { --cor: #1f4f8f; border-radius: 4px 0 0 4px; }
+  .pesos .barra.sobe { --cor: var(--cor-evadiu); border-radius: 0 4px 4px 0; }
+  .pesos .barra.desce { --cor: var(--cor-concluiu); border-radius: 4px 0 0 4px; }
 
   .rodape { color: var(--suave); font-size: .85rem; padding-top: 8px; padding-bottom: 40px; }
-  a { color: var(--marinho-2); }
+  a { color: var(--link); }
   [hidden] { display: none !important; }
 
   @media (min-width: 700px) {
@@ -226,6 +294,7 @@
     .menu-lista a { font-size: 1.05rem; padding: 11px 14px; }
     .menu-grupo { margin: 24px 14px 6px; font-size: .85rem; }
     .menu-lista a { margin-right: 14px; }
+    .ajustes { margin: 22px 14px 0 0; }
     .menu-rodape { display: block; margin: auto 14px 0 12px; padding-top: 24px; font-size: .8rem; color: #9fb4d4; }
     .cabeca { padding: 44px 0 22px; }
     /* Formulário à esquerda (curso, entrada e registro) e resultado à direita */
@@ -253,6 +322,7 @@
 </style>
 </head>
 <body>
+<a class="pular" href="#conteudo" id="pular">Pular para o conteúdo</a>
 <div class="app">
   <nav class="menu" aria-label="Seções do site">
     <a class="marca" href="#simulador">
@@ -272,15 +342,43 @@
       <li><a href="#etica" data-pagina="etica">Ética e privacidade</a></li>
     </ul>
     </div>
+    <details class="ajustes" id="ajustes">
+      <summary><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="2" fill="currentColor"/>
+        <path d="M5 8.5l7 1.5 7-1.5M12 10v5m0 0l-3.5 6.5M12 15l3.5 6.5" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round"/></svg>Acessibilidade e tema</summary>
+      <div class="opcoes">
+        <div>
+          <span class="titulo-opcao" id="r-tema">Tema</span>
+          <div class="grupo-botoes" role="radiogroup" aria-labelledby="r-tema">
+            <button type="button" role="radio" data-tema="claro">Claro</button>
+            <button type="button" role="radio" data-tema="escuro">Noturno</button>
+            <button type="button" role="radio" data-tema="auto">Automático</button>
+          </div>
+        </div>
+        <div>
+          <span class="titulo-opcao" id="r-texto">Tamanho do texto</span>
+          <div class="grupo-botoes" role="group" aria-labelledby="r-texto">
+            <button type="button" id="texto-menor" aria-label="Diminuir o texto">A−</button>
+            <output id="texto-valor" aria-live="polite">100%</output>
+            <button type="button" id="texto-maior" aria-label="Aumentar o texto">A+</button>
+          </div>
+        </div>
+        <label class="chave-opcao"><input type="checkbox" id="opt-contraste"> Alto contraste</label>
+        <label class="chave-opcao"><input type="checkbox" id="opt-espaco"> Mais espaço entre linhas e letras</label>
+        <label class="chave-opcao"><input type="checkbox" id="opt-movimento"> Sem animações</label>
+        <button type="button" class="restaurar" id="restaurar">Voltar ao padrão</button>
+        <p class="nota-fonte">A fonte do site, Atkinson Hyperlegible, foi criada para leitores com baixa visão.</p>
+      </div>
+    </details>
     <p class="menu-rodape">Projeto final de Inteligência Artificial, UFPI, 2026.2</p>
   </nav>
 
-<main class="conteudo">
+<main class="conteudo" id="conteudo" tabindex="-1">
   <section class="pagina" id="simulador" aria-labelledby="h-simulador">
     <div class="largura">
       <header class="cabeca">
         <h1 id="h-simulador">Alunos como você concluem?</h1>
-        <p class="abertura">Informe seu curso e os dados da sua entrada. O site mostra quantos alunos com perfil parecido
+        <p class="abertura">Informe seu curso e como foi a sua entrada nele. O site mostra quantos alunos com perfil parecido
           deixaram o curso sem concluir, segundo 178 mil matrículas dos Institutos Federais e escolas técnicas federais do Nordeste.</p>
       </header>
 
@@ -297,7 +395,9 @@
         <select id="campus" disabled></select>
         <label for="curso">Curso</label>
         <select id="curso" disabled></select>
-        <label for="oferta">Forma de oferta, turno e modalidade</label>
+        <label for="oferta">Forma de oferta, turno e modalidade
+          <span class="ajuda">Integrado: junto com o ensino médio, na mesma escola. Concomitante: ao mesmo tempo que o ensino
+            médio, em outra escola. Subsequente: depois de concluir o ensino médio. PROEJA: para jovens e adultos.</span></label>
         <select id="oferta" disabled></select>
       </div>
 
@@ -305,7 +405,7 @@
     </section>
 
     <section class="passo" id="passo-perfil" aria-labelledby="t2">
-      <h2 id="t2"><span class="n" aria-hidden="true">2</span>Sua entrada</h2>
+      <h2 id="t2"><span class="n" aria-hidden="true">2</span>Sua entrada no curso</h2>
       <div class="duas">
         <div>
           <label for="idade">Idade ao entrar</label>
@@ -350,10 +450,10 @@
       <div id="resultado">
         <div class="espera">
           <svg viewBox="0 0 400 60" aria-hidden="true">
-            <rect x="8" y="22" width="384" height="16" rx="3" fill="#e7edf6"/>
-            <line x1="8" x2="392" y1="45" y2="45" stroke="#c3cee0" stroke-width="1.5" stroke-dasharray="2 6"/>
+            <rect x="8" y="22" width="384" height="16" rx="3" style="fill: var(--marinho-claro)"/>
+            <line x1="8" x2="392" y1="45" y2="45" style="stroke: var(--borda-campo)" stroke-width="1.5" stroke-dasharray="2 6"/>
           </svg>
-          <p class="detalhe">Preencha seu curso e sua entrada. O risco aparece aqui.</p>
+          <p class="detalhe">Preencha seu curso e sua entrada no curso. O risco aparece aqui.</p>
         </div>
       </div>
     </section>
@@ -438,7 +538,7 @@
     <ul class="legenda"><li class="evadiu"><span class="chave"></span>Evadiu</li><li class="concluiu"><span class="chave"></span>Concluiu</li></ul>
 
     <h3>Evasão por instituição</h3>
-    <p class="detalhe">A linha escura marca a média do Nordeste. Passe o mouse ou toque numa linha para ver o total de matrículas.</p>
+    <p class="detalhe">A linha vertical em cada barra marca a média do Nordeste. Passe o mouse ou toque numa linha para ver o total de matrículas.</p>
     <div class="barras" id="g-instituicoes"></div>
 
     <h3 id="t-multiplos">Onde a evasão é maior</h3>
@@ -448,7 +548,7 @@
       <div><h4>Nível do curso</h4><div class="barras" id="g-nivel"></div></div>
       <div><h4>Forma de oferta</h4><div class="barras" id="g-oferta"></div></div>
       <div><h4>Idade ao entrar</h4><div class="barras" id="g-idade"></div></div>
-      <div><h4>Edição da Plataforma Nilo Peçanha</h4><div class="barras" id="g-edicao"></div></div>
+      <div><h4>Ano da edição da Plataforma Nilo Peçanha <span class="ajuda">Cada edição traz as turmas cujo prazo terminou no ano anterior.</span></h4><div class="barras" id="g-edicao"></div></div>
     </div>
     <p class="detalhe">Todas as 178 mil matrículas com desfecho, edições 2021 a 2023. Grupos com menos de 30 matrículas
       não aparecem.</p>
@@ -636,7 +736,7 @@ const GRUPOS = [
   { nome: "Idade ao entrar", colunas: ["idade_ingresso"] },
   { nome: "Sexo", colunas: ["sexo"] },
   { nome: "Cor/raça", colunas: ["cor_raca", "cor_nao_declarada"] },
-  { nome: "Renda declarada ou não", colunas: ["renda_nao_declarada"] },
+  { nome: "Se informou a renda", colunas: ["renda_nao_declarada"] },
   { nome: "Mês de ingresso", colunas: ["mes_ingresso"] },
 ];
 const pontos = v => `${v >= 0 ? "+" : "−"}${Math.abs(v * 100).toFixed(1).replace(".", ",")}`;
@@ -710,14 +810,14 @@ function regua(prob, limiar) {
   const marcas = Array.from({ length: 11 }, (_, i) => i / 10);
   const ancora = limiar > 0.8 ? "end" : limiar < 0.2 ? "start" : "middle";
   return `<svg viewBox="0 0 ${L} 92" role="img" aria-label="Risco de ${pct(prob)}; alerta a partir de ${pct(limiar)}">
-    <rect x="${x(0)}" y="30" width="${(x(ini) - x(0)).toFixed(1)}" height="16" rx="3" fill="#e2f0e7"/>
-    <rect x="${x(ini)}" y="30" width="${(x(fim) - x(ini)).toFixed(1)}" height="16" fill="#f7ecd9"/>
-    <rect x="${x(fim)}" y="30" width="${(x(1) - x(fim)).toFixed(1)}" height="16" rx="3" fill="#f6e1de"/>
-    ${marcas.map(v => `<line x1="${x(v)}" x2="${x(v)}" y1="46" y2="${Math.round(v * 10) % 5 === 0 ? 58 : 53}" stroke="#4b5873" stroke-width="1.5"/>`).join("")}
-    ${[0, 0.5, 1].map(v => `<text x="${x(v)}" y="78" text-anchor="${v === 0 ? "start" : v === 1 ? "end" : "middle"}" font-size="13" fill="#4b5873">${v * 100}%</text>`).join("")}
-    <line x1="${x(limiar)}" x2="${x(limiar)}" y1="22" y2="52" stroke="#13203a" stroke-width="2" stroke-dasharray="4 3"/>
-    <text x="${x(limiar)}" y="15" text-anchor="${ancora}" font-size="13" fill="#13203a">alerta a partir de ${pct(limiar)}</text>
-    <circle cx="${x(prob)}" cy="38" r="10" fill="#0f2a4f" stroke="#fff" stroke-width="3"/>
+    <rect x="${x(0)}" y="30" width="${(x(ini) - x(0)).toFixed(1)}" height="16" rx="3" style="fill: var(--selo-baixo-fundo)"/>
+    <rect x="${x(ini)}" y="30" width="${(x(fim) - x(ini)).toFixed(1)}" height="16" style="fill: var(--selo-duvida-fundo)"/>
+    <rect x="${x(fim)}" y="30" width="${(x(1) - x(fim)).toFixed(1)}" height="16" rx="3" style="fill: var(--selo-alto-fundo)"/>
+    ${marcas.map(v => `<line x1="${x(v)}" x2="${x(v)}" y1="46" y2="${Math.round(v * 10) % 5 === 0 ? 58 : 53}" style="stroke: var(--suave)" stroke-width="1.5"/>`).join("")}
+    ${[0, 0.5, 1].map(v => `<text x="${x(v)}" y="78" text-anchor="${v === 0 ? "start" : v === 1 ? "end" : "middle"}" font-size="13" style="fill: var(--suave)">${v * 100}%</text>`).join("")}
+    <line x1="${x(limiar)}" x2="${x(limiar)}" y1="22" y2="52" style="stroke: var(--tinta)" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="${x(limiar)}" y="15" text-anchor="${ancora}" font-size="13" style="fill: var(--tinta)">alerta a partir de ${pct(limiar)}</text>
+    <circle cx="${x(prob)}" cy="38" r="10" style="fill: var(--destaque); stroke: var(--regua-borda)" stroke-width="3"/>
   </svg>`;
 }
 
@@ -730,7 +830,7 @@ function calcular(evento) {
   const limiar = limiarDoNivel(modelo, curso.tipo_de_curso);
   const nivel = nivelDoCurso(curso.tipo_de_curso) === "Técnico" ? "dos cursos técnicos" : "das graduações";
   const alerta = prob >= limiar, duvida = Math.abs(prob - limiar) < 0.10;
-  const [classe, selo] = duvida ? ["duvida", "Perto do limite"] : alerta ? ["alto", "Risco alto"] : ["baixo", "Risco abaixo do alerta"];
+  const [classe, selo] = duvida ? ["duvida", "Perto do limite"] : alerta ? ["alto", "Risco alto"] : ["baixo", "Abaixo do limite de alerta"];
   const valor = Math.round(prob * 100) === Math.round(limiar * 100) ? `${(prob * 100).toFixed(1).replace(".", ",")}%` : pct(prob);
 
   $("resultado").innerHTML = `
@@ -739,9 +839,9 @@ function calcular(evento) {
     <p class="frase">dos alunos com perfil parecido com o seu deixaram o curso sem concluir.</p>
     <div class="regua">${regua(prob, limiar)}</div>
     <p class="leitura">${alerta
-      ? `Passa do limite de alerta ${nivel}: o modelo recomendaria acompanhamento desde a matrícula.`
-      : `Fica abaixo do limite de alerta ${nivel}: o modelo não emitiria alerta.`}
-      ${duvida ? "Como está perto do limite, aqui o modelo está pouco seguro." : ""}</p>
+      ? `Passa do limite de alerta ${nivel}. O alerta é o sinal que o modelo daria à instituição para acompanhar o aluno de perto desde a matrícula.`
+      : `Fica abaixo do limite de alerta ${nivel}. O alerta é o sinal que o modelo daria à instituição para acompanhar o aluno de perto; aqui ele não seria dado.`}
+      ${duvida ? "Como o valor está perto do limite, o modelo está pouco seguro sobre esse alerta." : ""}</p>
     <div class="pesos" id="pesos" ${painel ? "" : "hidden"}>
       <h3>O que mais pesou</h3>
       <p class="detalhe" id="pesos-texto">Calculando…</p>
@@ -760,7 +860,7 @@ function calcular(evento) {
   pedirExplicacao(entrada);
   mostrarAvaliacao();
   // No celular, rola até o resultado; no notebook, ele está ao lado e só rola se estiver fora da tela.
-  $("bloco-resultado").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+  $("bloco-resultado").scrollIntoView({ behavior: semAnimacao() ? "auto" : "smooth",
                                         block: matchMedia("(min-width: 1024px)").matches ? "nearest" : "start" });
 }
 
@@ -960,6 +1060,52 @@ async function enviar() {
   }
 }
 
+/* ---------- Tema e acessibilidade ---------- */
+const CHAVE_PREF = "evasao-preferencias";
+const ESCALAS = [0.9, 1, 1.125, 1.25, 1.375, 1.5];
+let pref = {};
+try { pref = JSON.parse(localStorage.getItem(CHAVE_PREF) || "{}"); } catch { pref = {}; }
+const semAnimacao = () => pref.movimento || matchMedia("(prefers-reduced-motion: reduce)").matches;
+const escuroDoSistema = matchMedia("(prefers-color-scheme: dark)");
+
+function aplicarPreferencias() {
+  const d = document.documentElement, tema = pref.tema || "auto";
+  d.dataset.tema = tema === "auto" ? (escuroDoSistema.matches ? "escuro" : "claro") : tema;
+  for (const [chave, atributo, valor] of [["contraste", "contraste", "alto"], ["espaco", "espaco", "amplo"], ["movimento", "movimento", "reduzido"]]) {
+    if (pref[chave]) d.dataset[atributo] = valor; else delete d.dataset[atributo];
+    $(`opt-${chave}`).checked = Boolean(pref[chave]);
+  }
+  const escala = pref.escala || 1;
+  d.style.fontSize = escala === 1 ? "" : `${escala * 100}%`;
+  $("texto-valor").textContent = `${Math.round(escala * 100)}%`;
+  $("texto-menor").disabled = escala <= ESCALAS[0];
+  $("texto-maior").disabled = escala >= ESCALAS[ESCALAS.length - 1];
+  for (const b of document.querySelectorAll("button[data-tema]")) b.setAttribute("aria-checked", String(b.dataset.tema === tema));
+  document.querySelector('meta[name="theme-color"]').content = d.dataset.tema === "escuro" ? "#071327" : "#0f2a4f";
+  try { localStorage.setItem(CHAVE_PREF, JSON.stringify(pref)); } catch { /* sem armazenamento: vale só nesta visita */ }
+}
+
+function iniciarPreferencias() {
+  for (const b of document.querySelectorAll("button[data-tema]")) b.addEventListener("click", () => { pref.tema = b.dataset.tema; aplicarPreferencias(); });
+  const mudarEscala = passo => {
+    const i = ESCALAS.indexOf(pref.escala || 1);
+    pref.escala = ESCALAS[Math.min(ESCALAS.length - 1, Math.max(0, i + passo))];
+    aplicarPreferencias();
+  };
+  $("texto-menor").addEventListener("click", () => mudarEscala(-1));
+  $("texto-maior").addEventListener("click", () => mudarEscala(1));
+  for (const chave of ["contraste", "espaco", "movimento"])
+    $(`opt-${chave}`).addEventListener("change", e => { pref[chave] = e.target.checked; aplicarPreferencias(); });
+  $("restaurar").addEventListener("click", () => { pref = {}; aplicarPreferencias(); });
+  escuroDoSistema.addEventListener("change", () => { if (!pref.tema || pref.tema === "auto") aplicarPreferencias(); });
+  // "Pular para o conteúdo" leva ao título da página aberta, sem mudar o endereço.
+  $("pular").addEventListener("click", e => {
+    e.preventDefault();
+    document.querySelector(".pagina:not([hidden]) h1").focus();
+  });
+  aplicarPreferencias();
+}
+
 /* ---------- Páginas (menu lateral) ---------- */
 function mostrarPagina() {
   const paginas = [...document.querySelectorAll(".pagina")];
@@ -975,12 +1121,19 @@ function mostrarPagina() {
   return atual;
 }
 function iniciarPaginas() {
-  addEventListener("hashchange", () => { mostrarPagina(); scrollTo(0, 0); $("dica").hidden = true; });
+  addEventListener("hashchange", () => {
+    const atual = mostrarPagina();
+    scrollTo(0, 0);
+    $("dica").hidden = true;
+    $(`h-${atual}`).focus({ preventScroll: true });  // leitores de tela anunciam a página nova
+  });
+  for (const h of document.querySelectorAll(".pagina h1")) h.tabIndex = -1;
   mostrarPagina();
 }
 
 /* ---------- Início ---------- */
 async function iniciar() {
+  iniciarPreferencias();
   iniciarPaginas();
   $("contato").innerHTML = CONTATO
     ? `<a href="mailto:${CONTATO}">${CONTATO}</a>`
