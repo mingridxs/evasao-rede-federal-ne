@@ -5,8 +5,8 @@ Projeto final da disciplina de Inteligência Artificial (UFPI, 2026.2), de Maria
 Um modelo de classificação estima, a partir de dados conhecidos no ingresso (curso, campus, oferta, idade e sexo), a probabilidade de um aluno de curso técnico ou de graduação evadir. O trabalho avalia o desempenho contra baselines simples, a calibração das probabilidades e a desigualdade de erros entre grupos de alunos.
 
 - **Demonstração:** https://mingridxs.github.io/evasao-rede-federal-ne/ (o modelo roda no navegador; só a avaliação opcional, com consentimento, é enviada)
-- **Notebook:** em preparação
-- **Dados limpos:** em preparação (Kaggle)
+- **Notebook:** `notebook/evasao_rede_federal_ne.ipynb` (versão publicada no Kaggle: em preparação)
+- **Dados (brutos e limpos):** [Evasao na Rede Federal do Nordeste (PNP 2021-2023)](https://www.kaggle.com/datasets/mariaingridxavier/evasao-na-rede-federal-do-nordeste-pnp-2021-2023), no Kaggle
 
 ## Resultados principais (teste, 17.849 matrículas)
 

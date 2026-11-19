@@ -2,7 +2,8 @@
 
 ## Configuração do dataset
 
-- **Título:** Evasão na Rede Federal do Nordeste (PNP 2021–2023)
+- **Título:** Evasao na Rede Federal do Nordeste (PNP 2021-2023) (sem acento e com hífen, para o Kaggle gerar um endereço limpo)
+- **Endereço:** https://www.kaggle.com/datasets/mariaingridxavier/evasao-na-rede-federal-do-nordeste-pnp-2021-2023
 - **Subtítulo:** Microdados de Eficiência Acadêmica da Plataforma Nilo Peçanha e base limpa para previsão de evasão
 - **Licença:** Open Data Commons Open Database License (ODbL). É a mesma licença dos dados originais e a ODbL exige que a redistribuição a mantenha.
 - **Visibilidade:** pública

@@ -101,6 +101,7 @@ Este notebook reproduz o trabalho inteiro, dos microdados brutos aos resultados 
 
 **Links:** [site](https://mingridxs.github.io/evasao-rede-federal-ne/) ·
 [repositório](https://github.com/mingridxs/evasao-rede-federal-ne) ·
+[dataset no Kaggle](https://www.kaggle.com/datasets/mariaingridxavier/evasao-na-rede-federal-do-nordeste-pnp-2021-2023) ·
 dados: Plataforma Nilo Peçanha (MEC), licença ODbL.
 
 **Como rodar no Kaggle:** anexe o dataset com os microdados (*Add Input*) e use *Run All*.
