@@ -190,7 +190,7 @@
       <div class="marca"><img src="favicon.svg" alt="">Projeto de Inteligência Artificial, UFPI</div>
       <h1>Qual o risco de evasão no seu curso?</h1>
       <p class="abertura">Informe seu curso e como você entrou. O site mostra quantos alunos com perfil parecido deixaram
-        o curso sem concluir, segundo 178 mil matrículas da Rede Federal no Nordeste.</p>
+        o curso sem concluir, segundo 178 mil matrículas dos Institutos Federais e CEFETs do Nordeste.</p>
     </div>
     <p class="lado">Leva cerca de um minuto. O cálculo acontece no seu aparelho, e no fim você diz se o resultado combina
       com o que vive no curso.</p>
@@ -202,12 +202,7 @@
     <section class="passo" aria-labelledby="t1">
       <h2 id="t1"><span class="n" aria-hidden="true">1</span>Seu curso</h2>
 
-      <span class="rotulo" id="r-onde">Onde você estuda</span>
-      <div class="alternar" role="radiogroup" aria-labelledby="r-onde">
-        <button type="button" role="radio" aria-checked="true" data-modo="lista">Instituto Federal ou CEFET</button>
-        <button type="button" role="radio" aria-checked="false" data-modo="outra">Outra instituição</button>
-      </div>
-
+      <p class="detalhe">Institutos Federais, CEFETs e escolas técnicas vinculadas a universidades, no Nordeste.</p>
       <div id="modo-lista">
         <label for="instituicao">Instituição</label>
         <select id="instituicao" disabled><option>Carregando…</option></select>
@@ -219,39 +214,6 @@
         <select id="oferta" disabled></select>
       </div>
 
-      <div id="modo-outra" hidden>
-        <p class="detalhe">Para universidades e outras instituições fora da base, o modelo usa só o curso, a forma de oferta e o seu perfil.</p>
-        <div class="duas empilha">
-          <div>
-            <label for="o-uf">Estado</label>
-            <select id="o-uf"></select>
-          </div>
-          <div>
-            <label for="o-tipo">Nível</label>
-            <select id="o-tipo"></select>
-          </div>
-        </div>
-        <label for="o-curso">Curso <span class="ajuda">Escolha o nome mais parecido com o seu</span></label>
-        <select id="o-curso" disabled></select>
-        <div id="o-eixo-bloco" hidden>
-          <label for="o-eixo">Área do curso</label>
-          <select id="o-eixo"></select>
-        </div>
-        <div id="o-oferta-bloco" hidden>
-          <label for="o-oferta">Forma de oferta</label>
-          <select id="o-oferta"></select>
-        </div>
-        <div class="duas">
-          <div>
-            <label for="o-turno">Turno</label>
-            <select id="o-turno"></select>
-          </div>
-          <div>
-            <label for="o-modalidade">Modalidade</label>
-            <select id="o-modalidade"></select>
-          </div>
-        </div>
-      </div>
       <p class="detalhe" id="detalhe-curso"></p>
     </section>
 
@@ -310,8 +272,15 @@
     </section>
 
     <section class="passo" id="bloco-avaliacao" aria-labelledby="t4" hidden>
-      <h2 id="t4"><span class="n" aria-hidden="true">4</span>Esse resultado faz sentido para você?</h2>
-      <span class="rotulo" id="r-escala">Quanto ele combina com o que você vive no curso</span>
+      <h2 id="t4"><span class="n" aria-hidden="true">4</span>Quer registrar suas respostas?</h2>
+      <div class="alternar" role="radiogroup" aria-labelledby="t4" id="registrar">
+        <button type="button" role="radio" aria-checked="false" data-registrar="sim">Sim</button>
+        <button type="button" role="radio" aria-checked="false" data-registrar="nao">Não</button>
+      </div>
+      <p class="detalhe" id="nao-registrar" hidden>Nada foi enviado.</p>
+
+      <div id="bloco-registro" hidden>
+      <span class="rotulo" id="r-escala">O resultado combina com o que você vive no curso?</span>
       <div class="escala" role="radiogroup" aria-labelledby="r-escala">
         <button type="button" role="radio" aria-checked="false" data-nota="1" aria-label="1, não combina nada">1</button>
         <button type="button" role="radio" aria-checked="false" data-nota="2" aria-label="2">2</button>
@@ -355,11 +324,12 @@
             <span>Autorizo também, de forma específica, o envio da minha cor ou raça, que é um dado pessoal sensível. Opcional.</span>
           </label>
         </div>
-        <button type="button" id="enviar" class="acao" disabled>Enviar avaliação</button>
+        <button type="button" id="enviar" class="acao" disabled>Registrar respostas</button>
       </div>
       <p class="detalhe" id="sem-coleta" hidden>O envio de avaliações ainda não está ligado neste site.</p>
       <p class="enviado" id="enviado" hidden></p>
       <p class="erro" id="falha-envio" hidden>Não foi possível enviar. Confira a conexão e tente de novo.</p>
+      </div>
     </section>
   </aside>
 </main>
@@ -467,8 +437,8 @@
           casos para medir com precisão.</li>
         <li>Quem entra com até 17 anos (quase sempre no técnico integrado) evade menos, e o modelo encontra só cerca de
           40% desses casos de evasão.</li>
-        <li>As turmas da base passaram pela pandemia, e a base cobre só o Nordeste. Para universidades, que não estão na
-          base, o resultado é uma extrapolação.</li>
+        <li>As turmas da base passaram pela pandemia, e a base cobre só os Institutos Federais e CEFETs do Nordeste.
+          Por isso o site não aceita universidades nem outras instituições: o resultado seria uma extrapolação.</li>
         <li>O uso pretendido é orientar apoio. Usar o risco para negar vaga, bolsa ou qualquer direito seria um uso
           indevido.</li>
       </ul>
@@ -495,9 +465,6 @@ import { ENDERECO_COLETA, CONTATO } from "./coleta.js";
 const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto",
                "setembro", "outubro", "novembro", "dezembro"];
 const SEXOS = { F: "Feminino", M: "Masculino" };
-const UFS = { AL: "Alagoas", BA: "Bahia", CE: "Ceará", MA: "Maranhão", PB: "Paraíba", PE: "Pernambuco",
-              PI: "Piauí", RN: "Rio Grande do Norte", SE: "Sergipe" };
-const TIPOS = ["Bacharelado", "Licenciatura", "Tecnologia", "Técnico"];
 const NOMES = {
   instituicao: "Instituição", unidade_de_ensino: "Campus", uf: "Estado", nome_de_curso: "Nome do curso",
   tipo_de_curso: "Nível do curso", tipo_de_oferta: "Forma de oferta", modalidade_de_ensino: "Modalidade",
@@ -507,17 +474,14 @@ const NOMES = {
   idade_ingresso: "Idade ao entrar", renda_nao_declarada: "Renda registrada ou não",
   cor_nao_declarada: "Cor/raça registrada ou não",
 };
-const OUTRO = "__outro", PREFIRO_NAO = "__prefiro_nao";
+const PREFIRO_NAO = "__prefiro_nao";
 const $ = id => document.getElementById(id);
 const pct = v => `${Math.round(v * 100)}%`;
 const dec = v => v.toFixed(2).replace(".", ",");
 const unicos = lista => [...new Set(lista)].filter(v => v !== null && v !== undefined)
   .sort((a, b) => String(a).localeCompare(String(b), "pt-BR"));
-const moda = lista => { const c = new Map(); for (const v of lista) c.set(v, (c.get(v) || 0) + 1);
-  return [...c.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null; };
-const mediana = lista => { const s = [...lista].sort((a, b) => a - b); return s.length ? s[Math.floor(s.length / 2)] : null; };
 
-let modelo, ofertas, modo = "lista", ultimo = null, nota = null;
+let modelo, ofertas, ultimo = null, nota = null, registrar = null;
 // Indicadores de não declaração: 0 = informou, 1 = não informou, null = não lembra (o modelo trata como ausente).
 const declaracao = { renda_nao_declarada: undefined, cor_nao_declarada: undefined };
 
@@ -563,58 +527,9 @@ function listaOfertas() {
   atualizar();
 }
 
-/* ---------- Modo "Outra instituição" ---------- */
-function ofertasDoTipo() { return ofertas.filter(o => o.tipo_de_curso === $("o-tipo").value); }
-function outraTipo() {
-  const doTipo = ofertasDoTipo();
-  preencher($("o-curso"), [...unicos(doTipo.map(o => o.nome_de_curso)), [OUTRO, "Meu curso não está na lista"]]);
-  preencher($("o-eixo"), unicos(doTipo.map(o => o.eixo_tecnologico)));
-  const tecnico = $("o-tipo").value === "Técnico";
-  $("o-oferta-bloco").hidden = !tecnico;
-  preencher($("o-oferta"), tecnico ? unicos(doTipo.map(o => o.tipo_de_oferta)) : []);
-  preencher($("o-turno"), unicos(doTipo.map(o => o.turno)), t => t === "Não se aplica" ? "Não se aplica (a distância)" : t);
-  preencher($("o-modalidade"), unicos(doTipo.map(o => o.modalidade_de_ensino)), m => m.replace("Educação ", ""));
-  if (!$("o-tipo").value) for (const id of ["o-curso", "o-turno", "o-modalidade"]) $(id).disabled = true;
-  $("o-eixo-bloco").hidden = true;
-  atualizar();
-}
-function outraCurso() { $("o-eixo-bloco").hidden = $("o-curso").value !== OUTRO; atualizar(); }
-
-// Para quem não está na base, completa o que o formulário não pergunta com o mais comum em cursos parecidos.
-function perfilDoCurso() {
-  let base = ofertasDoTipo();
-  const nome = $("o-curso").value;
-  const porCurso = nome === OUTRO ? base.filter(o => o.eixo_tecnologico === $("o-eixo").value)
-                                  : base.filter(o => o.nome_de_curso === nome);
-  if (porCurso.length) base = porCurso;
-  const oferta = $("o-tipo").value === "Técnico" ? $("o-oferta").value : moda(base.map(o => o.tipo_de_oferta));
-  const comOferta = base.filter(o => o.tipo_de_oferta === oferta);
-  if (comOferta.length) base = comOferta;
-  return {
-    instituicao: null, unidade_de_ensino: null,
-    uf: $("o-uf").value || null,
-    nome_de_curso: nome === OUTRO ? null : nome,
-    tipo_de_curso: $("o-tipo").value,
-    tipo_de_oferta: oferta,
-    modalidade_de_ensino: $("o-modalidade").value,
-    eixo_tecnologico: nome === OUTRO ? $("o-eixo").value : moda(base.map(o => o.eixo_tecnologico)),
-    subeixo_tecnologico: moda(base.map(o => o.subeixo_tecnologico)),
-    turno: $("o-turno").value,
-    fonte_de_financiamento: moda(base.map(o => o.fonte_de_financiamento)),
-    carga_horaria: mediana(base.map(o => o.carga_horaria)),
-    duracao_prevista_meses: mediana(base.map(o => o.duracao_prevista_meses)),
-  };
-}
-
 function cursoEscolhido() {
-  if (modo === "lista") {
-    if ($("oferta").value === "") return null;
-    return { ...ofertas[Number($("oferta").value)] };
-  }
-  const ok = $("o-tipo").value && $("o-curso").value && $("o-turno").value && $("o-modalidade").value
-             && ($("o-curso").value !== OUTRO || $("o-eixo").value)
-             && ($("o-tipo").value !== "Técnico" || $("o-oferta").value);
-  return ok ? perfilDoCurso() : null;
+  if ($("oferta").value === "") return null;
+  return { ...ofertas[Number($("oferta").value)] };
 }
 
 function atualizar() {
@@ -628,13 +543,6 @@ function atualizar() {
                              && idade >= 12 && idade <= 80 && respondeu);
 }
 
-function trocarModo(novo) {
-  modo = novo;
-  for (const b of document.querySelectorAll("[data-modo]")) b.setAttribute("aria-checked", String(b.dataset.modo === novo));
-  $("modo-lista").hidden = novo !== "lista";
-  $("modo-outra").hidden = novo !== "outra";
-  atualizar();
-}
 
 /* ---------- Resultado ---------- */
 function regua(prob, limiar) {
@@ -675,8 +583,6 @@ function calcular(evento) {
       ? `Passa do limite de alerta ${nivel}: o modelo recomendaria acompanhamento desde a matrícula.`
       : `Fica abaixo do limite de alerta ${nivel}: o modelo não emitiria alerta.`}
       ${duvida ? "Como está perto do limite, aqui o modelo está pouco seguro." : ""}</p>
-    ${modo === "outra" ? `<p class="nota cautela">Sua instituição não está na base de treino. O resultado usa só o curso,
-      a forma de oferta e o seu perfil, então vale como uma aproximação.</p>` : ""}
     <p class="nota">Isto descreve o histórico de alunos parecidos, não o seu futuro. Se você pensa em deixar o curso,
       a assistência estudantil e a coordenação do seu campus podem ajudar.</p>`;
   $("resultado").classList.remove("resultado-novo"); void $("resultado").offsetWidth;
@@ -692,6 +598,7 @@ function calcular(evento) {
 /* ---------- Avaliação e envio ---------- */
 function mostrarAvaliacao() {
   $("bloco-avaliacao").hidden = false;
+  escolherRegistro(null);
   $("enviado").hidden = true; $("falha-envio").hidden = true;
   nota = null;
   for (const b of document.querySelectorAll("[data-nota]")) b.setAttribute("aria-checked", "false");
@@ -703,7 +610,14 @@ function mostrarAvaliacao() {
   $("sem-coleta").hidden = Boolean(ENDERECO_COLETA);
   verificarEnvio();
 }
-function verificarEnvio() { $("enviar").disabled = !(nota && $("aceite").checked && ultimo); }
+function escolherRegistro(valor) {
+  registrar = valor;
+  for (const b of document.querySelectorAll("[data-registrar]")) b.setAttribute("aria-checked", String(b.dataset.registrar === valor));
+  $("bloco-registro").hidden = valor !== "sim";
+  $("nao-registrar").hidden = valor !== "nao";
+  verificarEnvio();
+}
+function verificarEnvio() { $("enviar").disabled = !(registrar === "sim" && nota && $("aceite").checked && ultimo); }
 
 function codigoResposta() {
   const letras = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -717,7 +631,7 @@ async function enviar() {
   const e = ultimo.entrada, comCor = $("aceite-cor").checked && !$("linha-aceite-cor").hidden;
   const codigo = codigoResposta();
   const dados = {
-    codigo, versao_site: "4", modo, instituicao: e.instituicao, campus: e.unidade_de_ensino, uf: e.uf,
+    codigo, versao_site: "5", instituicao: e.instituicao, campus: e.unidade_de_ensino, uf: e.uf,
     curso: e.nome_de_curso, tipo_de_curso: e.tipo_de_curso, tipo_de_oferta: e.tipo_de_oferta,
     turno: e.turno, modalidade: e.modalidade_de_ensino, eixo: e.eixo_tecnologico,
     sexo: e.sexo, idade: e.idade_ingresso, mes: e.mes_ingresso,
@@ -731,7 +645,7 @@ async function enviar() {
     await fetch(ENDERECO_COLETA, { method: "POST", mode: "no-cors",
                                    headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(dados) });
     $("bloco-envio").hidden = true;
-    $("enviado").innerHTML = `Avaliação enviada. Obrigada por ajudar a testar o modelo.<br>
+    $("enviado").innerHTML = `Respostas registradas. Obrigada por ajudar a testar o modelo.<br>
       Código da sua resposta: <span class="codigo">${codigo}</span>. Guarde-o se quiser pedir a exclusão.`;
     $("enviado").hidden = false;
   } catch {
@@ -781,9 +695,6 @@ async function iniciar() {
   preencher($("sexo"), opcoes.sexos.filter(s => SEXOS[s]), s => SEXOS[s]);
   preencher($("mes"), opcoes.meses, m => MESES[m - 1]);
   preencher($("cor"), [...(opcoes.cores || []), [PREFIRO_NAO, "Prefiro não informar"]]);
-  preencher($("o-uf"), [...Object.entries(UFS), ["fora", "Fora do Nordeste"]]);
-  preencher($("o-tipo"), TIPOS);
-  outraTipo();
 
   $("n-arvores").textContent = String(modelo.arvores.length);
   $("t-arvores").textContent = String(modelo.arvores.length);
@@ -796,11 +707,8 @@ async function iniciar() {
   $("instituicao").addEventListener("change", listaCampus);
   $("campus").addEventListener("change", listaCursos);
   $("curso").addEventListener("change", listaOfertas);
-  $("o-tipo").addEventListener("change", outraTipo);
-  $("o-curso").addEventListener("change", outraCurso);
-  for (const id of ["oferta", "o-uf", "o-eixo", "o-oferta", "o-turno", "o-modalidade", "idade", "sexo", "mes", "cor"])
+  for (const id of ["oferta", "idade", "sexo", "mes", "cor"])
     $(id).addEventListener("input", atualizar);
-  for (const b of document.querySelectorAll("[data-modo]")) b.addEventListener("click", () => trocarModo(b.dataset.modo));
   for (const grupo of document.querySelectorAll("[data-campo]")) {
     for (const b of grupo.querySelectorAll("[data-valor]")) b.addEventListener("click", () => {
       declaracao[grupo.dataset.campo] = b.dataset.valor === "" ? null : Number(b.dataset.valor);
@@ -814,6 +722,8 @@ async function iniciar() {
     verificarEnvio();
   });
   $("aceite").addEventListener("change", verificarEnvio);
+  for (const b of document.querySelectorAll("[data-registrar]"))
+    b.addEventListener("click", () => escolherRegistro(b.dataset.registrar));
   $("enviar").addEventListener("click", enviar);
   $("formulario").addEventListener("submit", calcular);
 }
