@@ -252,6 +252,7 @@ SECOES = [
     ("10_renda_raca.py", "## 7. Renda e cor/raça\n\n### 7.1 Registro no ingresso e indicadores de não declaração"),
     ("11_cor_raca_entrada.py", "### 7.2 Cor/raça como entrada"),
     ("12_renda_entrada.py", "### 7.3 Faixa de renda como entrada"),
+    ("16_ic_calibracao_raca.py", "### 7.4 Incerteza da calibração por cor/raça"),
     ("14_modelo_ifpi.py", "## 8. Modelo do Nordeste ou modelo só do IFPI?"),
 ]
 for nome, titulo in SECOES:
