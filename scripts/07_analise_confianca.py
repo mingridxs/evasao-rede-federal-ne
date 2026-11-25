@@ -22,16 +22,28 @@ COR, CINZA = "#2b6cb0", "#9aa5b1"
 plt.rcParams.update({"figure.dpi": 110, "axes.spines.top": False,
                      "axes.spines.right": False, "axes.titleweight": "bold"})
 GRADUACAO = {"Tecnologia", "Licenciatura", "Bacharelado"}
+AUSENTES = {"Não informado", "Não declarada", "Não declarado", "Não Declarada", "nan"}
+
+
+def limiar_por_aluno(d, final):
+    """Limiar de alerta de cada aluno: por nível e, se adotado (seção 6.2), por declaração de renda."""
+    if final.get("limiar_renda"):
+        nd = d["renda_nao_declarada"].astype(int)
+        return np.array([final["limiar_renda"][f"{n}|{r}"] for n, r in zip(d["nivel"], nd)])
+    lim = final["limiar"]
+    return d["nivel"].map(lim).to_numpy() if isinstance(lim, dict) else np.full(len(d), float(lim))
+
 
 final = joblib.load(PASTA_RES / "modelo_final.joblib")
 limiares = final["limiar"]
 p = pd.read_csv(PASTA_RES / "predicoes_teste.csv")
 p["nivel"] = np.where(p["tipo_de_curso"].isin(GRADUACAO), "Graduação", "Técnico")
-p["limiar"] = p["nivel"].map(limiares) if isinstance(limiares, dict) else float(limiares)
+p["renda_nao_declarada"] = (p["renda_familiar"].isin(AUSENTES) | p["renda_familiar"].isna()).astype(int)
+p["limiar"] = limiar_por_aluno(p, final)
 p["alerta"] = (p["prob_principal"] >= p["limiar"]).astype(int)
 p["acertou"] = (p["alerta"] == p["evadiu"]).astype(int)
 p["confianca"] = (p["prob_principal"] - p["limiar"]).abs()
-print(f"Limiares: {limiares}")
+print(f"Limiares: {final.get('limiar_renda') or limiares}")
 print(f"Acerto geral no teste: {p['acertou'].mean():.1%} em {len(p):,} matrículas")
 
 # %% [markdown]

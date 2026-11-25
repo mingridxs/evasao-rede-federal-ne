@@ -47,6 +47,16 @@ CAT, NUM = list(pre.transformers_[0][2]), list(pre.transformers_[1][2])
 PARAMS, LIMIAR = final["hiperparametros"], final["limiar"]
 
 
+
+def limiar_por_aluno(d, final):
+    """Limiar de alerta de cada aluno: por nível e, se adotado (seção 6.2), por declaração de renda."""
+    if final.get("limiar_renda"):
+        nd = d["renda_nao_declarada"].astype(int)
+        return np.array([final["limiar_renda"][f"{n}|{r}"] for n, r in zip(d["nivel"], nd)])
+    lim = final["limiar"]
+    return d["nivel"].map(lim).to_numpy() if isinstance(lim, dict) else np.full(len(d), float(lim))
+
+
 def prepara(df):
     df = df.copy()
     numericas = {"carga_horaria", "ano_ingresso", "mes_ingresso", "duracao_prevista_meses", "idade_ingresso",
@@ -107,14 +117,14 @@ linhas, probs = [], {}
 for nome, d in grupos.items():
     p = risco(final["modelo"], final["calibrador"], CAT, d)
     probs[nome] = p
-    lim = d["nivel"].map(LIMIAR).to_numpy() if isinstance(LIMIAR, dict) else LIMIAR
+    lim = limiar_por_aluno(d, final)
     for nivel in ["Todos", "Técnico", "Graduação"]:
         m = np.ones(len(d), bool) if nivel == "Todos" else (d["nivel"] == nivel).to_numpy()
         if m.sum() == 0:
             continue
         linhas.append({"grupo": nome, "nível": nivel, "n": int(m.sum()), "risco médio (%)": p[m].mean() * 100,
                        "risco mediano (%)": np.median(p[m]) * 100,
-                       "recebem alerta (%)": (p[m] >= np.broadcast_to(lim, p.shape)[m]).mean() * 100})
+                       "recebem alerta (%)": (p[m] >= lim[m]).mean() * 100})
 tab_risco = pd.DataFrame(linhas).set_index(["nível", "grupo"]).sort_index()
 print(tab_risco.round(1).to_string())
 
@@ -203,21 +213,29 @@ from sklearn.metrics import balanced_accuracy_score, brier_score_loss
 va2 = partes2["validacao"]
 p_va2 = risco(modelo2, cal2, CAT, va2)
 grade = np.linspace(0.05, 0.95, 91)
-LIMIAR2 = {}
-for nivel in ["Técnico", "Graduação"]:
-    m = (va2["nivel"] == nivel).to_numpy()
-    LIMIAR2[nivel] = float(grade[int(np.argmax([balanced_accuracy_score(va2["nao_concluiu"].to_numpy()[m],
-                                                                       (p_va2[m] >= t).astype(int)) for t in grade]))])
-print("Limiares · evasão:", {k: round(v, 2) for k, v in LIMIAR.items()}, "· não concluiu no prazo:", LIMIAR2)
+
+
+def melhor_limiar(m):
+    return float(grade[int(np.argmax([balanced_accuracy_score(va2["nao_concluiu"].to_numpy()[m],
+                                                              (p_va2[m] >= t).astype(int)) for t in grade]))])
+
+
+# Mesma regra do modelo de evasão: por nível e, se ela foi adotada, também por declaração de renda.
+LIMIAR2 = {"limiar": {n: melhor_limiar((va2["nivel"] == n).to_numpy()) for n in ["Técnico", "Graduação"]}}
+if final.get("limiar_renda"):
+    LIMIAR2["limiar_renda"] = {f"{n}|{r}": melhor_limiar(((va2["nivel"] == n) & (va2["renda_nao_declarada"] == r)).to_numpy())
+                               for n in ["Técnico", "Graduação"] for r in [0, 1]}
+print("Limiares · evasão:", final.get("limiar_renda") or LIMIAR, "· não concluiu no prazo:",
+      LIMIAR2.get("limiar_renda") or LIMIAR2["limiar"])
 
 MODELOS = {
     "Evasão (site)": dict(dados=teste, y=teste["evadiu"].to_numpy(), p=risco(final["modelo"], final["calibrador"], CAT, teste),
-                          limiar=LIMIAR),
+                          limiar=final),
     "Não concluiu no prazo": dict(dados=te2, y=te2["nao_concluiu"].to_numpy(), p=risco(modelo2, cal2, CAT, te2),
                                   limiar=LIMIAR2),
 }
 for m in MODELOS.values():
-    m["alerta"] = (m["p"] >= m["dados"]["nivel"].map(m["limiar"]).to_numpy()).astype(int)
+    m["alerta"] = (m["p"] >= limiar_por_aluno(m["dados"], m["limiar"])).astype(int)
 
 
 def medidas(y, p, alerta):

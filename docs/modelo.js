@@ -147,6 +147,13 @@ export function nivelDoCurso(tipoDeCurso) {
   return GRADUACAO.has(tipoDeCurso) ? "Graduação" : "Técnico";
 }
 
-export function limiarDoNivel(modelo, tipoDeCurso) {
-  return modelo.limiar[nivelDoCurso(tipoDeCurso)];
+// Limiar de alerta: por nível e, quando se sabe se a renda foi declarada, também por isso.
+// Sem essa informação ("Não lembro"), vale o limiar do nível.
+export function limiarDoNivel(modelo, tipoDeCurso, rendaNaoDeclarada) {
+  const nivel = nivelDoCurso(tipoDeCurso);
+  const chave = `${nivel}|${rendaNaoDeclarada}`;
+  if (modelo.limiar_renda && (rendaNaoDeclarada === 0 || rendaNaoDeclarada === 1) && chave in modelo.limiar_renda) {
+    return modelo.limiar_renda[chave];
+  }
+  return modelo.limiar[nivel];
 }

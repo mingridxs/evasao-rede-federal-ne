@@ -43,6 +43,16 @@ PESOS = [3, 10]
 
 
 
+
+def limiar_por_aluno(d, final):
+    """Limiar de alerta de cada aluno: por nível e, se adotado (seção 6.2), por declaração de renda."""
+    if final.get("limiar_renda"):
+        nd = d["renda_nao_declarada"].astype(int)
+        return np.array([final["limiar_renda"][f"{n}|{r}"] for n, r in zip(d["nivel"], nd)])
+    lim = final["limiar"]
+    return d["nivel"].map(lim).to_numpy() if isinstance(lim, dict) else np.full(len(d), float(lim))
+
+
 def caminho(pasta, nome):
     """Arquivo gerado pelo notebook; numa sessão nova do Kaggle, procura nas entradas."""
     if (pasta / nome).exists():
@@ -112,7 +122,7 @@ rng = np.random.default_rng(SEMENTE)
 def resumo(parte, p, com_ic=False):
     d = partes[parte]
     y, cor = d["evadiu"].to_numpy(), d["cor_raca"].to_numpy()
-    lim = d["nivel"].map(LIMIAR).to_numpy() if isinstance(LIMIAR, dict) else LIMIAR
+    lim = limiar_por_aluno(d, final)
     ind = cor == GRUPO
     erros = {g: (p[cor == g].mean() - y[cor == g].mean()) * 100
              for g in pd.unique(cor) if (cor == g).sum() >= 100 and g != GRUPO}

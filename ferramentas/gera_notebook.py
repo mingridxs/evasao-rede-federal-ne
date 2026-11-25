@@ -248,7 +248,9 @@ SECOES = [
     ("04_modelagem.py", "## 4. Modelagem"),
     ("05_analise_vies.py", "## 5. Análise de viés"),
     ("06_experimentos_melhoria.py", "## 6. Experimentos de melhoria"),
-    ("07_analise_confianca.py", "### 6.2 Nível de confiança"),
+    ("18_alarmes_renda.py", "### 6.2 Limiar por nível e por renda"),
+    ("07_analise_confianca.py", "### 6.3 Nível de confiança"),
+    ("19_pontos_fracos.py", "### 6.4 Atendimento por capacidade e alunos de até 17 anos"),
     ("10_renda_raca.py", "## 7. Renda e cor/raça\n\n### 7.1 Registro no ingresso e indicadores de não declaração"),
     ("11_cor_raca_entrada.py", "### 7.2 Cor/raça como entrada"),
     ("12_renda_entrada.py", "### 7.3 Faixa de renda como entrada"),
@@ -266,7 +268,10 @@ md("""
 ## Conclusão
 
 - O gradient boosting com indicadores de "não declarou renda" e "não declarou cor/raça" e com a cor/raça como
-  entrada é o modelo final: AUC de 0,829 no teste, bem calibrado, com limiar de alerta por nível de curso.
+  entrada é o modelo final: AUC de 0,829 no teste, bem calibrado.
+- Com um limiar por nível, quem não declarou renda recebia muito mais alarmes falsos (40% contra 21%). Limiares
+  por nível e por declaração de renda, escolhidos na validação, reduziram essa diferença para 4 pontos, quase sem
+  custo na acurácia balanceada (72,4% para 72,3%); essa passou a ser a regra de alerta (seção 6.2).
 - As diferenças entre grupos aparecem sobretudo nas taxas de erro (recall e falsos positivos), porque as taxas de
   evasão diferem; a calibração é boa para quase todos os grupos. Estudantes indígenas parecem ter o risco
   subestimado (−3,0 pontos na validação e −6,6 no teste), mas são só 182 e 98 matrículas, e os intervalos de 95%

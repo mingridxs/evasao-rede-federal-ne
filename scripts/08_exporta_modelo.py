@@ -68,6 +68,8 @@ modelo_json = {
     "calibracao": {"x": calibrador.X_thresholds_.tolist(), "y": calibrador.y_thresholds_.tolist()},
     "limiar": limiar if isinstance(limiar, dict) else {"Técnico": float(limiar), "Graduação": float(limiar)},
 }
+if final.get("limiar_renda"):  # regra adotada na seção 6.2: limiar por nível e por declaração de renda
+    modelo_json["limiar_renda"] = {k: float(v) for k, v in final["limiar_renda"].items()}
 (PASTA_SITE / "modelo.json").write_text(json.dumps(modelo_json, ensure_ascii=False, separators=(",", ":")),
                                         encoding="utf-8")
 print(f"docs/modelo.json: {len(arvores)} árvores, "
