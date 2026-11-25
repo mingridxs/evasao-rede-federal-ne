@@ -4,7 +4,7 @@
 # O acerto geral (cerca de 71%) mistura alunos sobre os quais o modelo tem
 # certeza com alunos em que ele está em dúvida. Aqui o acerto é medido em
 # função da confiança, no **teste**, com o modelo e os limiares finais
-# (limiar por nível de curso). Nada é ajustado.
+# (por nível de curso e por declaração de renda, seção 6.2). Nada é ajustado.
 #
 # Confiança de uma previsão = distância entre a probabilidade e o limiar do
 # nível do aluno. Quanto mais longe do limiar, mais "decidido" o modelo está.

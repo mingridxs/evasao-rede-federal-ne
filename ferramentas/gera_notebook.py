@@ -281,7 +281,9 @@ md("""
   uma delas pelo teste seria usá-lo para decidir. A saída é ter mais dados, como os da região Norte (seção 7.5).
 - Um modelo só do IFPI não supera o regional, que já funciona calibrado dentro do IFPI.
 - Os retidos (20% das matrículas com ciclo encerrado) se parecem mais com quem evade; um modelo de "não concluiu
-  no prazo" tem o mesmo desempenho e é um pouco mais equilibrado por renda e nível.
+  no prazo" tem desempenho e diferenças entre grupos parecidos com os do modelo de evasão.
+- Entre quem entra com até 17 anos, só um terço das evasões é detectado; um limiar próprio para esse grupo
+  aumentaria a detecção, mas reduziria a acurácia balanceada geral e não passou no critério (seção 6.4).
 
 O site que usa o modelo final está em https://mingridxs.github.io/evasao-rede-federal-ne/.
 """)

@@ -5,7 +5,7 @@
 #
 # 1. **Se a equipe só consegue atender os K% de maior risco**, quantos deles
 #    realmente evadiriam (precisão), e que parte de todas as evasões eles cobrem?
-# 2. **Estudantes de até 17 anos** (sobretudo técnico integrado): só 39% das
+# 2. **Estudantes de até 17 anos** (sobretudo técnico integrado): poucas
 #    evasões são detectadas. Um limiar próprio para eles, escolhido na validação
 #    pela acurácia balanceada, melhora? A que custo em falsos alarmes?
 #
