@@ -1069,7 +1069,7 @@ async function enviar() {
   const e = ultimo.entrada, comCor = $("aceite-cor").checked && !$("linha-aceite-cor").hidden;
   const codigo = codigoResposta();
   const dados = {
-    codigo, versao_site: "6", instituicao: e.instituicao, campus: e.unidade_de_ensino, uf: e.uf,
+    codigo, instituicao: e.instituicao, campus: e.unidade_de_ensino, uf: e.uf,
     curso: e.nome_de_curso, tipo_de_curso: e.tipo_de_curso, tipo_de_oferta: e.tipo_de_oferta,
     turno: e.turno, modalidade: e.modalidade_de_ensino, eixo: e.eixo_tecnologico,
     sexo: e.sexo, idade: e.idade_ingresso, mes: e.mes_ingresso,
