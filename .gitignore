@@ -3,24 +3,17 @@
 __pycache__/
 .ipynb_checkpoints/
 
-# Dados: microdados originais e bases derivadas não vão para o GitHub
-# (limite de 100 MB por arquivo; a base limpa fica no Kaggle)
+# Só o site fica no GitHub; o código das análises e os dados estão no Kaggle
 dados/
-*.csv
-*.zip
-!resultados/*.csv
-
-# Histórico local que não precisa ir para o repositório
-historico/saidas_v1/
-historico/antes_da_reorganizacao/
-
-# Documentos de referência grandes (o Guia PNP tem centenas de páginas)
-referencias/*
-!referencias/instrucoes_microdados_pnp_2020_ano_base_2019.pdf
-
-# Modelo em formato Python (depende da versão do scikit-learn; o site usa docs/modelo.json)
-resultados/*.joblib
-
-# Saídas geradas ao rodar os scripts (as da versão final ficam no Kaggle)
+scripts/
+ferramentas/
+notebook/
+historico/
+artigo/
 resultados/
 figuras/
+referencias/
+organiza_pasta.sh
+requirements.txt
+*.csv
+*.zip
