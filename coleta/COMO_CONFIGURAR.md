@@ -15,7 +15,7 @@ O site funciona sem isto: calcula o risco e mostra a avaliação, mas avisa que 
    ```
 6. Faça commit e push. Em um ou dois minutos o site passa a mostrar a caixa de consentimento e o botão de envio.
 
-Se a planilha já existia de uma versão anterior do site, cole o novo `Code.gs`, apague a aba "respostas" (ela é recriada com as colunas certas no próximo envio) e publique uma nova versão em **Implantar → Gerenciar implantações → Editar → Nova versão**. Assim o endereço `/exec` continua o mesmo.
+Se a planilha já existia de uma versão anterior do site, cole o novo `Code.gs` (ele completa o cabeçalho da aba "respostas" com as colunas novas no próximo envio, sem apagar as respostas antigas) e publique uma nova versão em **Implantar → Gerenciar implantações → Editar → Nova versão**. Assim o endereço `/exec` continua o mesmo.
 
 Para testar, abra o site, calcule um risco, avalie, marque o consentimento e envie. Uma linha nova deve aparecer na aba "respostas" da planilha.
 

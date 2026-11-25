@@ -170,6 +170,7 @@
 
   .alternar { display: grid; grid-template-columns: 1fr 1fr; background: var(--marinho-claro); border-radius: 10px; padding: 4px; gap: 4px; }
   .alternar.tres { grid-template-columns: 1fr 1fr 1fr; }
+  .alternar.quatro { grid-template-columns: 1fr 1fr; }
   .alternar button { min-height: 48px; border: 0; border-radius: 8px; background: transparent; font: inherit; font-size: .95rem;
                      color: var(--suave); cursor: pointer; padding: 6px 8px; line-height: 1.25; }
   .alternar button:hover { color: var(--destaque); }
@@ -201,6 +202,7 @@
   .nota { margin: 16px 0 0; padding: 12px 14px; border-left: 4px solid var(--marinho); background: var(--marinho-claro);
           border-radius: 0 8px 8px 0; font-size: .95rem; }
   .nota.cautela { border-color: var(--duvida); background: var(--cautela-fundo); }
+  .nota.demo { max-width: 44em; }
 
   /* Avaliação e consentimento */
   .escala { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 8px; }
@@ -388,9 +390,12 @@
     <div class="largura">
       <header class="cabeca">
         <h1 id="h-simulador">Alunos como você concluem?</h1>
-        <p class="linha-fina">O número mostrado é a chance de deixar o curso sem concluir.</p>
+        <p class="linha-fina">O número mostrado é uma estimativa da chance de deixar o curso sem concluir.</p>
         <p class="abertura">Informe seu curso e como foi a sua entrada nele. O site mostra quantos alunos com perfil parecido
           deixaram o curso sem concluir, segundo 178 mil matrículas dos Institutos Federais e escolas técnicas federais do Nordeste.</p>
+        <p class="nota cautela demo"><strong>Demonstração de um trabalho acadêmico.</strong> O modelo erra em cerca de 3 a cada 10
+          casos e tem limites conhecidos (veja <a href="#etica">Ética e privacidade</a>). O resultado não é um diagnóstico
+          e não deve ser usado para decidir nada sobre ninguém.</p>
       </header>
 
       <div class="grade">
@@ -471,7 +476,8 @@
     </section>
 
     <section class="passo" id="bloco-avaliacao" aria-labelledby="t4" hidden>
-      <h2 id="t4"><span class="n" aria-hidden="true">4</span>Quer registrar suas respostas?</h2>
+      <h2 id="t4"><span class="n" aria-hidden="true">4</span>Quer ajudar a testar o modelo?</h2>
+      <p class="detalhe">Contando o que aconteceu de fato no seu curso, você ajuda a medir se a estimativa acerta.</p>
       <div class="alternar" role="radiogroup" aria-labelledby="t4" id="registrar">
         <button type="button" role="radio" aria-checked="false" data-registrar="sim">Sim</button>
         <button type="button" role="radio" aria-checked="false" data-registrar="nao">Não</button>
@@ -479,7 +485,16 @@
       <p class="detalhe" id="nao-registrar" hidden>Nada foi enviado.</p>
 
       <div id="bloco-registro" hidden>
-      <span class="rotulo" id="r-escala">O resultado combina com o que você vive no curso?</span>
+      <span class="rotulo" id="r-situacao">Qual é a sua situação nesse curso hoje?</span>
+      <div class="alternar quatro" role="radiogroup" aria-labelledby="r-situacao">
+        <button type="button" role="radio" aria-checked="false" data-situacao="cursando">Ainda estou cursando</button>
+        <button type="button" role="radio" aria-checked="false" data-situacao="concluiu">Concluí</button>
+        <button type="button" role="radio" aria-checked="false" data-situacao="evadiu">Saí sem concluir</button>
+        <button type="button" role="radio" aria-checked="false" data-situacao="trancou">Tranquei a matrícula</button>
+      </div>
+      <label for="ano-ingresso">Ano em que entrou no curso <span class="ajuda">Opcional.</span></label>
+      <select id="ano-ingresso"></select>
+      <span class="rotulo" id="r-escala">O resultado combina com o que você vive no curso? <span class="ajuda">Opcional.</span></span>
       <div class="escala" role="radiogroup" aria-labelledby="r-escala">
         <button type="button" role="radio" aria-checked="false" data-nota="1" aria-label="1, não combina nada">1</button>
         <button type="button" role="radio" aria-checked="false" data-nota="2" aria-label="2">2</button>
@@ -498,11 +513,11 @@
             <summary>Ler o termo de consentimento</summary>
             <dl>
               <dt>Para que</dt>
-              <dd>Avaliar se o modelo faz sentido para estudantes reais, como parte do trabalho final da disciplina de
+              <dd>Avaliar se o modelo faz sentido para estudantes reais e comparar a estimativa com o que aconteceu de fato no curso, como parte do trabalho final da disciplina de
                 Inteligência Artificial da UFPI e de artigos acadêmicos derivados dele. Os dados
                 não são usados para nenhuma outra finalidade nem vendidos.</dd>
               <dt>O que é enviado</dt>
-              <dd>As respostas dos passos 1 e 2, o resultado do modelo, a nota e o comentário. Cor ou raça só se você
+              <dd>As respostas dos passos 1 e 2, o resultado do modelo, sua situação no curso, o ano de ingresso, a nota e o comentário. Cor ou raça só se você
                 marcar a segunda caixa. Não pedimos nome, e-mail nem documento, e o site não registra seu endereço de internet.</dd>
               <dt>Quem acessa e por quanto tempo</dt>
               <dd>Só a responsável pelo trabalho, Maria Ingrid Xavier Sousa, numa planilha privada. As respostas são guardadas
@@ -740,7 +755,7 @@ const dec = v => v.toFixed(2).replace(".", ",");
 const unicos = lista => [...new Set(lista)].filter(v => v !== null && v !== undefined)
   .sort((a, b) => String(a).localeCompare(String(b), "pt-BR"));
 
-let modelo, ofertas, painel = null, pedido = 0, ultimo = null, nota = null, registrar = null;
+let modelo, ofertas, painel = null, pedido = 0, ultimo = null, nota = null, registrar = null, situacao = null;
 
 // Grupos de atributos para explicar o resultado ("o que mais pesou").
 const GRUPOS = [
@@ -1023,8 +1038,8 @@ function mostrarAvaliacao() {
   $("bloco-avaliacao").hidden = false;
   escolherRegistro(null);
   $("enviado").hidden = true; $("falha-envio").hidden = true;
-  nota = null;
-  for (const b of document.querySelectorAll("[data-nota]")) b.setAttribute("aria-checked", "false");
+  nota = null; situacao = null; $("ano-ingresso").value = "";
+  for (const b of document.querySelectorAll("[data-nota], [data-situacao]")) b.setAttribute("aria-checked", "false");
   $("comentario").value = ""; $("aceite").checked = false; $("aceite-cor").checked = false;
   // A segunda autorização só aparece se houver uma cor/raça declarada para enviar.
   const temCor = ultimo.entrada.cor_raca && ultimo.entrada.cor_raca !== "Não declarada";
@@ -1040,7 +1055,7 @@ function escolherRegistro(valor) {
   $("nao-registrar").hidden = valor !== "nao";
   verificarEnvio();
 }
-function verificarEnvio() { $("enviar").disabled = !(registrar === "sim" && nota && $("aceite").checked && ultimo); }
+function verificarEnvio() { $("enviar").disabled = !(registrar === "sim" && situacao && $("aceite").checked && ultimo); }
 
 function codigoResposta() {
   const letras = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -1054,7 +1069,7 @@ async function enviar() {
   const e = ultimo.entrada, comCor = $("aceite-cor").checked && !$("linha-aceite-cor").hidden;
   const codigo = codigoResposta();
   const dados = {
-    codigo, versao_site: "5", instituicao: e.instituicao, campus: e.unidade_de_ensino, uf: e.uf,
+    codigo, versao_site: "6", instituicao: e.instituicao, campus: e.unidade_de_ensino, uf: e.uf,
     curso: e.nome_de_curso, tipo_de_curso: e.tipo_de_curso, tipo_de_oferta: e.tipo_de_oferta,
     turno: e.turno, modalidade: e.modalidade_de_ensino, eixo: e.eixo_tecnologico,
     sexo: e.sexo, idade: e.idade_ingresso, mes: e.mes_ingresso,
@@ -1062,6 +1077,7 @@ async function enviar() {
     cor_nao_declarada: e.cor_nao_declarada, cor_raca: comCor ? e.cor_raca : null,
     consentimento: true, consentimento_cor: comCor,
     probabilidade: Number(ultimo.prob.toFixed(4)), limiar: Number(ultimo.limiar.toFixed(2)), alerta: ultimo.alerta,
+    situacao, ano_ingresso: $("ano-ingresso").value ? Number($("ano-ingresso").value) : null,
     avaliacao: nota, comentario: $("comentario").value.trim().slice(0, 400),
   };
   try {
@@ -1200,6 +1216,14 @@ async function iniciar() {
       atualizar();
     });
   }
+  $("ano-ingresso").innerHTML = '<option value="">Prefiro não dizer</option>' +
+    Array.from({ length: new Date().getFullYear() - 2009 }, (_, i) => new Date().getFullYear() - i)
+      .map(a => `<option value="${a}">${a}</option>`).join("");
+  for (const b of document.querySelectorAll("[data-situacao]")) b.addEventListener("click", () => {
+    situacao = b.dataset.situacao;
+    for (const o of document.querySelectorAll("[data-situacao]")) o.setAttribute("aria-checked", String(o === b));
+    verificarEnvio();
+  });
   for (const b of document.querySelectorAll("[data-nota]")) b.addEventListener("click", () => {
     nota = Number(b.dataset.nota);
     for (const o of document.querySelectorAll("[data-nota]")) o.setAttribute("aria-checked", String(o === b));

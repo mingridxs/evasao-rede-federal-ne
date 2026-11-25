@@ -6,6 +6,7 @@ const COLUNAS = [
   "tipo_de_oferta", "turno", "modalidade", "eixo", "sexo", "idade", "mes",
   "renda_nao_declarada", "cor_nao_declarada", "cor_raca",
   "consentimento", "consentimento_cor", "probabilidade", "limiar", "alerta", "avaliacao", "comentario",
+  "situacao", "ano_ingresso",
 ];
 
 // Impede que um texto enviado seja interpretado como fórmula pela planilha.
@@ -21,6 +22,8 @@ function doPost(e) {
     const arquivo = SpreadsheetApp.getActiveSpreadsheet();
     const aba = arquivo.getSheetByName("respostas") || arquivo.insertSheet("respostas");
     if (aba.getLastRow() === 0) aba.appendRow(COLUNAS);
+    // Planilha de uma versão anterior: completa o cabeçalho com as colunas novas, sem mexer nas respostas.
+    else if (aba.getLastColumn() < COLUNAS.length) aba.getRange(1, 1, 1, COLUNAS.length).setValues([COLUNAS]);
     const dados = JSON.parse(e.postData.contents);
     aba.appendRow(COLUNAS.map(c => c === "recebido_em" ? new Date() : seguro(dados[c] ?? "")));
     return ContentService.createTextOutput("ok");
