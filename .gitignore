@@ -20,3 +20,7 @@ referencias/*
 
 # Modelo em formato Python (depende da versão do scikit-learn; o site usa docs/modelo.json)
 resultados/*.joblib
+
+# Saídas geradas ao rodar os scripts (as da versão final ficam no Kaggle)
+resultados/
+figuras/

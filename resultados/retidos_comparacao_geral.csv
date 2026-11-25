@@ -1,3 +1,0 @@
-modelo,AUC,Brier,acurácia (%),acurácia balanceada (%),n,taxa real (%),previsto médio (%),erro de calibração (pontos),taxa de alerta (%),recall (%),falsos positivos (%)
-Evasão (site),0.829,0.1654,72.4915,72.4206,17849,58.3842,58.6153,0.2311,54.1823,72.8433,28.0022
-Não concluiu no prazo,0.8259,0.1562,71.6423,72.1262,22322,66.7234,66.9641,0.2407,55.9538,70.6795,26.427
