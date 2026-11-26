@@ -30,5 +30,5 @@ Para atender um pedido de exclusão, procure a linha pelo código que a pessoa i
 - Cor ou raça é dado pessoal sensível pela LGPD. O consentimento do site cita esse dado de forma explícita; não o retire do texto. Guarde a planilha só com acesso seu.
 
 - Numa turma pequena, curso, idade e sexo juntos podem identificar alguém. Não publique as linhas da planilha; publique só contagens e médias.
-- Para usar as respostas no artigo ou em outra publicação, combine antes com o professor. Pesquisa com pessoas pode exigir aprovação de um comitê de ética.
+- Para usar as respostas no trabalho ou em outra publicação, combine antes com o professor. Pesquisa com pessoas pode exigir aprovação de um comitê de ética.
 - Para desligar o envio, deixe `ENDERECO_COLETA` vazio de novo ou arquive a implantação no Apps Script.

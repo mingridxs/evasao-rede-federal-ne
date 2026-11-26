@@ -28,7 +28,7 @@ As três versões de gradient boosting empatam: as diferenças de AUC (0,001 a 0
 - **0,831, com os indicadores de não declaração e sem cor/raça:** acrescentar a cor/raça quase não muda a AUC, mas reduz a subestimação do risco de estudantes indígenas, de 5,8 para 3,0 pontos na validação e de 10,4 para 6,6 pontos no teste. Por isso o modelo final usa cor/raça.
 - **0,830, com as faixas de renda e a cor/raça declaradas:** na validação, ficou um pouco abaixo do modelo com indicadores (0,8304 contra 0,8315). Quase todo o ganho de renda e cor/raça vem de saber **se** foram declaradas (106% do ganho deste modelo), e, entre quem declarou, a faixa de renda não melhora a previsão. Assim, o site não precisa perguntar a renda de ninguém, só se ela foi informada na matrícula.
 
-O alerta usa limiares por nível de curso e por declaração de renda, escolhidos na validação. Com eles, o modelo acerta 72,1% das matrículas do teste (acurácia balanceada de 72,3%), contra 68,0% da taxa histórica do curso. Nos 30% de casos em que está mais seguro, acerta 83%. Ele é bem calibrado para quase todos os grupos; as limitações (estudantes indígenas, alunos de até 17 anos) estão no notebook e no artigo.
+O alerta usa limiares por nível de curso e por declaração de renda, escolhidos na validação. Com eles, o modelo acerta 72,1% das matrículas do teste (acurácia balanceada de 72,3%), contra 68,0% da taxa histórica do curso. Nos 30% de casos em que está mais seguro, acerta 83%. Ele é bem calibrado para quase todos os grupos; as limitações (estudantes indígenas, alunos de até 17 anos) estão no notebook e no resumo expandido.
 
 ## Onde está o resto do trabalho
 
